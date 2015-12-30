@@ -9,8 +9,6 @@ echo "[`date`] PWD"
 pwd
 echo "[`date`] ls of local dir"
 ls -al
-echo "[`date`] rm -rf "
-rm -rf Offline nightly*
 
 REPORT=nightly-build-`date +"%Y-%m-%d.txt"`
 VALFILES=nightly-validation-`date +"%Y-%m-%d.txt"`
