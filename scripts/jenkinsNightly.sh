@@ -11,7 +11,7 @@ echo "[`date`] ls of local dir"
 ls -al
 
 REPORT=nightly-build-`date +"%Y-%m-%d.txt"`
-VALFILE=val-genReco-5000-nightly_`date +"%Y-%m-%d.txt"`-0.root
+VALFILE=val-genReco-5000-nightly_`date +"%Y-%m-%d"`-0.root
 
 echo "[`date`] source products common"
 source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
