@@ -27,7 +27,7 @@ fi
 cp $LOG $NDIR
 rm -f $LOG
 
-VAL=val-genReco-5000-nightly_${DATE}.txt-0.root
+VAL=val-genReco-5000-nightly_${DATE}-0.root
 wget "$ARTIFACT/$VAL"
 
 VALRC="-"
