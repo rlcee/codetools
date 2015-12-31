@@ -11,7 +11,7 @@ echo "[`date`] ls of local dir"
 ls -al
 
 REPORT=nightly-build-`date +"%Y-%m-%d.txt"`
-VALFILES=nightly-validation-`date +"%Y-%m-%d.txt"`
+VALFILE=val-genReco-5000-nightly_`date +"%Y-%m-%d.txt"`-0.root
 
 echo "[`date`] source products common"
 source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
@@ -64,6 +64,9 @@ mu2e -s genReco.art -c validation/fcl/validation1.fcl
 RC7=$?
 echo "[`date`] validation exe return code $RC7" | tee -a $REPORT
 
+cp validation.root ../copyBack/$VALFILE
+
+
 RC=$(($RC1+$RC2+$RC3+$VOLCHECKB+$RC4+$RC5+$RC6))
 echo "Total return code=$RC" | tee -a $REPORT
 
@@ -74,10 +77,12 @@ echo "[`date`] mail report"
 cat $REPORT | mail -s "Nightly build, status=$RC" \
 rlc@fnal.gov,genser@fnal.gov,kutschke@fnal.gov,david.brown@louisville.edu
 
-cp $REPORT ..
+cp $REPORT ../copyBack
 cd ..
 echo "[`date`] ls of local dir"
 ls -al
+echo "[`date`] ls of copyBack"
+ls -al copyBack
 
 
 exit $RC
