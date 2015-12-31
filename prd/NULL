@@ -5,6 +5,6 @@ VERSION = REPLACE_VERSION
 
 FLAVOR = NULL
 QUALIFIERS = ""
-  PROD_DIR = validation/REPLACE_VERSION
+  PROD_DIR = codetools/REPLACE_VERSION
   UPS_DIR = ups
   TABLE_FILE = codetools.table

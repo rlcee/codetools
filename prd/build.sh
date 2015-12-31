@@ -35,6 +35,7 @@ install() {
     return 1
   fi
   mkdir -p $DV
+  mkdir -p $DU
   mkdir -p $DD/bin
 
   # install UPS files
