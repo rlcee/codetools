@@ -1,18 +1,29 @@
 #!/bin/bash
 #
-# pull a Offline release build from Jenkins build machine
-# $1 = git release tag, like v5_2_1
-# $2,$3 = subsets.  If =SLF5 then do SLF5 prof and debug.  
-#   If debug then do SLF5 and 6 for debug. If SLF5 debug then
-#   only do SLF5 debug.
 #
 # Ray Culbertson
 #
 
+usage()
+{
+    echo "
+ Pull an Offline release build from Jenkins build machine
+ \$1 = git release tag, like v5_2_1
+ \$2,\$3 = select subsets.  If SLF5 then do SLF5, prof and debug.  
+   If debug then do SLF5 and 6, for debug. If SLF5 debug then
+   only do SLF5 debug.
+
+  Should be run in the directory where the verison listing
+  will appear (cd /cvmfs/mu2e.opensciencegrid.org/Offline).
+
+"
+}
+
+
 export TAG=$1
 
 if [ "$TAG" == "" ]; then
-  echo "Tag argument (like v5_2_1) is required"
+  usage
   exit 1
 fi
 
@@ -63,11 +74,6 @@ done
 
 exit
 
-wget https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-build/BUILDTYPE=debug,label=SLF5/lastSuccessfulBuild/artifact/mu2e_tarballs/Offline_v5_2_1_SLF5_debug.tgz
-wget https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-build/BUILDTYPE=debug,label=SLF6/lastSuccessfulBuild/artifact/mu2e_tarballs/Offline_v5_2_1_SLF6_debug.tgz
-wget https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-build/BUILDTYPE=prof,label=SLF5/lastSuccessfulBuild/artifact/mu2e_tarballs/Offline_v5_2_1_SLF5_prof.tgz
-wget https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-build/BUILDTYPE=prof,label=SLF6/lastSuccessfulBuild/artifact/mu2e_tarballs/Offline_v5_2_1_SLF6_prof.tgz
-exit
 
 # copy the artifacts from the last succcessful build of a Jenkins project
 
