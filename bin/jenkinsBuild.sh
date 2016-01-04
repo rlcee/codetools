@@ -54,9 +54,10 @@ P2=`echo $OLDVER | awk -F_ '{print $2}'`
 P3=`echo $OLDVER | awk -F_ '{print $3}'`
 NEWP2=`printf "%02d" $(($P2+1))`
 NEWVER="${P1}_${NEWP2}_${P3}"
-./validation/prd/build.sh -i -v $NEWP2 -p ..
+./validation/prd/build.sh -i -v $NEWP2 -d ..
 
 echo "["`date`"] making tarballs"
+cd ..
 echo "["`date`"] pwd"
 pwd
 echo "["`date`"] ls of local dir"
