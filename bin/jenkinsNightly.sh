@@ -18,6 +18,9 @@ source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
 echo "[`date`] setup mu2e"
 setup mu2e
 
+echo "[`date`] printenv after setup"
+printenv
+
 echo "[`date`] clone offline"
 git clone http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline/Offline.git
 echo "[`date`] cd Offline"

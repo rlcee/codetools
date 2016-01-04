@@ -12,7 +12,7 @@ PDIR=/web/sites/mu2e.fnal.gov/htdocs/atwork/computing/ops/val/plots
 ARTIFACT=https://buildmaster.fnal.gov/job/mu2e-offline-nightly/label=SLF6/lastBuild/artifact/copyBack
 DATE=`date +"%Y-%m-%d"`
 FN=nightly-build-${DATE}.txt
-wget "$ARTIFACT/$FN"
+wget -q "$ARTIFACT/$FN"
 if [ ! -r "$FN" ]; then
   echo "[`date`] No build report found " > $FN
 fi
@@ -20,7 +20,7 @@ TODAYTOTRC="`cat $FN | grep "Total" | awk -F= '{print $2}'`"
 [ -z "$TODAYTOTRC" ] && TODAYTOTRC="-"
 
 LOG=nightly-log-${DATE}.log
-wget "$ARTIFACT/$LOG"
+wget -q "$ARTIFACT/$LOG"
 if [ ! -r "$LOG" ]; then
   echo "[`date`] No build log found " > $LOG
 fi
@@ -28,7 +28,7 @@ cp $LOG $NDIR
 rm -f $LOG
 
 VAL=val-genReco-5000-nightly_${DATE}-0.root
-wget "$ARTIFACT/$VAL"
+wget -q "$ARTIFACT/$VAL"
 
 VALRC="-"
 rm -f summary.txt
@@ -38,10 +38,12 @@ if [ -r $VAL ]; then
   source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
   setup mu2e
   OVER=`ls -1 /cvmfs/mu2e.opensciencegrid.org/Offline | tail -1`
+  echo "setting up offline $OVER"
   source /cvmfs/mu2e.opensciencegrid.org/Offline/$OVER/SLF6/prof/Offline/setup.sh
   VVER=`ups list -aK+ validation | awk '{print $2}' | tr '"' ' ' | sort | tail -1`
-  echo "setting up validation $VVER"
-  setup validation $VVER
+#  echo "setting up validation $VVER"
+#  setup validation $VVER
+  setup validation v0_00_01
 
   # find last version
   CFILE=`ls -tr $FDIR/val-genReco-5000-nightly* | tail -1`
@@ -54,10 +56,10 @@ if [ -r $VAL ]; then
 
   # make text comparison
   # -s summary -r report -w filespec
-  valCompare -s $VAL  $CFILE >> summary.txt
+  valCompare -s $CFILE $VAL >> summary.txt
   echo "" >> summary.txt
   echo "" >> summary.txt
-  valCompare -r $VAL  $CFILE >> summary.txt
+  valCompare -r $CFILE $VAL >> summary.txt
 
   NT=`cat summary.txt | grep "Compared" | awk '{print $1}'`
   NP=`cat summary.txt | grep "had perfect match" | awk '{print $1}'`
@@ -72,7 +74,7 @@ if [ -r $VAL ]; then
 
   # make web page
   mkdir -p $PDIR/nightly-${DATE}
-  valCompare -w $PDIR/nightly-${DATE}/val.html $VAL  $FDIR/$CFILE 2>&1 | grep -v Info
+  valCompare -w $PDIR/nightly-${DATE}/val.html $CFILE $VAL 2>&1 | grep -v Info
 
 #TValCompare Status Summary:
 #   87 Compared

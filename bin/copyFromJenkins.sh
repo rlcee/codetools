@@ -53,7 +53,7 @@ do
     mkdir -p ${TAG}/${OS}/${TYPE}
     cd ${TAG}/${OS}/${TYPE}
     export TBALL=Offline_${TAG}_${OS}_${TYPE}.tgz
-    export URL="https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-build/BUILDTYPE=${TYPE},label=${OS}/lastSuccessfulBuild/artifact/mu2e_tarballs/$TBALL"
+    export URL="https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-build/BUILDTYPE=${TYPE},label=${OS}/lastSuccessfulBuild/artifact/copyBack/$TBALL"
     wget $URL
     RC=$?
     if [ $RC -ne 0 ];then
@@ -67,94 +67,11 @@ do
     echo Unrolled $SIZE MB
     echo ""
 
-    wget -O build.log https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-build/BUILDTYPE=${TYPE},label=${OS}/lastBuild/consoleText
+    export LOG=Offline_${TAG}_${OS}_${TYPE}.log
+    wget -O build.log https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-build/BUILDTYPE=${TYPE},label=${OS}/lastSuccessfulBuild/artifact/copyBack/$LOG
 
   done
 done
 
 exit
 
-
-# copy the artifacts from the last succcessful build of a Jenkins project
-
-usage()
-{
-    echo "$(basename ${0}) <project> [build type] [OS]"
-    echo "    NOTE: this script pulls the last successful build"
-    echo "    The Jenkins project name (e.g., geant4-release-build) is required"
-    echo "    if build type is not specified, both debug and prof will be copied"
-    echo "    if OS is not specified, the script will look for SLF5, SLF6, and OS_X"
-}
-
-project="${1}"
-
-if [ -z ${project} ]
-then
-  echo "ERROR: please specify at least the release url"
-  usage
-  exit 1
-fi
-
-build_type="${2}"
-build_os="${3}"
-
-case ${build_type} in
-  debug)  
-    build_array=(${build_type}) ;;
-  opt)  
-    build_array=(${build_type}) ;;
-  prof)
-    build_array=(${build_type}) ;;
-  none)
-    build_array=(${build_type}) ;;
-  *)
-    echo "will copy debug and prof artifacts"
-    build_array=(debug prof)
-esac
-
-case ${build_os} in
-  SLF5)  
-    os_array=(${build_os}) ;;
-  SLF6)  
-    os_array=(${build_os}) ;;
-  OS_X)
-    os_array=(${build_os}) ;;
-  *)
-    echo "will copy artifacts for SLF5 SLF6 OS_X"
-    os_array=(SLF5 SLF6 OS_X)
-esac
-
-for (( i=0; i<${#os_array[@]}; i++ ));
-do
-  OS=${os_array[$i]}
-
-  for (( j=0; j<${#build_array[@]}; j++ ));
-  do
-    if [ "${build_array[$j]}" = "none" ]
-    then
-      btype=""
-    else
-      btype="BUILDTYPE=${build_array[$j]},"
-    fi
-
-    url="https://buildmaster.fnal.gov/job/${project}/${btype}label1=swarm,label2=${OS}/lastSuccessfulBuild/artifact/copyBack/"
-
-    artifacts=(`curl -F "web=@;type=text/html" ${url} \
-      | sed -e 's/<\/a>/<\/a>\n/g' \
-      | sed -e 's/<a href/\n <a href/g' \
-      | grep view | grep -v \/view \
-      | sed -e 's/<a href=\"//' \
-      | sed -e 's/\">view<\/a>//' \
-      | sed -e 's/\/\*view\*\///'`)
-
-    for (( k=0; k<${#artifacts[@]}; k++ ));
-    do
-      echo "copy ${url}/${artifacts[$k]}"
-      curl -O ${url}/${artifacts[$k]}
-    done
-
-  done
-
-done
-
-exit 0

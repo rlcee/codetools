@@ -1,7 +1,8 @@
 #!/bin/bash
-
-#rm -rf Offline
-#rm -rf mu2e_tarballs
+#
+# build a tagged version of Offline in Jenkins system
+# $MU2E_RELEASE_TAG should be set
+#
 
 
 echo "[`date`] start for MU2E_RELEASE_TAG=$MU2E_RELEASE_TAG"
