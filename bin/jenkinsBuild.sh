@@ -49,12 +49,12 @@ RC=$?
 echo "["`date`"] scons return code=$RC"
 
 echo "[`date`] run genReco"
-mu2e -n 5000 Analyses/test/genReco.fcl
+mu2e -n 5000 -c Analyses/test/genReco.fcl
 
 echo "[`date`] run validation"
-mu2e -n 1000 -s genReco.art validation/fcl/validation1.fcl
+mu2e -n 1000 -s genReco.art -c validation/fcl/validation1.fcl
 mv validation.root ../copyBack/val-genReco-1000-${$MU2E_RELEASE_TAG}.root
-mu2e -n 5000 -s genReco.art validation/fcl/validation1.fcl
+mu2e -n 5000 -s genReco.art -c validation/fcl/validation1.fcl
 mv validation.root ../copyBack/val-genReco-5000-${$MU2E_RELEASE_TAG}.root
 
 echo "[`date`] remove genReco"
