@@ -32,6 +32,7 @@ wget -q "$ARTIFACT/$VAL"
 
 VALRC="-"
 rm -f summary.txt
+
 if [ -r $VAL ]; then
 
   # setup code for comparison
@@ -41,12 +42,12 @@ if [ -r $VAL ]; then
   echo "setting up offline $OVER"
   source /cvmfs/mu2e.opensciencegrid.org/Offline/$OVER/SLF6/prof/Offline/setup.sh
   VVER=`ups list -aK+ validation | awk '{print $2}' | tr '"' ' ' | sort | tail -1`
-#  echo "setting up validation $VVER"
+  echo "setting up validation $VVER"
 #  setup validation $VVER
   setup validation v0_00_01
 
   # find last version
-  CFILE=`ls -tr $FDIR/val-genReco-5000-nightly* | tail -1`
+  CFILE=`ls -tr $FDIR/val-genReco-5000-nightly* | grep -v $DATE | tail -1`
   CFILE=`basename $CFILE`
   cp $FDIR/$CFILE .
 
@@ -87,6 +88,9 @@ if [ -r $VAL ]; then
 #    5 had perfect match
 #   16 passed loose or better
 #   11 passed tight or better
+
+  # keep the validation files
+  cp $VAL $FDIR
 
 else
   echo "ERROR - validation file not found"
