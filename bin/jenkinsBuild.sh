@@ -18,6 +18,7 @@ echo "[`date`] df -h"
 df -h
 echo "[`date`] PWD"
 pwd
+export LOCAL_DIR=$PWD
 echo "[`date`] ls of local dir"
 ls -al
 
@@ -47,17 +48,34 @@ scons -j 16
 RC=$?
 echo "["`date`"] scons return code=$RC"
 
+echo "[`date`] run genReco"
+mu2e -n 5000 Analyses/test/genReco.fcl
+
+echo "[`date`] run validation"
+mu2e -n 1000 -s genReco.art validation/fcl/validation1.fcl
+mv validation.root ../copyBack/val-genReco-1000-${$MU2E_RELEASE_TAG}.root
+mu2e -n 5000 -s genReco.art validation/fcl/validation1.fcl
+mv validation.root ../copyBack/val-genReco-5000-${$MU2E_RELEASE_TAG}.root
+
+echo "[`date`] remove genReco"
+rm -f genReco*
+
 echo "[`date`] build validation product"
 OLDVER=`find /cvmfs/mu2e.opensciencegrid.org/artexternals/validation -name "v*_*_*" | tail -1 | awk -F/ '{print $NF}'`
 P1=`echo $OLDVER | awk -F_ '{print $1}'`
 P2=`echo $OLDVER | awk -F_ '{print $2}'`
 P3=`echo $OLDVER | awk -F_ '{print $3}'`
 NEWP2=`printf "%02d" $(($P2+1))`
-NEWVER="${P1}_${NEWP2}_${P3}"
-./validation/prd/build.sh -i -v $NEWP2 -d ..
+NEWVALVER="${P1}_${NEWP2}_${P3}"
+./validation/prd/build.sh -i -v $NEWVALVER -d ..
+
+echo "["`date`"] removing validation"
+./validation/prd/build.sh -c
+rm -rf validation
 
 echo "["`date`"] making tarballs"
-cd ..
+# back to the top of the working directory
+cd $LOCAL_DIR
 echo "["`date`"] pwd"
 pwd
 echo "["`date`"] ls of local dir"
@@ -66,7 +84,9 @@ ls -al
 echo "["`date`"] tar of Offline"
 tar -czf copyBack/Offline_${MU2E_RELEASE_TAG}_${label}_${BUILDTYPE}.tgz Offline
 echo "["`date`"] tar of validation"
-tar -czf copyBack/validation_${MU2E_RELEASE_TAG}_${label}_${BUILDTYPE}.tgz validation
+tar -czf copyBack/validation_${NEWVALVER}_${label}_${BUILDTYPE}.tgz validation
 echo "["`date`"] done tarballs"
+
+ls -1 copyBack > copyBack/listing.txt
 
 exit $RC

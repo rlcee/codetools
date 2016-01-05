@@ -14,7 +14,7 @@ usage()
    only do SLF5 debug.
 
   Should be run in the directory where the verison listing
-  will appear (cd /cvmfs/mu2e.opensciencegrid.org/Offline).
+  will appear (for example: cd /cvmfs/mu2e.opensciencegrid.org/Offline).
 
 "
 }
@@ -49,7 +49,7 @@ do
   for TYPE in $BBLIST
   do
     cd $BDIR
-    echo "Filling $PWD/${TAG}/${OS}/${TYPE}"
+    echo "Creating and filling $PWD/${TAG}/${OS}/${TYPE}"
     mkdir -p ${TAG}/${OS}/${TYPE}
     cd ${TAG}/${OS}/${TYPE}
     export TBALL=Offline_${TAG}_${OS}_${TYPE}.tgz
@@ -64,11 +64,30 @@ do
     tar -xzf $TBALL
     rm -f $TBALL
     SIZE=`du -ms Offline | awk '{print $1}'`
-    echo Unrolled $SIZE MB
+    FILES=`find Offline -type f | wc -l`
+    echo "Unrolled $SIZE MB for $FILES files"
     echo ""
 
     export LOG=Offline_${TAG}_${OS}_${TYPE}.log
     wget -O build.log https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-build/BUILDTYPE=${TYPE},label=${OS}/lastSuccessfulBuild/artifact/copyBack/$LOG
+
+    wget -O build.log https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-build/BUILDTYPE=${TYPE},label=${OS}/lastSuccessfulBuild/artifact/copyBack/listing.txt
+    echo "listing.txt:"
+    cat listing.txt
+
+    export VAL=`cat listing.txt | grep validation | grep tgz`
+    if [ -n "$VAL" ]; then
+      wget https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-build/BUILDTYPE=${TYPE},label=${OS}/lastSuccessfulBuild/artifact/copyBack/$VAL
+    fi
+
+    for FF in `cat listing.txt | grep val-genReco`
+    do
+      wget https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-build/BUILDTYPE=${TYPE},label=${OS}/lastSuccessfulBuild/artifact/copyBack/$FF
+    done
+
+    ls -al
+    echo "clean object files with"
+    echo "cleanupRelease.sh ${TAG}/${OS}/${TYPE}/Offline"
 
   done
 done
