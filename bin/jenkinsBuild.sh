@@ -66,7 +66,7 @@ ls -al
 echo "["`date`"] tar of Offline"
 tar -czf copyBack/Offline_${MU2E_RELEASE_TAG}_${label}_${BUILDTYPE}.tgz Offline
 echo "["`date`"] tar of validation"
-tar -czf copyBack/validation_${MU2E_RELEASE_TAG}_${label}_${BUILDTYPE}.tgz ${NEWVER}*
+tar -czf copyBack/validation_${MU2E_RELEASE_TAG}_${label}_${BUILDTYPE}.tgz validation
 echo "["`date`"] done tarballs"
 
 exit $RC
