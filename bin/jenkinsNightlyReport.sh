@@ -63,8 +63,11 @@ if [ -r $VAL ]; then
   valCompare -r $CFILE $VAL >> summary.txt
 
   NT=`cat summary.txt | grep "Compared" | awk '{print $1}'`
+  [ -z "$NT" ] && NT=0
   NP=`cat summary.txt | grep "had perfect match" | awk '{print $1}'`
+  [ -z "$NP" ] && NP=0
   NF=`cat summary.txt | grep "failed loose comparison" | awk '{print $1}'`
+  [ $NT -eq 0 ] && NF=999
   echo "[`date`] $NF validation plots failed loose comparison to yesterday" >> $FN
   VALRC=1
   [ $NF -eq 0 ] && VALRC=0
