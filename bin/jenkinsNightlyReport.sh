@@ -101,6 +101,8 @@ fi
 rm -f $CFILE
 mv $VAL val.root
 
+echo "VALRC=$VALRC"
+
 cp $FN $NDIR
 mv $FN nightly.txt
 
@@ -133,6 +135,8 @@ do
   ST="<a href=\"$FF\">summary</a>"
   TOTRC="`cat $FF | grep "Total" | awk -F= '{print $2}'`"
   [ -z "$TOTRC" ] && TOTRC="-"
+  VALRC="`cat $FF | grep "validation plots failed" | awk '{print $7}'`"
+  [ -z "$VALRC" ] && VALRC="-"
 
   echo "<TR> <TD> $DD </TD> <TD> $TOTRC </TD> <TD> $LT </TD> <TD> $ST </TD> <TD> $VALRC </TD> <TD> $VT </TD> </TR>" >> $TT
 done < $TL
