@@ -61,19 +61,23 @@ mu2e -n 5 -c Mu2eG4/fcl/transportOnly.fcl
 RC5=$?
 echo "[`date`] transportOnly exe return code $RC5" | tee -a $REPORT
 
+mu2e -c JobConfig/cd3/beam/beam_g4s1.fcl -n 100
+RC6=$?
+echo "[`date`] beam_g4s1 return code $RC6" | tee -a $REPORT
+
 # needs data from /cvmfs/mu2e
 mu2e -n 5000 -c Analyses/test/genReco.fcl
-RC6=$?
-echo "[`date`] genReco exe return code $RC6" | tee -a $REPORT
+RC7=$?
+echo "[`date`] genReco exe return code $RC7" | tee -a $REPORT
 
 mu2e -s genReco.art -c validation/fcl/validation1.fcl 
-RC7=$?
-echo "[`date`] validation exe return code $RC7" | tee -a $REPORT
+RC8=$?
+echo "[`date`] validation exe return code $RC8" | tee -a $REPORT
 
 cp validation.root ../copyBack/$VALFILE
 
 
-RC=$(($RC1+$RC2+$RC3+$VOLCHECKB+$RC4+$RC5+$RC6))
+RC=$(($RC1+$RC2+$RC3+$VOLCHECKB+$RC4+$RC5+$RC6+$RC7))
 echo "Total return code=$RC" | tee -a $REPORT
 
 echo "[`date`] ls of Offline dir"
