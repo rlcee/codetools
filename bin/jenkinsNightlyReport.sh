@@ -12,23 +12,32 @@ PDIR=/web/sites/mu2e.fnal.gov/htdocs/atwork/computing/ops/val/plots
 ARTIFACT=https://buildmaster.fnal.gov/job/mu2e-offline-nightly/label=SLF6/lastBuild/artifact/copyBack
 DATE=`date +"%Y-%m-%d"`
 FN=nightly-build-${DATE}.txt
+echo "[`date`] wget $ARTIFACT/$FN"
 wget -q "$ARTIFACT/$FN"
 if [ ! -r "$FN" ]; then
   echo "[`date`] No build report found " > $FN
+  echo "[`date`] ERROR - could not wget $ARTIFACT/$FN"
 fi
 TODAYTOTRC="`cat $FN | grep "Total" | awk -F= '{print $2}'`"
 [ -z "$TODAYTOTRC" ] && TODAYTOTRC="-"
 
 LOG=nightly-log-${DATE}.log
+echo "[`date`] wget $LOG"
 wget -q "$ARTIFACT/$LOG"
 if [ ! -r "$LOG" ]; then
   echo "[`date`] No build log found " > $LOG
+  echo "[`date`] ERROR - could not wget $LOG"
 fi
 cp $LOG $NDIR
 rm -f $LOG
 
 VAL=val-genReco-5000-nightly_${DATE}-0.root
+echo "[`date`] wget $ARTIFACT/$VAL"
 wget -q "$ARTIFACT/$VAL"
+RC=$?
+if [ ! -r $VAL ]; then
+  echo "[`date`] ERROR - could not wget $ARTIFACT/$VAL"
+fi
 
 VALRC="-"
 rm -f summary.txt
