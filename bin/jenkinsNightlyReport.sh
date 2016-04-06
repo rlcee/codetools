@@ -14,6 +14,10 @@ DATE=`date +"%Y-%m-%d"`
 FN=nightly-build-${DATE}.txt
 echo "[`date`] wget $ARTIFACT/$FN"
 wget -q "$ARTIFACT/$FN"
+RC=$?
+echo RC=$RC
+echo "FN=$FN"
+ls -l $FN
 if [ ! -r "$FN" ]; then
   echo "[`date`] No build report found " > $FN
   echo "[`date`] ERROR - could not wget $ARTIFACT/$FN"
@@ -26,7 +30,7 @@ echo "[`date`] wget $LOG"
 wget -q "$ARTIFACT/$LOG"
 if [ ! -r "$LOG" ]; then
   echo "[`date`] No build log found " > $LOG
-  echo "[`date`] ERROR - could not wget $LOG"
+  echo "[`date`] ERROR - could not wget $ARTIFACT/$LOG"
 fi
 cp $LOG $NDIR
 rm -f $LOG
@@ -138,7 +142,7 @@ do
     VT="-"
   fi
 
-  LT="<a href=\"$LOG\">log</a>"
+  LT="<a href=\"nightly-log-${DD}.log\">log</a>"
   [ ! -r $LOG ] && LT="-"
 
   ST="<a href=\"$FF\">summary</a>"
