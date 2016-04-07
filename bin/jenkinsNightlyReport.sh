@@ -119,9 +119,15 @@ echo "VALRC=$VALRC"
 cp $FN $NDIR
 mv $FN nightly.txt
 
+echo >> nightly.txt
+echo "All logs and validation plots can be found at:" >> nightly.txt
+echo "http://mu2e.fnal.gov/atwork/computing/ops/nightlyBuild/nightly.shtml" >> nightly.txt
+echo >> nightly.txt
+
+
 cat nightly.txt | mail -s "Nightly build, status=$TODAYTOTRC/$VALRC" \
-rlc@fnal.gov
-#rlc@fnal.gov,genser@fnal.gov,kutschke@fnal.gov,david.brown@louisville.edu
+rlc@fnal.gov,genser@fnal.gov,kutschke@fnal.gov,david.brown@louisville.edu
+#rlc@fnal.gov
 
 
 # construct the summary web page
