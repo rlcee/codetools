@@ -85,7 +85,8 @@ ls -al
 
 echo "[`date`] mail report"
 cat $REPORT | mail -s "Nightly build, status=$RC" \
-rlc@fnal.gov,genser@fnal.gov,kutschke@fnal.gov,david.brown@louisville.edu
+rlc@fnal.gov
+#rlc@fnal.gov,genser@fnal.gov,kutschke@fnal.gov,david.brown@louisville.edu
 
 cp $REPORT ../copyBack
 cd ..
