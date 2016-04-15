@@ -50,11 +50,17 @@ echo "["`date`"] scons return code=$RC"
 
 echo "[`date`] run genReco"
 mu2e -n 5000 -c Analyses/test/genReco.fcl
+RC=$?
+echo "["`date`"] genReco return code=$RC"
 
 echo "[`date`] run validation"
 mu2e -n 1000 -s genReco.art -c validation/fcl/validation1.fcl
+RC=$?
+echo "["`date`"] validation 1000 return code=$RC"
 mv validation.root ../copyBack/val-genReco-1000-${MU2E_RELEASE_TAG}.root
 mu2e -n 5000 -s genReco.art -c validation/fcl/validation1.fcl
+RC=$?
+echo "["`date`"] validation 5000 return code=$RC"
 mv validation.root ../copyBack/val-genReco-5000-${MU2E_RELEASE_TAG}.root
 
 echo "[`date`] remove genReco"
