@@ -81,6 +81,7 @@ cp validation.root ../copyBack/$VALFILE
 mu2e -c JobConfig/cd3/beam/dra_pure_baseline.fcl \
  -s /cvmfs/mu2e.opensciencegrid.org/DataFiles/ExampleDataFiles/StoppedMuons/sim.mu2e.cd3-beam-g4s4-detconversion.v566.004001_00000000.art
 RC9=$?
+echo "[`date`] CutAndCount return code $RC9" | tee -a $REPORT
 cp nts.owner.cd3-dra-pure-baseline.ver.seq.root ../copyBack/$CACFILE
 
 
