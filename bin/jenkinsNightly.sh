@@ -12,6 +12,7 @@ ls -al
 
 REPORT=nightly-build-`date +"%Y-%m-%d.txt"`
 VALFILE=val-genReco-5000-nightly_`date +"%Y-%m-%d"`-0.root
+CACFILE=candc-nightly_`date +"%Y-%m-%d"`-0.root
 
 echo "[`date`] source products common"
 source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
@@ -76,7 +77,15 @@ echo "[`date`] validation exe return code $RC8" | tee -a $REPORT
 
 cp validation.root ../copyBack/$VALFILE
 
+# run CutAndCount on its standard input
+mu2e -c JobConfig/cd3/beam/dra_pure_baseline.fcl \
+ -s /cvmfs/mu2e.opensciencegrid.org/DataFiles/ExampleDataFiles/StoppedMuons/sim.mu2e.cd3-beam-g4s4-detconversion.v566.004001_00000000.art
+RC9=$?
+cp nts.owner.cd3-dra-pure-baseline.ver.seq.root ../copyBack/$CACFILE
 
+
+# validation exes RC8 and 9 not included since it
+# will be implicitly included in the validation report
 RC=$(($RC1+$RC2+$RC3+$VOLCHECKB+$RC4+$RC5+$RC6+$RC7))
 echo "Total return code=$RC" | tee -a $REPORT
 
