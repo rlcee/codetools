@@ -71,23 +71,31 @@ mu2e -n 5000 -c Analyses/test/genReco.fcl
 RC7=$?
 echo "[`date`] genReco exe return code $RC7" | tee -a $REPORT
 
-mu2e -s genReco.art -c validation/fcl/validation1.fcl 
+# run gstudy2
+mu2e -n 5 -c Mu2eG4/fcl/g4study2.fcl
 RC8=$?
-echo "[`date`] validation exe return code $RC8" | tee -a $REPORT
+echo "[`date`] g4study2 exe return code $RC8" | tee -a $REPORT
+
+#
+# validation hists
+#
+
+mu2e -s genReco.art -c validation/fcl/validation1.fcl 
+RC9=$?
+echo "[`date`] validation exe return code $RC9" | tee -a $REPORT
 
 cp validation.root ../copyBack/$VALFILE
 
 # run CutAndCount on its standard input
 mu2e -c JobConfig/cd3/beam/dra_pure_baseline.fcl \
  -s /cvmfs/mu2e.opensciencegrid.org/DataFiles/ExampleDataFiles/StoppedMuons/sim.mu2e.cd3-beam-g4s4-detconversion.v566.004001_00000000.art
-RC9=$?
-echo "[`date`] CutAndCount return code $RC9" | tee -a $REPORT
+RC10=$?
+echo "[`date`] CutAndCount return code $RC10" | tee -a $REPORT
 cp nts.owner.cd3-dra-pure-baseline.ver.seq.root ../copyBack/$CACFILE
 
-
-# validation exes RC8 and 9 not included since it
+# validation exes RC9 and 10 not included since it
 # will be implicitly included in the validation report
-RC=$(($RC1+$RC2+$RC3+$VOLCHECKB+$RC4+$RC5+$RC6+$RC7))
+RC=$(($RC1+$RC2+$RC3+$VOLCHECKB+$RC4+$RC5+$RC6+$RC7+$RC8))
 echo "Total return code=$RC" | tee -a $REPORT
 
 echo "[`date`] ls of Offline dir"

@@ -35,6 +35,8 @@ fi
 cp $LOG $NDIR
 rm -f $LOG
 
+CAC=candc-nightly_${DATE}-0.root
+
 VAL=val-genReco-5000-nightly_${DATE}-0.root
 echo "[`date`] wget $ARTIFACT/$VAL"
 wget -q "$ARTIFACT/$VAL"
