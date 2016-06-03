@@ -194,9 +194,9 @@ echo "http://mu2e.fnal.gov/atwork/computing/ops/nightlyBuild/nightly.shtml" >> n
 echo >> nightly.txt
 
 
-cat nightly.txt | mail -s "Nightly build, status=$TODAYTOTRC/$VALRC" \
-rlc@fnal.gov
-#rlc@fnal.gov,genser@fnal.gov,kutschke@fnal.gov,david.brown@louisville.edu
+cat nightly.txt | mail -s "Nightly build, status=$TODAYTOTRC/$VALRC/$CACRC" \
+rlc@fnal.gov,genser@fnal.gov,kutschke@fnal.gov,david.brown@louisville.edu,gandr@fnal.gov
+#rlc@fnal.gov
 
 
 #
