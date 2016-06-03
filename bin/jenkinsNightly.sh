@@ -101,9 +101,9 @@ echo "Total return code=$RC" | tee -a $REPORT
 echo "[`date`] ls of Offline dir"
 ls -al
 
-echo "[`date`] mail report"
-cat $REPORT | mail -s "Nightly build, status=$RC" \
-rlc@fnal.gov
+#echo "[`date`] mail report"
+#cat $REPORT | mail -s "Nightly build, status=$RC" \
+#rlc@fnal.gov
 #rlc@fnal.gov,genser@fnal.gov,kutschke@fnal.gov,david.brown@louisville.edu
 
 cp $REPORT ../copyBack
