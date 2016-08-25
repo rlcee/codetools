@@ -61,6 +61,10 @@ scons -j 16
 RC=$?
 echo "["`date`"] scons return code=$RC"
 
+mu2e -c Mu2eG4/fcl/g4test_03.fcl
+RC=$?
+echo "[`date`] g4test_03 return code $RC"
+
 echo "[`date`] run genReco"
 mu2e -n 5000 -c Analyses/test/genReco.fcl
 RC=$?
