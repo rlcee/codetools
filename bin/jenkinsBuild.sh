@@ -33,8 +33,10 @@ cd Offline
 
 if [ "$MU2E_RELEASE_TAG" != "" ]; then
   CHECKOUT_COM="git checkout tags/$MU2E_RELEASE_TAG"
+  BUILD_NAME="$MU2E_RELEASE_TAG"
 elif [ "MU2E_BRANCH" != "" ]; then
   CHECKOUT_COM="git checkout $MU2E_BRANCH"
+  BUILD_NAME="$MU2E_BRANCH"
 else 
   echo MU2E_RELEASE_TAG = $MU2E_RELEASE_TAG
   echo MU2E_BRANCH = $MU2E_BRANCH
@@ -74,11 +76,11 @@ echo "[`date`] run validation"
 mu2e -n 1000 -s genReco.art -c validation/fcl/validation1.fcl
 RC=$?
 echo "["`date`"] validation 1000 return code=$RC"
-mv validation.root ../copyBack/val-genReco-1000-${MU2E_RELEASE_TAG}.root
+mv validation.root ../copyBack/val-genReco-1000-${BUILD_NAME}.root
 mu2e -n 5000 -s genReco.art -c validation/fcl/validation1.fcl
 RC=$?
 echo "["`date`"] validation 5000 return code=$RC"
-mv validation.root ../copyBack/val-genReco-5000-${MU2E_RELEASE_TAG}.root
+mv validation.root ../copyBack/val-genReco-5000-${BUILD_NAME}.root
 
 echo "[`date`] remove genReco"
 rm -f genReco*
@@ -105,7 +107,7 @@ echo "["`date`"] ls of local dir"
 ls -al
 
 echo "["`date`"] tar of Offline"
-tar -czf copyBack/Offline_${MU2E_RELEASE_TAG}_${label}_${BUILDTYPE}.tgz Offline
+tar -czf copyBack/Offline_${BUILD_NAME}_${label}_${BUILDTYPE}.tgz Offline
 echo "["`date`"] tar of validation"
 tar -czf copyBack/validation_${NEWVALVER}_${label}_${BUILDTYPE}.tgz validation
 echo "["`date`"] done tarballs"
