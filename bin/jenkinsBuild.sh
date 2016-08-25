@@ -5,12 +5,7 @@
 #
 
 
-echo "[`date`] start for MU2E_RELEASE_TAG=$MU2E_RELEASE_TAG"
-
-if [ "$MU2E_RELEASE_TAG" == "" ]; then
-   echo "MU2E_RELEASE_TAG is not set - exiting"
-   exit 1
-fi
+echo "[`date`] start for MU2E_RELEASE_TAG=$MU2E_RELEASE_TAG MU2E_BRANCH=$MU2E_BRANCH"
 
 echo "[`date`] printenv"
 printenv
@@ -31,10 +26,28 @@ echo "[`date`] printenv after setup"
 printenv
 
 echo "[`date`] clone offline"
-git clone -b $MU2E_RELEASE_TAG http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline/Offline.git
+git clone http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline/Offline.git
 
 echo "[`date`] cd Offline"
 cd Offline
+
+if [ "$MU2E_RELEASE_TAG" != "" ]; then
+  CHECKOUT_COM="git checkout tags/$MU2E_RELEASE_TAG"
+elif [ "MU2E_BRANCH" != "" ]; then
+  CHECKOUT_COM="git checkout $MU2E_BRANCH"
+else 
+  echo MU2E_RELEASE_TAG = $MU2E_RELEASE_TAG
+  echo MU2E_BRANCH = $MU2E_BRANCH
+  echo "Error - tag and branch not set - exiting"
+  exit 1
+fi
+echo "[`date`]checkout command: $CHECKOUT_COM"
+$CHECKOUT_COM
+
+echo "[`date`] show what is checked out"
+git show-ref $MU2E_RELEASE_TAG $MU2E_BRANCH
+git status
+
 
 echo "[`date`] clone validation"
 git clone http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline-validation/validation.git
