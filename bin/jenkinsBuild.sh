@@ -63,6 +63,7 @@ scons -j 16
 RC=$?
 echo "["`date`"] scons return code=$RC"
 
+echo "[`date`] run g4test_03"
 mu2e -c Mu2eG4/fcl/g4test_03.fcl
 RC=$?
 echo "[`date`] g4test_03 return code $RC"
@@ -107,7 +108,8 @@ echo "["`date`"] ls of local dir"
 ls -al
 
 echo "["`date`"] tar of Offline"
-tar -czf copyBack/Offline_${BUILD_NAME}_${label}_${BUILDTYPE}.tgz Offline
+tar -czf copyBack/Offline_${BUILD_NAME}_${label}_${BUILDTYPE}.tgz \
+  --exclude="Offline/*.root" Offline
 echo "["`date`"] tar of validation"
 tar -czf copyBack/validation_${NEWVALVER}_${label}_${BUILDTYPE}.tgz validation
 echo "["`date`"] done tarballs"
