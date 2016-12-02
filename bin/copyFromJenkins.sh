@@ -37,7 +37,8 @@ do
   [ $AA == "prof"  ] && BBLIST="$BBLIST $AA"
   [ $AA == "debug" ] && BBLIST="$BBLIST $AA"
 done
-[ -z "$OSLIST" ] && OSLIST="SLF5 SLF6"
+#[ -z "$OSLIST" ] && OSLIST="SLF5 SLF6"
+[ -z "$OSLIST" ] && OSLIST="SLF6"
 [ -z "$BBLIST" ] && BBLIST="prof debug"
 echo OSLIST=$OSLIST
 echo BBLIST=$BBLIST
@@ -71,14 +72,14 @@ do
     export LOG=Offline_${TAG}_${OS}_${TYPE}.log
     wget -O build.log https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-build/BUILDTYPE=${TYPE},label=${OS}/lastSuccessfulBuild/artifact/copyBack/$LOG
 
-    wget -O build.log https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-build/BUILDTYPE=${TYPE},label=${OS}/lastSuccessfulBuild/artifact/copyBack/listing.txt
+    wget -O listing.txt https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-build/BUILDTYPE=${TYPE},label=${OS}/lastSuccessfulBuild/artifact/copyBack/listing.txt
     echo "listing.txt:"
     cat listing.txt
 
-    export VAL=`cat listing.txt | grep validation | grep tgz`
-    if [ -n "$VAL" ]; then
-      wget https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-build/BUILDTYPE=${TYPE},label=${OS}/lastSuccessfulBuild/artifact/copyBack/$VAL
-    fi
+#    export VAL=`cat listing.txt | grep validation | grep tgz`
+#    if [ -n "$VAL" ]; then
+#      wget https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-build/BUILDTYPE=${TYPE},label=${OS}/lastSuccessfulBuild/artifact/copyBack/$VAL
+#    fi
 
     for FF in `cat listing.txt | grep val-genReco`
     do
