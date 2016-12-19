@@ -29,8 +29,8 @@ cd Offline
 echo "[`date`] print commit"
 git show
 git rev-parse HEAD
-echo "[`date`] clone validation"
-git clone http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline-validation/validation.git
+#echo "[`date`] clone validation"
+#git clone http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline-validation/validation.git
 echo "[`date`] source setup"
 source setup.sh
 
@@ -80,7 +80,8 @@ echo "[`date`] g4study2 exe return code $RC8" | tee -a $REPORT
 # validation hists
 #
 
-mu2e -s genReco.art -c validation/fcl/validation1.fcl 
+#mu2e -s genReco.art -c validation/fcl/validation1.fcl 
+mu2e -s genReco.art -c Validation/fcl/val.fcl 
 RC9=$?
 echo "[`date`] validation exe return code $RC9" | tee -a $REPORT
 

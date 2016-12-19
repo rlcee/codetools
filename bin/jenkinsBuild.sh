@@ -51,8 +51,8 @@ git show-ref $MU2E_RELEASE_TAG $MU2E_BRANCH
 git status
 
 
-echo "[`date`] clone validation"
-git clone http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline-validation/validation.git
+#echo "[`date`] clone validation"
+#git clone http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline-validation/validation.git
 
 echo "[`date`] source setup"
 ./buildopts --build=$BUILDTYPE
@@ -74,11 +74,13 @@ RC=$?
 echo "["`date`"] genReco return code=$RC"
 
 echo "[`date`] run validation"
-mu2e -n 1000 -s genReco.art -c validation/fcl/validation1.fcl
+#mu2e -n 1000 -s genReco.art -c validation/fcl/validation1.fcl
+mu2e -n 1000 -s genReco.art -c Validation/fcl/val.fcl
 RC=$?
 echo "["`date`"] validation 1000 return code=$RC"
 mv validation.root ../copyBack/val-genReco-1000-${BUILD_NAME}.root
-mu2e -n 5000 -s genReco.art -c validation/fcl/validation1.fcl
+#mu2e -n 5000 -s genReco.art -c validation/fcl/validation1.fcl
+mu2e -n 5000 -s genReco.art -c Validation/fcl/val.fcl
 RC=$?
 echo "["`date`"] validation 5000 return code=$RC"
 mv validation.root ../copyBack/val-genReco-5000-${BUILD_NAME}.root
@@ -86,18 +88,18 @@ mv validation.root ../copyBack/val-genReco-5000-${BUILD_NAME}.root
 echo "[`date`] remove genReco"
 rm -f genReco*
 
-echo "[`date`] build validation product"
-OLDVER=`find /cvmfs/mu2e.opensciencegrid.org/artexternals/validation -name "v*_*_*" | tail -1 | awk -F/ '{print $NF}'`
-P1=`echo $OLDVER | awk -F_ '{print $1}'`
-P2=`echo $OLDVER | awk -F_ '{print $2}'`
-P3=`echo $OLDVER | awk -F_ '{print $3}'`
-NEWP2=`printf "%02d" $(($P2+1))`
-NEWVALVER="${P1}_${NEWP2}_${P3}"
-./validation/prd/build.sh -i -v $NEWVALVER -d ..
-
-echo "["`date`"] removing validation"
-./validation/prd/build.sh -c
-rm -rf validation
+#  echo "[`date`] build validation product"
+#  OLDVER=`find /cvmfs/mu2e.opensciencegrid.org/artexternals/validation -name "v*_*_*" | tail -1 | awk -F/ '{print $NF}'`
+#  P1=`echo $OLDVER | awk -F_ '{print $1}'`
+#  P2=`echo $OLDVER | awk -F_ '{print $2}'`
+#  P3=`echo $OLDVER | awk -F_ '{print $3}'`
+#  NEWP2=`printf "%02d" $(($P2+1))`
+#  NEWVALVER="${P1}_${NEWP2}_${P3}"
+#  ./validation/prd/build.sh -i -v $NEWVALVER -d ..
+#  
+#  echo "["`date`"] removing validation"
+#  ./validation/prd/build.sh -c
+#  rm -rf validation
 
 echo "["`date`"] making tarballs"
 # back to the top of the working directory
@@ -110,8 +112,8 @@ ls -al
 echo "["`date`"] tar of Offline"
 tar -czf copyBack/Offline_${BUILD_NAME}_${label}_${BUILDTYPE}.tgz \
   --exclude="Offline/*.root" Offline
-echo "["`date`"] tar of validation"
-tar -czf copyBack/validation_${NEWVALVER}_${label}_${BUILDTYPE}.tgz validation
+# echo "["`date`"] tar of validation"
+# tar -czf copyBack/validation_${NEWVALVER}_${label}_${BUILDTYPE}.tgz validation
 echo "["`date`"] done tarballs"
 
 ls -1 copyBack > copyBack/listing.txt
