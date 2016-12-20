@@ -11,6 +11,8 @@ echo "[`date`] printenv"
 printenv
 echo "[`date`] df -h"
 df -h
+echo "[`date`] quota"
+quota -v
 echo "[`date`] PWD"
 pwd
 export LOCAL_DIR=$PWD

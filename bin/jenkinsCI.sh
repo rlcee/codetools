@@ -4,6 +4,7 @@ echo "["`date`"] environment"
 
 printenv
 df -h
+quota -v
 pwd
 
 echo "["`date`"] setups"
