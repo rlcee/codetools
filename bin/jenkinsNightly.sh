@@ -93,21 +93,11 @@ cp validation.root ../copyBack/$VALFILE
 mu2e -c JobConfig/cd3/beam/dra_pure_baseline.fcl \
  -s /cvmfs/mu2e.opensciencegrid.org/DataFiles/ExampleDataFiles/StoppedMuons/sim.mu2e.cd3-beam-g4s4-detconversion.v566.004001_00000000.art
 RC10=$?
-echo "[`date`] CutAndCount return code $RC10" | tee -a $REPORT
+echo "[`date`] CutAndCount exe return code $RC10" | tee -a $REPORT
 cp nts.owner.cd3-dra-pure-baseline.ver.seq.root ../copyBack/$CACFILE
-
-# validation exes RC9 and 10 not included since it
-# will be implicitly included in the validation report
-RC=$(($RC1+$RC2+$RC3+$VOLCHECKB+$RC4+$RC5+$RC6+$RC7+$RC8))
-echo "Total return code=$RC" | tee -a $REPORT
 
 echo "[`date`] ls of Offline dir"
 ls -al
-
-#echo "[`date`] mail report"
-#cat $REPORT | mail -s "Nightly build, status=$RC" \
-#rlc@fnal.gov
-#rlc@fnal.gov,genser@fnal.gov,kutschke@fnal.gov,david.brown@louisville.edu
 
 cp $REPORT ../copyBack
 cd ..
