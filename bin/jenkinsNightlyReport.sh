@@ -22,7 +22,7 @@ if [ ! -r "$FN" ]; then
   echo "[`date`] No build report found " > $FN
   echo "[`date`] ERROR - could not wget $ARTIFACT/$FN"
 fi
-TODAYTOTRC="`cat $FN | grep "Total" | awk -F= '{print $2}'`"
+TODAYTOTRC="`cat $FN | grep "before validation" | awk '{print $5}'`"
 [ -z "$TODAYTOTRC" ] && TODAYTOTRC="-"
 
 LOG=nightly-log-${DATE}.log
