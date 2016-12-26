@@ -79,7 +79,7 @@ RC8=$?
 echo "[`date`] g4study2 exe return code $RC8" | tee -a $REPORT
 
 RC=$(($RC1+$RC2+$RC3+$RC4+$RC5+$RC6+$RC7+$RC8))
-echo "Return code before validation $RC"
+echo "Return code before validation $RC" | tee -a $REPORT
 
 #
 # validation hists
