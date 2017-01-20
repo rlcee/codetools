@@ -24,6 +24,9 @@ if [ ! -r "$FN" ]; then
 fi
 TODAYTOTRC="`cat $FN | grep "before validation" | awk '{print $5}'`"
 [ -z "$TODAYTOTRC" ] && TODAYTOTRC="-"
+VALEXERC="`cat $FN | grep "validation exe return code" | awk '{print $11}'`"
+CACEXERC="`cat $FN | grep "CutAndCount exe return code" | awk '{print $11}'`"
+
 
 LOG=nightly-log-${DATE}.log
 echo "[`date`] wget $LOG"
@@ -33,8 +36,7 @@ if [ ! -r "$LOG" ]; then
   echo "[`date`] ERROR - could not wget $ARTIFACT/$LOG"
 fi
 cp $LOG $NDIR
-rm -f $LOG
-
+mv $LOG build.log
 
 # setup code for comparison
 source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
@@ -97,6 +99,7 @@ if [ -r $VAL ]; then
   echo "[`date`] $NF validation plots failed loose comparison to yesterday" >> $FN
   VALRC=1
   [ $NF -eq 0 ] && VALRC=0
+  [ "$VALEXERC" != "0" ] && VALRC=$VALEXERC
 
   # make web page
   mkdir -p $PDIR/nightly-${DATE}
@@ -161,7 +164,7 @@ if [ -r $CAC ]; then
   echo "[`date`] $NF CutAndCount plots failed loose comparison to yesterday" >> $FN
   CACRC=1
   [ $NF -eq 0 ] && CACRC=0
-
+  [ "$CACEXERC" != "0" ] && CACRC=$CACEXERC
 
   # make web page
   mkdir -p $PDIR/candc-${DATE}
