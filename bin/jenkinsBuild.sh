@@ -85,6 +85,7 @@ mv validation.root ../copyBack/val-genReco-5000-${BUILD_NAME}.root
 
 echo "[`date`] remove genReco"
 rm -f genReco*
+rm -f debug.log error.log
 
 echo "["`date`"] making tarballs"
 # back to the top of the working directory
