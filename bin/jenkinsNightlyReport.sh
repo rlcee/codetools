@@ -23,7 +23,6 @@ if [ ! -r "$FN" ]; then
   echo "[`date`] ERROR - could not wget $ARTIFACT/$FN"
 fi
 TODAYTOTRC="`cat $FN | grep "before validation" | awk '{print $5}'`"
-[ -z "$TODAYTOTRC" ] && TODAYTOTRC="-"
 VALEXERC="`cat $FN | grep "validation exe return code" | awk '{print $11}'`"
 CACEXERC="`cat $FN | grep "CutAndCount exe return code" | awk '{print $11}'`"
 
@@ -43,11 +42,6 @@ source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
 setup mu2e
 OVER=`ls -1 /cvmfs/mu2e.opensciencegrid.org/Offline | tail -1`
 echo "setting up offline $OVER"
-source /cvmfs/mu2e.opensciencegrid.org/Offline/$OVER/SLF6/prof/Offline/setup.sh
-VVER=`ups list -aK+ validation | awk '{print $2}' | tr '"' ' ' | sort | tail -1`
-echo "setting up validation $VVER"
-setup validation $VVER
-#  setup validation v0_00_01
 
 #
 # set up for validation plots
@@ -95,7 +89,13 @@ if [ -r $VAL ]; then
   NP=`cat temp.txt | grep "had perfect match" | awk '{print $1}'`
   [ -z "$NP" ] && NP=0
   NF=`cat temp.txt | grep "failed loose comparison" | awk '{print $1}'`
-  [ $NT -eq 0 ] && NF=999
+  NC=`cat temp.txt | grep "could not be compared" | awk '{print $1}'`
+  if [[ $NT -eq 0 || -z "$NF" || -z "$NC" ]]; then
+    NF=999
+  else
+    NF=$(($NF+$NC))
+  fi
+
   echo "[`date`] $NF validation plots failed loose comparison to yesterday" >> $FN
   VALRC=1
   [ $NF -eq 0 ] && VALRC=0
@@ -160,7 +160,13 @@ if [ -r $CAC ]; then
   NP=`cat temp.txt | grep "had perfect match" | awk '{print $1}'`
   [ -z "$NP" ] && NP=0
   NF=`cat temp.txt | grep "failed loose comparison" | awk '{print $1}'`
-  [ $NT -eq 0 ] && NF=999
+  NC=`cat temp.txt | grep "could not be compared" | awk '{print $1}'`
+  if [[ $NT -eq 0 || -z "$NF" || -z "$NC" ]]; then
+    NF=999
+  else
+    NF=$(($NF+$NC))
+  fi
+
   echo "[`date`] $NF CutAndCount plots failed loose comparison to yesterday" >> $FN
   CACRC=1
   [ $NF -eq 0 ] && CACRC=0
@@ -195,7 +201,6 @@ echo >> nightly.txt
 echo "All logs and validation plots can be found at:" >> nightly.txt
 echo "http://mu2e.fnal.gov/atwork/computing/ops/nightlyBuild/nightly.shtml" >> nightly.txt
 echo >> nightly.txt
-
 
 cat nightly.txt | mail -s "Nightly build, status=$TODAYTOTRC/$VALRC/$CACRC" \
 rlc@fnal.gov,genser@fnal.gov,kutschke@fnal.gov,david.brown@louisville.edu,gandr@fnal.gov
@@ -241,8 +246,12 @@ do
   fi
 
   ST="<a href=\"$FF\">summary</a>"
-  TOTRC="`cat $FF | grep "Total" | awk -F= '{print $2}'`"
+
+  # two tests due to schema evolution
+  TOTRC="`cat $FF | grep "Return code before validation" | awk '{print $5}'`"
+  [ -z "$TOTRC" ] && TOTRC="`cat $FF | grep "Total" | awk -F= '{print $2}'`"
   [ -z "$TOTRC" ] && TOTRC="-"
+
   VALRC="`cat $FF | grep "validation plots failed" | awk '{print $7}'`"
   [ -z "$VALRC" ] && VALRC="-"
   CACRC="`cat $FF | grep "CutAndCount plots failed" | awk '{print $7}'`"
