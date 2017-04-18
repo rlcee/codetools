@@ -42,7 +42,7 @@ source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
 setup mu2e
 OVER=`ls -1 /cvmfs/mu2e.opensciencegrid.org/Offline | tail -1`
 echo "setting up offline $OVER"
-
+source /cvmfs/mu2e.opensciencegrid.org/Offline/${OVER}/SLF6/prof/Offline/setup.sh
 #
 # set up for validation plots
 #
@@ -205,6 +205,7 @@ echo >> nightly.txt
 cat nightly.txt | mail -s "Nightly build, status=$TODAYTOTRC/$VALRC/$CACRC" \
 rlc@fnal.gov,genser@fnal.gov,kutschke@fnal.gov,david.brown@louisville.edu,gandr@fnal.gov
 #rlc@fnal.gov
+
 
 
 #
