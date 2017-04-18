@@ -58,21 +58,21 @@ egrep 'Checking overlaps for volume' surfaceCheck.log | grep -v OK | tee -a $REP
 
 mu2e -n 5 -c Mu2eG4/fcl/transportOnly.fcl
 RC4=$?
-echo "[`date`] transportOnly exe return code $RC5" | tee -a $REPORT
+echo "[`date`] transportOnly exe return code $RC4" | tee -a $REPORT
 
 mu2e -c JobConfig/cd3/beam/beam_g4s1.fcl -n 100
 RC5=$?
-echo "[`date`] beam_g4s1 return code $RC6" | tee -a $REPORT
+echo "[`date`] beam_g4s1 return code $RC5" | tee -a $REPORT
 
 # needs data from /cvmfs/mu2e
 mu2e -n 5000 -c Analyses/test/genReco.fcl
 RC6=$?
-echo "[`date`] genReco exe return code $RC7" | tee -a $REPORT
+echo "[`date`] genReco exe return code $RC6" | tee -a $REPORT
 
 # run gstudy2
 mu2e -n 5 -c Mu2eG4/fcl/g4study2.fcl
 RC7=$?
-echo "[`date`] g4study2 exe return code $RC8" | tee -a $REPORT
+echo "[`date`] g4study2 exe return code $RC7" | tee -a $REPORT
 
 RC=$(($RC1+$RC2+$RC3+$VOLCHECKB+$RC4+$RC5+$RC6+$RC7))
 echo "Return code before validation $RC" | tee -a $REPORT
