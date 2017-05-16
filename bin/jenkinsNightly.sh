@@ -11,6 +11,9 @@ echo "[`date`] PWD"
 pwd
 echo "[`date`] ls of local dir"
 ls -al
+echo "[`date`] cpuinfo"
+cat /proc/cpuinfo | head -30
+
 
 REPORT=nightly-build-`date +"%Y-%m-%d.txt"`
 VALFILE=val-genReco-5000-nightly_`date +"%Y-%m-%d"`-0.root

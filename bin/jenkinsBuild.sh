@@ -18,6 +18,8 @@ pwd
 export LOCAL_DIR=$PWD
 echo "[`date`] ls of local dir"
 ls -al
+echo "[`date`] cpuinfo"
+cat /proc/cpuinfo | head -30
 
 echo "[`date`] source products common"
 source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups

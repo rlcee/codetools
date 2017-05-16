@@ -1,14 +1,21 @@
 #!/bin/bash
 
-echo "["`date`"] environment"
-
+echo "[`date`] printenv"
 printenv
+echo "[`date`] df -h"
 df -h
+echo "[`date`] quota"
 quota -v
+echo "[`date`] PWD"
 pwd
+export LOCAL_DIR=$PWD
+echo "[`date`] ls of local dir"
+ls -al
+echo "[`date`] cpuinfo"
+cat /proc/cpuinfo | head -30
+
 
 echo "["`date`"] setups"
-
 source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
 setup mu2e
 
