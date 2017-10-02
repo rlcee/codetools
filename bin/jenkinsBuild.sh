@@ -23,8 +23,10 @@ cat /proc/cpuinfo | head -30
 
 echo "[`date`] source products common"
 source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
-echo "[`date`] setup mu2e"
-setup mu2e
+#echo "[`date`] setup mu2e"
+#setup mu2e
+echo "[`date`] setup experimentla mu2e setup script "
+source /cvmfs/mu2e.opensciencegrid.org/setupmu2e-art-test2.sh
 
 echo "[`date`] printenv after setup"
 printenv
@@ -71,6 +73,7 @@ rm -f data_03.root g4test_03.root
 
 echo "[`date`] run genReco"
 mu2e -n 5000 -c Analyses/test/genReco.fcl
+#mu2e -n 5000 -c Validation/fcl/genReco.fcl
 RC=$?
 echo "["`date`"] genReco return code=$RC"
 
