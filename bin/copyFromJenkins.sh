@@ -9,9 +9,9 @@ usage()
     echo "
  Pull an Offline release build from Jenkins build machine
  \$1 = git release tag, like v5_2_1
- \$2,\$3 = select subsets.  If SLF5 then do SLF5, prof and debug.  
-   If debug then do SLF5 and 6, for debug. If SLF5 debug then
-   only do SLF5 debug.
+ \$2,\$3 = select subsets.  If \"SLF6\" then do SLF6, prof and debug.  
+   If \"debug\" then do SLF6 and 7, for debug. If \"SLF6 debug\" then
+   only do SLF6 debug.
 
   Should be run in the directory where the verison listing
   will appear (for example: cd /cvmfs/mu2e.opensciencegrid.org/Offline).
@@ -32,13 +32,12 @@ BBLIST=""
 shift
 for AA in $*
 do
-  [ $AA == "SLF5" ] && OSLIST="$OSLIST $AA"
+  [ $AA == "SLF7" ] && OSLIST="$OSLIST $AA"
   [ $AA == "SLF6" ] && OSLIST="$OSLIST $AA"
   [ $AA == "prof"  ] && BBLIST="$BBLIST $AA"
   [ $AA == "debug" ] && BBLIST="$BBLIST $AA"
 done
-#[ -z "$OSLIST" ] && OSLIST="SLF5 SLF6"
-[ -z "$OSLIST" ] && OSLIST="SLF6"
+[ -z "$OSLIST" ] && OSLIST="SLF6 SLF7"
 [ -z "$BBLIST" ] && BBLIST="prof debug"
 echo OSLIST=$OSLIST
 echo BBLIST=$BBLIST
