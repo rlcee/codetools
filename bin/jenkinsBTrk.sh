@@ -28,14 +28,16 @@ echo "[`date`] source products common"
 source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
 echo "[`date`] setup mu2e"
 setup mu2e
-echo "[`date`] setup experimentla mu2e setup script "
-source /cvmfs/mu2e.opensciencegrid.org/setupmu2e-art.sh 
 
 echo "[`date`] printenv after setup"
 printenv
 
 echo "[`date`] clone BTrk"
 git clone https://github.com/KFTrack/BTrk.git
+RC=$?
+echo "[`date`] git RC=$RC"
+[ $RC -ne 0 ] && exit $RC
+
 cd BTrk
 echo "[`date`] checkout BTrk $PACKAGE_VERSION"
 git checkout -b work $PACKAGE_VERSION
@@ -48,9 +50,13 @@ echo "[`date`] scons"
 scons -j 10
 RC=$?
 echo "[`date`] scons RC=$RC"
+[ $RC -ne 0 ] && exit $RC
 
 export PRODUCTS_INSTALL=$LOCAL_DIR/prod
 source $LOCAL_DIR/BTrk/scripts/install.sh
+RC=$?
+echo "[`date`] install RC=$RC"
+[ $RC -ne 0 ] && exit $RC
 
 cd $LOCAL_DIR
 
@@ -59,10 +65,15 @@ PACKAGE_VERSION_DOT=`echo $PACKAGE_VERSION | sed -e 's/v//' -e 's/_/\./g' `
 TBALL=BTrk-${PACKAGE_VERSION_DOT}-${OS}-x86_64-${COMPILER}-${BUILDTYPE}.tar.bz2
 
 tar -cj -C prod -f $TBALL BTrk
+RC=$?
+echo "[`date`] tar RC=$RC"
+[ $RC -ne 0 ] && exit $RC
 mv $TBALL copyBack
 
 echo "[`date`] ls"
 ls -l *
 
-exit $RC
+echo "[`date`] normal exit"
+
+exit
 
