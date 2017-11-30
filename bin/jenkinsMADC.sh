@@ -43,7 +43,7 @@ echo "[`date`] git clone"
 # Make top level working directory, clone source and checkout tag
 git clone http://cdcvs.fnal.gov/projects/mu2e_artdaq-core
 RC=$?
-[ $RC -eq 0 ] && exit $RC
+[ $RC -ne 0 ] && exit $RC
 
 echo "[`date`] checkout"
 cd mu2e_artdaq-core
@@ -64,12 +64,12 @@ FLAG="-p"
 echo "[`date`] setup_for_development FLAG=$FLAG"
 source ../mu2e_artdaq-core/ups/setup_for_development $FLAG
 RC=$?
-[ $RC -eq 0 ] && exit $RC
+[ $RC -ne 0 ] && exit $RC
 
 echo "[`date`] buildtool"
 buildtool -i
 RC=$?
-[ $RC -eq 0 ] && exit $RC
+[ $RC -ne 0 ] && exit $RC
 
 echo "[`date`] buildtool RC=$RC"
 
@@ -81,7 +81,7 @@ cd $LOCAL_DIR
 
 tar -cj -C products -f $TBALL mu2e_artdaq_core
 RC=$?
-[ $RC -eq 0 ] && exit $RC
+[ $RC -ne 0 ] && exit $RC
 
 mv $TBALL copyBack
 
