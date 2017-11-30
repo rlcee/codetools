@@ -60,7 +60,6 @@ FLAG="-p"
 [ "$BUILDTYPE" == "debug" ] && FLAG="-d"
 echo "[`date`] setup_for_development FLAG=$FLAG"
 source ../mu2e_artdaq-core/ups/setup_for_development $FLAG
-ups list -a artdaq_core
 
 RC=$?
 RCTOT=$(($RCTOT+$RC))
@@ -75,6 +74,8 @@ echo "[`date`] buildtool RC=$RC"
 PACKAGE_VERSION_DOT=`echo $PACKAGE_VERSION | sed -e 's/v//' -e 's/_/\./g' `
 
 TBALL=mu2e_artdaq_core-${PACKAGE_VERSION_DOT}-${OS}-x86_64-${COMPILER}-${ART_VERSION}-${BUILDTYPE}.tar.bz2
+
+cd $LOCAL_DIR
 
 tar -cj -C products -f $TBALL mu2e_artdaq_core
 RC=$?
