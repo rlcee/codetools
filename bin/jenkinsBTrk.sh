@@ -59,5 +59,8 @@ TBALL=BTrk-${PACKAGE_VERSION_DOT}-${OS}-x86_64-${COMPILER}-${BUILDTYPE}.tar.bz2
 tar -cj -C prod -f $TBALL BTrk
 mv $TBALL copyBack
 
+echo "[`date`] ls"
+ls -l *
+
 exit $RC
 
