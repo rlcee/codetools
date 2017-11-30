@@ -1,17 +1,19 @@
 #!/bin/bash
 #
-# build a tagged version of Offline in Jenkins system
-# $MU2E_RELEASE_TAG should be set
+# build a tagged version of BTrk in Jenkins system
+# the following are defined by the project:
+# export BUILDTYPE=prof
+# export label=SLF6
+# the following are defined as jenkins project parameters
+# export PACKAGE_VERSION=v1_02_03
+# export COMPILER=e14
+# to run locally, define these in the environment first
 #
 
-export BUILDTYPE=prof
-export label=SLF6
-export PACKAGE_VERSION=v1_02_03
-export COMPILER=e14
 
 OS=`echo $label | tr "[A-Z]" "[a-z]"`
 
-echo "[`date`] start for BTRK_TAG=$PACKAGE_VERSION $COMPILER $BUILDTYPE $OS"
+echo "[`date`] start $PACKAGE_VERSION $COMPILER $BUILDTYPE $OS"
 echo "[`date`] PWD"
 pwd
 echo "[`date`] directories"
