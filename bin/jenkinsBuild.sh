@@ -26,7 +26,7 @@ source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
 #echo "[`date`] setup mu2e"
 #setup mu2e
 echo "[`date`] setup experimentla mu2e setup script "
-source /cvmfs/mu2e.opensciencegrid.org/setupmu2e-art-test2.sh
+source /cvmfs/mu2e.opensciencegrid.org/setupmu2e-art.sh
 
 echo "[`date`] printenv after setup"
 printenv
