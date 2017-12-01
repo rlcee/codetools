@@ -49,14 +49,6 @@ echo "[`date`] checkout"
 cd mu2e_artdaq-core
 git checkout -b work $PACKAGE_VERSION
 
-echo "************************************************************"
-echo " hacking s58 "
-echo "************************************************************"
-
-cat ups/product_deps | sed 's/e14:s50/e14:s58/g' > s.txt
-cp s.txt ups/product_deps
-rm s.txt
-
 cd $LOCAL_DIR/build
 
 FLAG="-p"
