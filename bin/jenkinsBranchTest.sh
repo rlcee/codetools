@@ -128,7 +128,7 @@ RC=$?
 [ $RC -ne 0 ] && exit 2
 
 NJOB=5
-echo "3112\n4438\n7204\n7864\n9578" > seeds.txt
+echo -e "3112\n4438\n7204\n7864\n9578" > seeds.txt
 
 (launch base $BASE_BUILD )
 RC=$?
@@ -149,6 +149,7 @@ do
   sleep 60
   N=`grep "Art has completed" base/*.log test/*.log | wc -l`
   echo "waiting: min $I logs $N"
+  I=$(($I+1))
 done
 
 #
