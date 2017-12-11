@@ -44,8 +44,60 @@ build() {
     return 0
 }
 
-#genreco() {
-#}
+
+launch() {
+    local CWD=$PWD
+    local DIR="$1"
+    local BUILD="$2"
+    shift 2
+    N=`cat seeds.txt | wc -l`
+    echo "[`date`] starting launch $DIR $BUILD $N seeds"
+    cd $DIR
+    local TYPE=`echo $BUILD | awk -F: '{print $1}'`
+    local TEXT=`echo $BUILD | awk -F: '{print $2}'`
+
+    source Offline/setup.sh
+    I=1
+    while [ $I -le $N ]; 
+    do
+	cp Offline/Analyses/test/genReco.fcl ./${I}.fcl
+	SEED=`sed "${I}q;d" ../seeds.txt`
+	echo "services.SeedService.baseSeed: $SEED" >> ${I}.fcl
+	mu2e -n 1000 -o ${I}.art -T ${I}.root >& ${I}.log &
+	I=$(($I+1))
+    done
+
+    echo "[`date`] launch ls"
+    ls -l
+    echo "[`date`] launch ps"
+    ps -fwww -f
+
+    cd $CWD
+    return 0
+}
+
+collect() {
+    local CWD=$PWD
+    local DIR="$1"
+    local BUILD="$2"
+    shift 2
+    echo "[`date`] starting collect $DIR $BUILD"
+    cd $DIR
+    local TYPE=`echo $BUILD | awk -F: '{print $1}'`
+    local TEXT=`echo $BUILD | awk -F: '{print $2}'`
+
+    source Offline/setup.sh
+    ls -l
+
+    ls *.art > input.txt
+    mu2e -S input.txt -C Validation/fcl/val.fcl
+
+    VF=`echo val_${BUILD}_${BUILD_NAME}.root | tr ":" "-"`
+    cp validation.root ../copyBack/$VF
+
+    cd $CWD
+    return 0
+}
 
 
 echo "[`date`] printenv"
@@ -75,29 +127,47 @@ RC=$?
 RC=$?
 [ $RC -ne 0 ] && exit 2
 
+NJOB=5
+echo "3112\n4438\n7204\n7864\n9578" > seeds.txt
 
+(launch base $BASE_BUILD )
+RC=$?
+[ $RC -ne 0 ] && exit 11
 
+(launch test $TEST_BUILD )
+RC=$?
+[ $RC -ne 0 ] && exit 12
 
-## pull the main repo
-#git clone http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline/Offline.git
-#cd Offline
 #
-## dump the rev
-#git show
-#git rev-parse HEAD
+# wait for results
 #
-## building prof and debug
-#./buildopts --build=$BUILDTYPE
-#source setup.sh
+NTJOB=$((2*$NJOB))
+N=0
+I=0
+while [[ $N -lt $NTJOB && $I -lt 50 ]];
+do
+  sleep 60
+  N=`grep "Art has completed" base/*.log test/*.log | wc -l`
+  echo "waiting: min $I logs $N"
+done
+
 #
-#echo "["`date`"] ups"
-#ups active
+# make val files
 #
-#echo "["`date`"] build"
-#
-#scons -j 16
-#RC=$?
-#
-#echo "["`date`"] scons return code is $RC"
+
+(collect base $BASE_BUILD )
+RC=$?
+[ $RC -ne 0 ] && exit 21
+
+(collect test $TEST_BUILD )
+RC=$?
+[ $RC -ne 0 ] && exit 22
+
+echo "[`date`] done collect"
+
+ls -l *
+
+echo "[`date`] exit"
+
 
 exit $RC
