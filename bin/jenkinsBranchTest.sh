@@ -5,6 +5,7 @@ build() {
     local CWD=$PWD
     local DIR="$1"
     local BUILD="$2"
+    shift 2
     echo "[`date`] starting build $DIR $BUILD"
     mkdir $DIR
     cd $DIR
