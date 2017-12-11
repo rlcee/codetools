@@ -43,8 +43,8 @@ build() {
     return 0
 }
 
-genreco() {
-}
+#genreco() {
+#}
 
 
 echo "[`date`] printenv"
