@@ -1,0 +1,99 @@
+#! /bin/bash
+#
+# branchTest tag:v6_3_2 branch:triggerDev
+#
+
+usage() {
+cat <<EOF
+  banchTest <baseBuild> <testBuild>
+
+  Cause a jenkins project to run to test a commit or tag against a 
+  standard base build.  The release can be a tag, a commit, or the 
+  head of a branch.  Here are example of how to specify the builds:
+  tag:v6_3_2
+  commit:1879cd0a3
+  branch:a-banch-name
+
+EOF
+}
+
+
+if [[ "$1" == "-h" || "$1" == "--help" || $# -ne 2 ]]; then
+  usage
+  exit 1
+fi
+
+BB="$1"
+TB="$2"
+
+BN=`date +"%Y-%m-%d:%H:%M"`
+echo "baseBuild=$BB"
+echo "testBuild=$TB"
+echo "buildname=$BN"
+
+echo "triggering jenkins"
+curl  -X POST "https://buildmaster.fnal.gov//view/mu2e/job/mu2e-branch-test/buildWithParameters?token=02345&BASE_BUILD=${BB}&TEST_BUILD=$TB&BUILD_NAME=$BN"
+
+echo "You can watch the build at this link:"
+echo "https://buildmaster.fnal.gov/view/mu2e/job/mu2e-branch-test/"
+
+URLBASE="https://buildmaster.fnal.gov/view/mu2e/job/mu2e-branch-test/BUILDTYPE=prof,label=SLF6/lastBuild/artifact/copyBack"
+
+#VFBASE=`echo val_${BB}_${BUILD_NAME}.root | tr ":" "-"`
+#VFTEST=`echo val_${TB}_${BUILD_NAME}.root | tr ":" "-"`
+#
+#N=0
+#while [ $N -lt 20 ];
+#do
+#    
+#    N=$(($N+1))
+#done
+
+#echo "sleeping 2 min"
+#sleep 120
+#
+#DOT=`echo $VV | sed -e 's/v//' -e 's/_/\./g' `
+#COM=""
+#DOM=""
+#for os in SLF6 SLF7
+#do
+#  ostag=`echo $os | sed 's/SLF/slf/'`
+#  for bb in prof debug
+#  do
+#     URLBASE="https://buildmaster.fnal.gov/view/mu2e/job/mu2e-BTrk-build/BUILDTYPE=${bb},label=${os}/lastSuccessfulBuild/artifact/copyBack"
+#
+#     LOG="BTrk_${VV}_${os}_${bb}.log"
+#     URL="$URLBASE/$LOG"
+#     wget -q "$URL"
+#     RC=$?
+#     if [ $RC -ne 0 ]; then
+#	 echo "wget failed on log file $os $bb"
+#         echo $URL
+#     else
+#	 echo tail of log from $LOG
+#	 tail -2 $LOG
+#     fi
+#
+#     TBALL="BTrk-${DOT}-${ostag}-x86_64-${CC}-${bb}.tar.bz2"
+#     URL="$URLBASE/$TBALL"
+#     wget -q "$URL"
+#     RC=$?
+#     if [ $RC -ne 0 ]; then
+#	 wget failed on tarball file $os $bb
+#         echo $URL
+#     else
+#	 COM="${COM}\n./copyToSciSoft $TBALL"
+#	 DOM="${DOM}\n.~/pullPackage -r \$PWD $ostag BTrk-${VV} $CC $bb"
+#     fi
+#  done
+#done
+#
+#echo -e "$COM"
+#echo -e "$DOM"
+#
+##~/pullPackage -r $PWD slf6 BTrk-v1_02_04 e14 prof
+#
+#~/pullPackage -r $PWD slf6 BTrk-v1_02_05 e14 prof
+#~/pullPackage -r $PWD slf6 BTrk-v1_02_05 e14 debug
+#~/pullPackage -r $PWD slf7 BTrk-v1_02_05 e14 prof
+#~/pullPackage -r $PWD slf7 BTrk-v1_02_05 e14 debug
