@@ -63,14 +63,16 @@ launch() {
 	cp Offline/Analyses/test/genReco.fcl ./${I}.fcl
 	SEED=`sed "${I}q;d" ../seeds.txt`
 	echo "services.SeedService.baseSeed: $SEED" >> ${I}.fcl
-	mu2e -n 1000 -o ${I}.art -T ${I}.root >& ${I}.log &
+	mu2e -n 1000 -o ${I}.art -T ${I}.root -c ${I}.fcl >& ${I}.log &
 	I=$(($I+1))
     done
 
     echo "[`date`] launch ls"
     ls -l
     echo "[`date`] launch ps"
-    ps -fwww -f
+    ps -fwww f
+    echo "[`date`] launch ps"
+    ps -fwww fT
 
     cd $CWD
     return 0
@@ -90,7 +92,7 @@ collect() {
     ls -l
 
     ls *.art > input.txt
-    mu2e -S input.txt -C Validation/fcl/val.fcl
+    mu2e -S input.txt -c Validation/fcl/val.fcl
 
     VF=`echo val_${BUILD}_${BUILD_NAME}.root | tr ":" "-"`
     cp validation.root ../copyBack/$VF
