@@ -62,13 +62,43 @@ cd $LOCAL_DIR
 
 PACKAGE_VERSION_DOT=`echo $PACKAGE_VERSION | sed -e 's/v//' -e 's/_/\./g' `
 
+echo "debug 00"
+pwd
+echo "debug 01"
+ls -l
+echo "debug 02"
+echo "$PACKAGE_VERSION"
+echo "debug 03"
+echo "$PACKAGE_VERSION_DOT"
+echo "debug 04"
+echo "ls -l copyBack"
+echo "debug 05"
+
+
 TBALL=BTrk-${PACKAGE_VERSION_DOT}-${OS}-x86_64-${COMPILER}-${BUILDTYPE}.tar.bz2
+
+echo "debug 06"
+echo "echo $TBALL"
+
 
 tar -cj -C prod -f $TBALL BTrk
 RC=$?
 echo "[`date`] tar RC=$RC"
+
+echo "debug 07"
+ls -al
+
+
 [ $RC -ne 0 ] && exit $RC
 mv $TBALL copyBack
+
+echo "debug 08"
+ls -al
+echo "debug 09"
+ls -al prod
+echo "debug 10"
+ls -al copyBack
+
 
 echo "[`date`] ls"
 ls -l *
