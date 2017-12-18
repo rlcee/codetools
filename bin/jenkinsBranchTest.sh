@@ -90,9 +90,15 @@ collect() {
 
     source Offline/setup.sh
     ls -l
-
+    echo "[`date`] collect $DIR first fcl file"
+    cat 1.fcl
+    echo "[`date`] collect $DIR first log file"
+    cat 1.log
+    echo "[`date`] collect $DIR attempt validation exe"
     ls *.art > input.txt
     mu2e -S input.txt -c Validation/fcl/val.fcl
+    RC=$?
+    echo "[`date`] collect $DIR validation RC=$RC"
 
     VF=`echo val_${BUILD}_${BUILD_NAME}.root | tr ":" "-"`
     cp validation.root ../copyBack/$VF
