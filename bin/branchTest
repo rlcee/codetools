@@ -9,10 +9,24 @@ cat <<EOF
 
   Cause a jenkins project to run to test a commit or tag against a 
   standard base build.  The release can be a tag, a commit, or the 
-  head of a branch.  Here are example of how to specify the builds:
-  tag:v6_3_2
+  head of a branch.  Here are examples of how to specify the builds:
+
+  tag:v6_0_0
   commit:1879cd0a3
   branch:a-banch-name
+  branch:master
+
+  example command:
+  branchTest tag:v6_3_2 branch:triggerDev
+
+  The script triggers a jenkins project to do the work.  The result
+  is two files of validation histograms derived from conversion electron
+  generation and simulation.  
+  The script will then block, waiting for the job to finish, polling it 
+  occasionally.  If it is interupted, the result can still be retireved 
+  from jenkins.  If the script runs to the end, the files will be copied
+  locally, then if you have a valid kerberos ticket and permission
+  to write to the wbe area, it will make a web page of results.
 
 EOF
 }
@@ -32,13 +46,110 @@ echo "testBuild=$TB"
 echo "buildname=$BN"
 
 echo "triggering jenkins"
-curl  -X POST "https://buildmaster.fnal.gov//view/mu2e/job/mu2e-branch-test/buildWithParameters?token=02345&BASE_BUILD=${BB}&TEST_BUILD=$TB&BUILD_NAME=$BN"
+curl -X POST "https://buildmaster.fnal.gov//view/mu2e/job/mu2e-branch-test/buildWithParameters?token=02345&BASE_BUILD=${BB}&TEST_BUILD=$TB&BUILD_NAME=$BN"
 
+echo
 echo "You can watch the build at this link:"
-echo "https://buildmaster.fnal.gov/view/mu2e/job/mu2e-branch-test/"
+echo "https://buildmaster.fnal.gov/view/mu2e/job/mu2e-branch-test"
 
+# the file names
+VFLOG=`echo log_${BB}_${TB}_${BN}.log | tr ":" "-"`
+VFBASE=`echo val_${BB}_${BN}.root | tr ":" "-"`
+VFTEST=`echo val_${TB}_${BN}.root | tr ":" "-"`
+
+echo $VFLOG
+echo $VFBASE
+echo $VFTEST
+
+# where to write the val files
+OUTDIR=/tmp/
+[ -w $PWD ] && OUTDIR=""
+LFLOG="${OUTDIR}$VFLOG"
+LFBASE="${OUTDIR}$VFBASE"
+LFTEST="${OUTDIR}$VFTEST"
+
+#
+# wait loop
+#
+
+COUNTDOWN=18 # 18*5min = 90 min
+
+# the files should appear here
 URLBASE="https://buildmaster.fnal.gov/view/mu2e/job/mu2e-branch-test/BUILDTYPE=prof,label=SLF6/lastBuild/artifact/copyBack"
 
+while [[ $COUNTDOWN -gt 0 ]]; 
+do
+    sleep 300
+    COUNTDOWN=$(($COUNTDOWN-1))
+    URL="$URLBASE/$VFLOG"
+    echo "`date` checking job completion"
+    #echo trying $URL
+    wget -q -o /tmp/branchTest_log_${$}.log -O $LFLOG $URL
+    RC=$?
+    #echo RC=$RC
+    [ $RC -eq 0 ] && break
+done
+
+# if we don't have real log file
+if [[ ! ( -r $LFLOG && `cat $LFLOG | wc -l` -gt 0 ) ]]; then
+    echo
+    echo "ERROR retrieving log file - exiting "
+    echo "you can investigate on the jenkins site"
+    echo "last wget log follows "
+    cat /tmp/branchTest_log_${$}.log
+    exit 1
+fi
+
+# have the log file, try to get the root files
+for RFILE in $LFBASE $LFTEST
+do
+    URL="$URLBASE/$RFILE"
+    wget -q -o /tmp/branchTest_${$}.log -O $RFILE $URL
+    RC=$?
+    echo RC $RFILE=$RC
+    if [ $RC -ne 0 ]; then
+	echo
+	echo "ERROR - retrieving root file - exiting "
+	echo "you can investigate on the jenkins site"
+	echo "last wget log follows "
+	cat /tmp/branchTest_${$}.log
+	exit 1
+    fi
+done
+
+HTMLDIR=/web/sites/mu2e.fnal.gov/htdocs/atwork/computing/ops/val/plots
+HTMLURL=mu2e.fnal.gov/atwork/computing/ops/val/plots
+if [ ! -w $HTMLDIR ]; then
+  echo
+  echo "You could not write to the web area so we didn't make"
+  echo "a web page of the comprison results.  The files are here"
+  echo $LFBASE
+  echo $LFTEST
+  exit 1
+fi
+
+if ! command valCompare -h >& /dev/null ; then
+    source /cvmfs/mu2e.opensciencegrid.org/setupmu2e-art.sh
+    VV=`ls -1 /cvmfs/mu2e.opensciencegrid.org/Offline | tail -1`
+    echo "INFO- did not find Offline setup, trying to setup $VV"
+    source /cvmfs/mu2e.opensciencegrid.org/Offline/$VV
+fi
+WDIR=`echo ${HTMLDIR}/${BN} | tr ":" "-"`
+mkdir $WDIR
+echo valCompare $LFBASE $LFTEST -w $WDIR/result.html
+valCompare $LFBASE $LFTEST -w $WDIR/result.html >& /dev/null
+
+URL=`echo ${HTMLURL}/${BN}/result.html | tr ':' '-'`
+URL="http://$URL"
+echo 
+echo "completed writing comparison URL"
+echo $URL
+echo "and here is the log file"
+echo $LFLOG
+
+exit 0
+
+#source /cvmfs/mu2e.opensciencegrid.org/setupmu2e-art.sh
 #VFBASE=`echo val_${BB}_${BUILD_NAME}.root | tr ":" "-"`
 #VFTEST=`echo val_${TB}_${BUILD_NAME}.root | tr ":" "-"`
 #
