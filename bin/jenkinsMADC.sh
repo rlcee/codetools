@@ -14,7 +14,7 @@
 
 OS=`echo $label | tr "[A-Z]" "[a-z]"`
 
-echo "[`date`] start $PACKAGE_VERSION $COMPILER $BUILDTYPE $OS"
+echo "[`date`] start $PACKAGE_VERSION $COMPILER $ART_VERSION $BUILDTYPE $OS"
 echo "[`date`] PWD"
 pwd
 echo "[`date`] directories"
@@ -54,7 +54,7 @@ cd $LOCAL_DIR/build
 FLAG="-p"
 [ "$BUILDTYPE" == "debug" ] && FLAG="-d"
 echo "[`date`] setup_for_development FLAG=$FLAG"
-source ../mu2e_artdaq-core/ups/setup_for_development $FLAG
+source ../mu2e_artdaq-core/ups/setup_for_development $FLAG ${COMPILER}:$ART_VERSION
 RC=$?
 [ $RC -ne 0 ] && exit $RC
 
