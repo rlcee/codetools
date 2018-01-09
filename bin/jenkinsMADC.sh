@@ -54,7 +54,7 @@ cd $LOCAL_DIR/build
 FLAG="-p"
 [ "$BUILDTYPE" == "debug" ] && FLAG="-d"
 echo "[`date`] setup_for_development FLAG=$FLAG"
-source ../mu2e_artdaq-core/ups/setup_for_development $FLAG ${COMPILER}:$ART_VERSION
+source ../mu2e_artdaq-core/ups/setup_for_development $FLAG ${COMPILER}:${ART_VERSION}:offline
 RC=$?
 [ $RC -ne 0 ] && exit $RC
 
