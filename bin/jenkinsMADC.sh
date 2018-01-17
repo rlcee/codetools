@@ -4,6 +4,7 @@
 # the following are defined by the project:
 # export BUILDTYPE=prof
 # export label=SLF6
+# export LOCATION=offline or online
 # the following are defined as jenkins project parameters
 # export PACKAGE_VERSION=v1_02_00a
 # export COMPILER=e14
@@ -14,7 +15,7 @@
 
 OS=`echo $label | tr "[A-Z]" "[a-z]"`
 
-echo "[`date`] start $PACKAGE_VERSION $COMPILER $ART_VERSION $BUILDTYPE $OS"
+echo "[`date`] start $PACKAGE_VERSION $COMPILER $ART_VERSION $BUILDTYPE $OS $LOCATION"
 echo "[`date`] PWD"
 pwd
 echo "[`date`] directories"
@@ -54,7 +55,7 @@ cd $LOCAL_DIR/build
 FLAG="-p"
 [ "$BUILDTYPE" == "debug" ] && FLAG="-d"
 echo "[`date`] setup_for_development FLAG=$FLAG"
-source ../mu2e_artdaq-core/ups/setup_for_development $FLAG ${COMPILER}:${ART_VERSION}:offline
+source ../mu2e_artdaq-core/ups/setup_for_development $FLAG ${COMPILER}:${ART_VERSION}:${LOCATION}
 RC=$?
 [ $RC -ne 0 ] && exit $RC
 
