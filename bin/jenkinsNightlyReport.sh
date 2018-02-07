@@ -9,15 +9,28 @@ cd ~/cron/val
 NDIR=/web/sites/mu2e.fnal.gov/htdocs/atwork/computing/ops/nightlyBuild
 FDIR=/web/sites/mu2e.fnal.gov/htdocs/atwork/computing/ops/val/files
 PDIR=/web/sites/mu2e.fnal.gov/htdocs/atwork/computing/ops/val/plots
-ARTIFACT=https://buildmaster.fnal.gov/job/mu2e-offline-nightly/label=SLF6/lastBuild/artifact/copyBack
+#ARTIFACT=https://buildmaster.fnal.gov/job/mu2e-offline-nightly/label=SLF6/lastBuild/artifact/copyBack
+ARTIFACT=https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-nightly/label=SLF6/lastBuild/artifact/copyBack
 DATE=`date +"%Y-%m-%d"`
 FN=nightly-build-${DATE}.txt
-echo "[`date`] wget $ARTIFACT/$FN"
-wget -q "$ARTIFACT/$FN"
-RC=$?
-echo RC=$RC
-echo "FN=$FN"
-ls -l $FN
+
+# wait up to 6 hours for the log file to appear
+I=0
+DONE=false
+while [[ $I -lt 24 && "$DONE" == "false" ]];
+do
+  echo "[`date`] wget $FN"
+  wget -q "$ARTIFACT/$FN"
+  RC=$?
+  if [ -r "$FN" ]; then
+    DONE=true
+  else
+    echo "[`date`] sleeping"
+    sleep 900
+    I=$(($I+1))
+  fi
+done
+
 if [ ! -r "$FN" ]; then
   echo "[`date`] No build report found " > $FN
   echo "[`date`] ERROR - could not wget $ARTIFACT/$FN"
@@ -30,6 +43,7 @@ CACEXERC="`cat $FN | grep "CutAndCount exe return code" | awk '{print $11}'`"
 LOG=nightly-log-${DATE}.log
 echo "[`date`] wget $LOG"
 wget -q "$ARTIFACT/$LOG"
+
 if [ ! -r "$LOG" ]; then
   echo "[`date`] No build log found " > $LOG
   echo "[`date`] ERROR - could not wget $ARTIFACT/$LOG"
