@@ -68,7 +68,7 @@ echo "[`date`] buildtool RC=$RC"
 
 PACKAGE_VERSION_DOT=`echo $PACKAGE_VERSION | sed -e 's/v//' -e 's/_/\./g' `
 
-TBALL=mu2e_artdaq_core-${PACKAGE_VERSION_DOT}-${OS}-x86_64-${COMPILER}-${ART_VERSION}-${BUILDTYPE}.tar.bz2
+TBALL=mu2e_artdaq_core-${PACKAGE_VERSION_DOT}-${OS}-x86_64-${COMPILER}-${LOCATION}-${ART_VERSION}-${BUILDTYPE}.tar.bz2
 
 cd $LOCAL_DIR
 
