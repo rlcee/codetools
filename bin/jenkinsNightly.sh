@@ -63,7 +63,7 @@ mu2e -n 5 -c Mu2eG4/fcl/transportOnly.fcl
 RC4=$?
 echo "[`date`] transportOnly exe return code $RC4" | tee -a $REPORT
 
-mu2e -c JobConfig/cd3/beam/beam_g4s1.fcl -n 100
+mu2e -c JobConfig/beam/beam_g4s1.fcl -n 100
 RC5=$?
 echo "[`date`] beam_g4s1 return code $RC5" | tee -a $REPORT
 
@@ -92,11 +92,11 @@ echo "[`date`] validation exe return code $RC9" | tee -a $REPORT
 cp validation.root ../copyBack/$VALFILE
 
 # run CutAndCount on its standard input
-mu2e -c JobConfig/cd3/beam/dra_pure_baseline.fcl \
+mu2e -c JobConfig/beam/dra_pure_baseline.fcl \
  -s /cvmfs/mu2e.opensciencegrid.org/DataFiles/ExampleDataFiles/StoppedMuons/sim.mu2e.cd3-beam-g4s4-detconversion.v566.004001_00000000.art
 RC10=$?
 echo "[`date`] CutAndCount exe return code $RC10" | tee -a $REPORT
-cp nts.owner.cd3-dra-pure-baseline.ver.seq.root ../copyBack/$CACFILE
+cp nts.owner.dra-pure-baseline.ver.seq.root ../copyBack/$CACFILE
 
 echo "[`date`] ls of Offline dir"
 ls -al
