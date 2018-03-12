@@ -4,12 +4,15 @@
 # run it through the root overlap checker
 #
 
-if [ ! -r  Mu2eG4/fcl/transportOnly.fcl ]; then
-    echo "ERROR rootOverlaps needs to be run in an Offline directory"
+if [ -r ${MU2E_SATELLITE_RELEASE}/Mu2eG4/fcl/transportOnly.fcl ]; then
+    cp ${MU2E_SATELLITE_RELEASE}/Mu2eG4/fcl/transportOnly.fcl makeGdml.fcl
+elif [ -r ${MU2E_BASE_RELEASE}/Mu2eG4/fcl/transportOnly.fcl ]; then
+    cp ${MU2E_BASE_RELEASE}/Mu2eG4/fcl/transportOnly.fcl makeGdml.fcl
+else
+    echo "ERROR rootOverlaps could not find Mu2eG4/fcl/transportOnly.fcl"
     exit 1
 fi
 
-cp Mu2eG4/fcl/transportOnly.fcl makeGdml.fcl
 echo "physics.producers.g4run.debug.writeGDML : true" >> makeGdml.fcl
 rm -f mu2e.gdml
 mu2e -n 1 -c makeGdml.fcl >& makeGdml.log
@@ -19,12 +22,20 @@ if [ $RC -ne 0  ]; then
     tail -30 makeGdml.log
     exit $RC
 fi
-bin/overlapCheck.sh mu2e.gdml >& overlapCheck.log
+
+if [ -r ${MU2E_SATELLITE_RELEASE}/bin/overlapCheck.sh ]; then
+    cp ${MU2E_SATELLITE_RELEASE}/bin/overlapCheck.sh mu2e.gdml >& overlapCheck.log 
+elif [ -r ${MU2E_BASE_RELEASE}/bin/overlapCheck.sh ]; then
+    cp ${MU2E_BASE_RELEASE}/bin/overlapCheck.sh mu2e.gdml >& overlapCheck.log
+else
+    echo "ERROR rootOverlaps could not find bin/overlapCheck.sh"
+    exit 1
+fi
 
 RC=`grep "illegal" overlapCheck.log | awk '{print $NF}'`
 grep "illegal" overlapCheck.log
 cat overlapCheck.log | awk 'BEGIN{flag=0;}{if(flag==1) print $0; if($1=="===") flag=1; }'
 
-rm -f mu2e.gdml makeGdml.fcl makeGdml.log
+rm -f mu2e.gdml makeGdml.fcl makeGdml.log data_06.root transportOnly.root overlapCheck.log
 
 exit $RC
