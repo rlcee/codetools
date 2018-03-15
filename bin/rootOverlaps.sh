@@ -37,6 +37,6 @@ RC=`grep "illegal" overlapCheck.log | awk '{print $NF}'`
 grep "illegal" overlapCheck.log
 cat overlapCheck.log | awk 'BEGIN{flag=0;}{if(flag==1) print $0; if($1=="===") flag=1; }'
 
-#rm -f mu2e.gdml makeGdml.fcl makeGdml.log data_06.root transportOnly.root overlapCheck.log
+rm -f mu2e.gdml makeGdml.fcl makeGdml.log data_06.root transportOnly.root overlapCheck.log
 
 exit $RC
