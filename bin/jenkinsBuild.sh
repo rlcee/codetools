@@ -71,6 +71,11 @@ RC=$?
 echo "[`date`] g4test_03 return code $RC"
 rm -f data_03.root g4test_03.root
 
+echo "[`date`] run rootOverlaps"
+rootOverlaps.sh
+RC=$?
+echo "[`date`] rootOverlaps return code $RC"
+
 echo "[`date`] run genReco"
 mu2e -n 5000 -c Analyses/test/genReco.fcl
 #mu2e -n 5000 -c Validation/fcl/genReco.fcl

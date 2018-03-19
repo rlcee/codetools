@@ -37,8 +37,17 @@ ups active
 echo "["`date`"] build"
 
 scons -j 16
-RC=$?
+RC1=$?
+echo "["`date`"] scons return code is $RC1"
 
-echo "["`date`"] scons return code is $RC"
+mu2e -n 10 -c Analyses/test/genReco.fcl
+RC2=$?
+echo "["`date`"] genReco return code is $RC2"
 
+#rootOverlaps.sh
+#RC3=$?
+#echo "["`date`"] rootOverlaps return code is $RC3"
+
+#RC=$(($RC1+$RC2+$RC3))
+RC=$(($RC1+$RC2))
 exit $RC

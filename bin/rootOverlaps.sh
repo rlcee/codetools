@@ -31,9 +31,14 @@ else
     echo "ERROR rootOverlaps could not find bin/overlapCheck.sh"
     exit 1
 fi
+
+# a message on how many volumes checked
 grep "in Geometry imported from GDML" overlapCheck.log
+
+# check number of failures
 RC=`grep "illegal" overlapCheck.log | awk '{print $NF}'`
 [ "$RC" == "" ] && RC=0
+# also print them
 grep "illegal" overlapCheck.log
 cat overlapCheck.log | awk 'BEGIN{flag=0;}{if(flag==1) print $0; if($1=="===") flag=1; }'
 
