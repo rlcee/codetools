@@ -23,6 +23,7 @@ echo "[`date`] source products common"
 source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
 echo "[`date`] setup mu2e"
 setup mu2e
+setup codetools
 
 echo "[`date`] printenv after setup"
 printenv
