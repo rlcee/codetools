@@ -18,6 +18,7 @@ cat /proc/cpuinfo | head -30
 echo "["`date`"] setups"
 source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
 setup mu2e
+setup codetools
 
 # pull the main repo
 git clone http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline/Offline.git
