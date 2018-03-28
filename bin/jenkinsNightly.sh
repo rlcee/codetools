@@ -77,10 +77,10 @@ mu2e -n 5000 -c Analyses/test/genReco.fcl
 RC7=$?
 echo "[`date`] genReco exe return code $RC7" | tee -a $REPORT
 
-# run gstudy2
-mu2e -n 5 -c Mu2eG4/fcl/g4study2.fcl
+# run gstudy
+mu2e -n 5 -c Mu2eG4/fcl/g4study.fcl
 RC8=$?
-echo "[`date`] g4study2 exe return code $RC8" | tee -a $REPORT
+echo "[`date`] g4study exe return code $RC8" | tee -a $REPORT
 
 RC=$(($RC1+$RC2+$RC3+$VOLCHECKB+$RC4+$RC5+$RC6+$RC7+$RC8))
 echo "Return code before validation $RC" | tee -a $REPORT
