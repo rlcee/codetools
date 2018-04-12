@@ -14,6 +14,8 @@ else
 fi
 
 echo "physics.producers.g4run.debug.writeGDML : true" >> makeGdml.fcl
+echo "services.GeometryService.inputFile : \"Mu2eG4/geom/geom_common_current.txt\"" >> makeGdml.fcl
+
 rm -f mu2e.gdml
 mu2e -n 1 -c makeGdml.fcl >& makeGdml.log
 RC=$?
