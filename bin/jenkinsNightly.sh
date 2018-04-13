@@ -51,7 +51,11 @@ mu2e -c Mu2eG4/fcl/g4test_03.fcl
 RC2=$?
 echo "[`date`] g4test_03 return code $RC2" | tee -a $REPORT
 
-mu2e -c Mu2eG4/fcl/surfaceCheck.fcl >& surfaceCheck.log
+# surfacecheck
+cp Mu2eG4/fcl/surfaceCheck.fcl .
+# switch to current geometry
+echo "services.GeometryService.inputFile : \"Mu2eG4/geom/geom_common_current.txt\"" >> surfaceCheck.fcl
+mu2e -c surfaceCheck.fcl >& surfaceCheck.log
 RC3=$?
 echo "[`date`] surfaceCheck exe return code $RC3" | tee -a $REPORT
 
@@ -60,24 +64,33 @@ VOLCHECKB=`egrep 'Checking overlaps for volume' surfaceCheck.log | grep -v OK | 
 echo "Volume checks:  OK=${VOLCHECKG},  not OK=$VOLCHECKB" | tee -a $REPORT
 egrep 'Checking overlaps for volume' surfaceCheck.log | grep -v OK | tee -a $REPORT
 
+rm -f surfaceCheck.fcl
+
+# rootOverlaps
 rootOverlaps.sh | tee -a $REPORT
 RC4=${PIPESTATUS[0]}
 echo "[`date`] root overlap checks $RC4" | tee -a $REPORT
 
+# transportOnly
 mu2e -n 5 -c Mu2eG4/fcl/transportOnly.fcl
 RC5=$?
 echo "[`date`] transportOnly exe return code $RC5" | tee -a $REPORT
 
+# beam_g4s1
 mu2e -c JobConfig/beam/beam_g4s1.fcl -n 100
 RC6=$?
 echo "[`date`] beam_g4s1 return code $RC6" | tee -a $REPORT
 
-# needs data from /cvmfs/mu2e
-mu2e -n 5000 -c Analyses/test/genReco.fcl
+# genReco
+cp Analyses/test/genReco.fcl .
+# switch to current geometry
+echo "services.GeometryService.inputFile : \"Mu2eG4/geom/geom_common_current.txt\"" >> genReco.fcl
+mu2e -n 5000 -c genReco.fcl
 RC7=$?
 echo "[`date`] genReco exe return code $RC7" | tee -a $REPORT
+rm -f genReco.fcl
 
-# run gstudy
+# g4study
 mu2e -n 5 -c Mu2eG4/fcl/g4study.fcl
 RC8=$?
 echo "[`date`] g4study exe return code $RC8" | tee -a $REPORT
