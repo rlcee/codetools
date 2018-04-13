@@ -52,12 +52,19 @@ RC2=$?
 echo "[`date`] g4test_03 return code $RC2" | tee -a $REPORT
 
 # surfacecheck
+# switch it to current geometry 
+cat Mu2eG4/test/geom_SurfaceCheck.txt | \
+  sed 's/geom_common/geom_common_current/' \
+  > Mu2eG4/test/geom_SurfaceCheck_current.txt
 cp Mu2eG4/fcl/surfaceCheck.fcl .
-# switch to current geometry
-echo "services.GeometryService.inputFile : \"Mu2eG4/geom/geom_common_current.txt\"" >> surfaceCheck.fcl
+# point to to current geometry
+echo "services.GeometryService.inputFile : \"Mu2eG4/test/geom_SurfaceCheck_current.txt\"" >> surfaceCheck.fcl
 mu2e -c surfaceCheck.fcl >& surfaceCheck.log
 RC3=$?
 echo "[`date`] surfaceCheck exe return code $RC3" | tee -a $REPORT
+#echo "[`date`] debug start"
+#cat surfaceCheck.log
+#echo "[`date`] debug end"
 
 VOLCHECKG=`egrep 'Checking overlaps for volume' surfaceCheck.log | grep OK | wc -l`
 VOLCHECKB=`egrep 'Checking overlaps for volume' surfaceCheck.log | grep -v OK | wc -l`
