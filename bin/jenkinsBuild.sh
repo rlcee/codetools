@@ -66,6 +66,11 @@ scons -j 16
 RC=$?
 echo "["`date`"] scons return code=$RC"
 
+if [ $RC -ne 0  ]; then
+    echo "["`date`"] exiting after scons with return code=$RC"
+    exit $RC
+fi
+
 echo "[`date`] run g4test_03"
 mu2e -c Mu2eG4/fcl/g4test_03.fcl
 RC=$?
