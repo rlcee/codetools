@@ -113,4 +113,6 @@ echo "["`date`"] done tarball"
 
 ls -1 copyBack > copyBack/listing.txt
 
+echo "["`date`"] exiting with RC=$RC"
+
 exit $RC
