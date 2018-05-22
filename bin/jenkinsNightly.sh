@@ -32,6 +32,8 @@ echo "[`date`] clone offline"
 git clone http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline/Offline.git
 echo "[`date`] cd Offline"
 cd Offline
+echo "[`date`] switch to MDC2018 ********************"
+git checkout MDC2018
 echo "[`date`] print commit"
 git show
 git rev-parse HEAD
