@@ -85,10 +85,10 @@ mu2e -n 5 -c Mu2eG4/fcl/transportOnly.fcl
 RC5=$?
 echo "[`date`] transportOnly exe return code $RC5" | tee -a $REPORT
 
-# beam_g4s1
-mu2e -c JobConfig/beam/beam_g4s1.fcl -n 100
+# beam_g4s1, now PS on MDC2018
+mu2e -c JobConfig/beam/PS.fcl -n 100
 RC6=$?
-echo "[`date`] beam_g4s1 return code $RC6" | tee -a $REPORT
+echo "[`date`] PS return code $RC6" | tee -a $REPORT
 
 # genReco
 cp Analyses/test/genReco.fcl .
