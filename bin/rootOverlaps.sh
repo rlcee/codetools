@@ -4,20 +4,8 @@
 # run it through the root overlap checker
 #
 
-#if [ -r ${MU2E_SATELLITE_RELEASE}/Mu2eG4/fcl/transportOnly.fcl ]; then
-#    cp ${MU2E_SATELLITE_RELEASE}/Mu2eG4/fcl/transportOnly.fcl makeGdml.fcl
-#elif [ -r ${MU2E_BASE_RELEASE}/Mu2eG4/fcl/transportOnly.fcl ]; then
-#    cp ${MU2E_BASE_RELEASE}/Mu2eG4/fcl/transportOnly.fcl makeGdml.fcl
-#else
-#    echo "ERROR rootOverlaps could not find Mu2eG4/fcl/transportOnly.fcl"
-#    exit 1
-#fi
-#
-#echo "physics.producers.g4run.debug.writeGDML : true" >> makeGdml.fcl
-#echo "services.GeometryService.inputFile : \"Mu2eG4/geom/geom_common_current.txt\"" >> makeGdml.fcl
 
 rm -f mu2e.gdml
-#mu2e -n 1 -c makeGdml.fcl >& makeGdml.log
 mu2e -c Mu2eG4/fcl/gdmldump.fcl >& makeGdml.log
 RC=$?
 if [ $RC -ne 0  ]; then
