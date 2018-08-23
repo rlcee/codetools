@@ -32,8 +32,8 @@ echo "[`date`] clone offline"
 git clone http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline/Offline.git
 echo "[`date`] cd Offline"
 cd Offline
-echo "[`date`] switch to MDC2018 ********************"
-git checkout MDC2018
+#echo "[`date`] switch to MDC2018 ********************"
+#git checkout MDC2018
 echo "[`date`] print commit"
 git show
 git rev-parse HEAD
@@ -85,10 +85,10 @@ mu2e -n 5 -c Mu2eG4/fcl/transportOnly.fcl
 RC5=$?
 echo "[`date`] transportOnly exe return code $RC5" | tee -a $REPORT
 
-# beam_g4s1, now PS on MDC2018
+# potons on target
 mu2e -c JobConfig/beam/PS.fcl -n 100
 RC6=$?
-echo "[`date`] PS return code $RC6" | tee -a $REPORT
+echo "[`date`] PS (POT) return code $RC6" | tee -a $REPORT
 
 # genReco
 cp Analyses/test/genReco.fcl .
@@ -111,7 +111,6 @@ echo "Return code before validation $RC" | tee -a $REPORT
 # validation hists
 #
 
-#mu2e -s genReco.art -c validation/fcl/validation1.fcl 
 mu2e -s genReco.art -c Validation/fcl/val.fcl 
 RC9=$?
 echo "[`date`] validation exe return code $RC9" | tee -a $REPORT
