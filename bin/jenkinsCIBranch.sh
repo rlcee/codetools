@@ -3,9 +3,11 @@
 # expects in the environment:
 # label=SLF6 or 7
 # BUILDTYPE=prof or debug
+# GIT_BRANCH=origin/master (or other branch)
 #
 
-dump() {
+initialize() {
+  echo "[$(date)] GIT_BRANCH=$GIT_BRANCH"
   echo "[$(date)] printenv"
   printenv
   echo "[$(date)] df -h"
@@ -14,7 +16,6 @@ dump() {
   quota -v
   echo "[$(date)] PWD"
   pwd
-  export LOCAL_DIR=$PWD
   echo "[$(date)] ls of local dir"
   ls -al
   echo "[$(date)] cpuinfo"
@@ -26,36 +27,23 @@ dump() {
       tail -1 | awk '{print $NF}')
   echo "[$(date)] architecture $ARCH"
   echo "[$(date)] number of processors $NPROC"
+
+  mkdir -p copyBack
+
+  return 0
 }
 
 #
 # checkout the main repo
-# fetch the list of branches to make
 #
 getCode() {
-    echo "[$(date)] setups"
-    source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
-    setup mu2e
-    setup codetools
-    
+
     echo "[$(date)] clone"
   # pull the main repo
     if ! git clone http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline/Offline.git ; then
 	echo "[$(date)] failed to clone"
 	return 1
     fi
-
-    if ! wget -q -O branches.txt https://mu2e.fnal.gov/public/hep/computing/ops/jenkinsCIBranch/branches.txt ; then
-	echo "[$(date)] failed to retrieve branches"
-	return 2
-    fi
-
-    export BRANCHES=$(cat branches.txt)
-    echo "[$(date)] found branches:"
-    echo $BRANCHES
-    rm -f branches.txt
-
-    return 0
 }
 
 #
@@ -84,7 +72,7 @@ buildBranch() (
 	cd $BUILDTOP
 	return 3
     fi
-    local DATE=$( git show $HASH | grep Date: | \
+    local DATE=$( git show $HASH | grep Date: | head -1 | \
         awk '{print $2" "$3" "$4" "$5" "}' )
     local DATESTR=$( date -d "$DATE" +%Y_%m_%d_%H_%M)
     if [[ -z "$DATE" || -z "$DATESTR" ]] ; then
@@ -123,8 +111,8 @@ buildBranch() (
 	return 7
     fi
 
-    local SHORT=lib/libmu2e_Validation_root.so
-    #local SHORT=
+    #local SHORT=lib/libmu2e_Validation_root.so
+    local SHORT=
     if ! scons -j 16 $SHORT >& build.log ; then
 	echo "[$(date)][$BRANCH] failed to run scons build"
 	cat build.log
@@ -143,6 +131,9 @@ buildBranch() (
 	echo "[$(date)][$BRANCH] found $N deps"      
     fi
     
+  # make sure .git is packed
+    git repack -d -l
+
   # cleanup
     echo "[$(date)][$BRANCH] run cleanup"
     rm -rf tmp
@@ -177,22 +168,17 @@ buildBranch() (
 export BUILDTOP=$PWD
 export BASECDIR=/cvmfs/mu2e-development.opensciencegrid.org/CIBranches
 export LABEL=$label
-mkdir copyBack
 
-# print info
-dump
+# print info, check dirs
+initialize
 
-# clone and find list of branches
+# clone and set list of branches in BRANCHES
 getCode
 RC=$?
 [ $RC -ne 0 ] && exit $RC
 
-RC=0
-for BRANCH in $BRANCHES
-do
-    buildBranch
-    RCB=$?
-    RC=$(($RC+$RCB))
-done
+export BRANCH=$( echo $GIT_BRANCH | awk -F/ '{print $NF}' )
+buildBranch
+RC=$?
 
 exit $RC
