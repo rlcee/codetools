@@ -17,7 +17,6 @@ cat /proc/cpuinfo | head -30
 
 REPORT=nightly-build-`date +"%Y-%m-%d.txt"`
 VALFILE=val-genReco-5000-nightly_`date +"%Y-%m-%d"`-0.root
-CACFILE=candc-nightly_`date +"%Y-%m-%d"`-0.root
 
 echo "[`date`] source products common"
 source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
@@ -116,13 +115,6 @@ RC9=$?
 echo "[`date`] validation exe return code $RC9" | tee -a $REPORT
 
 cp validation.root ../copyBack/$VALFILE
-
-# run CutAndCount on its standard input
-mu2e -c JobConfig/beam/dra_pure_baseline.fcl \
- -s /cvmfs/mu2e.opensciencegrid.org/DataFiles/ExampleDataFiles/StoppedMuons/sim.mu2e.cd3-beam-g4s4-detconversion.v566.004001_00000000.art
-RC10=$?
-echo "[`date`] CutAndCount exe return code $RC10" | tee -a $REPORT
-cp nts.owner.dra-pure-baseline.ver.seq.root ../copyBack/$CACFILE
 
 echo "[`date`] ls of Offline dir"
 ls -al
