@@ -53,7 +53,7 @@ do
     mkdir -p ${TAG}/${OS}/${TYPE}
     cd ${TAG}/${OS}/${TYPE}
     export TBALL=Offline_${TAG}_${OS}_${TYPE}.tgz
-    export URL="https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-build/BUILDTYPE=${TYPE},label=${OS}/lastSuccessfulBuild/artifact/copyBack/$TBALL"
+    export URL="https://buildmaster.fnal.gov/buildmaster/view/mu2e/job/mu2e-offline-build/BUILDTYPE=${TYPE},label=${OS}/lastSuccessfulBuild/artifact/copyBack/$TBALL"
     wget $URL
     RC=$?
     if [ $RC -ne 0 ];then
@@ -69,20 +69,20 @@ do
     echo ""
 
     export LOG=Offline_${TAG}_${OS}_${TYPE}.log
-    wget -O build.log https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-build/BUILDTYPE=${TYPE},label=${OS}/lastSuccessfulBuild/artifact/copyBack/$LOG
+    wget -O build.log https://buildmaster.fnal.gov/buildmaster/view/mu2e/job/mu2e-offline-build/BUILDTYPE=${TYPE},label=${OS}/lastSuccessfulBuild/artifact/copyBack/$LOG
 
-    wget -O listing.txt https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-build/BUILDTYPE=${TYPE},label=${OS}/lastSuccessfulBuild/artifact/copyBack/listing.txt
+    wget -O listing.txt https://buildmaster.fnal.gov/buildmaster/view/mu2e/job/mu2e-offline-build/BUILDTYPE=${TYPE},label=${OS}/lastSuccessfulBuild/artifact/copyBack/listing.txt
     echo "listing.txt:"
     cat listing.txt
 
 #    export VAL=`cat listing.txt | grep validation | grep tgz`
 #    if [ -n "$VAL" ]; then
-#      wget https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-build/BUILDTYPE=${TYPE},label=${OS}/lastSuccessfulBuild/artifact/copyBack/$VAL
+#      wget https://buildmaster.fnal.gov/buildmaster/view/mu2e/job/mu2e-offline-build/BUILDTYPE=${TYPE},label=${OS}/lastSuccessfulBuild/artifact/copyBack/$VAL
 #    fi
 
     for FF in `cat listing.txt | grep val-genReco`
     do
-      wget https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-build/BUILDTYPE=${TYPE},label=${OS}/lastSuccessfulBuild/artifact/copyBack/$FF
+      wget https://buildmaster.fnal.gov/buildmaster/view/mu2e/job/mu2e-offline-build/BUILDTYPE=${TYPE},label=${OS}/lastSuccessfulBuild/artifact/copyBack/$FF
     done
 
     ls -al
