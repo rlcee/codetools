@@ -40,7 +40,7 @@ getCode() {
 
     echo "[$(date)] clone"
   # pull the main repo
-    if ! git clone http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline/Offline.git ; then
+    if ! git clone ssh://p-mu2eofflinesoftwaremu2eoffline@cdcvs.fnal.gov/cvs/projects/mu2eofflinesoftwaremu2eoffline/Offline.git ; then
 	echo "[$(date)] failed to clone"
 	return 1
     fi
