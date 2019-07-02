@@ -6,18 +6,21 @@
 #
 cd ~/cron/val
 
+# make sure we have kerberos for writing to web
+source $HOME/bin/authentication.sh
+
 NDIR=/web/sites/mu2e.fnal.gov/htdocs/atwork/computing/ops/nightlyBuild
 FDIR=/web/sites/mu2e.fnal.gov/htdocs/atwork/computing/ops/val/files
 PDIR=/web/sites/mu2e.fnal.gov/htdocs/atwork/computing/ops/val/plots
 #ARTIFACT=https://buildmaster.fnal.gov/job/mu2e-offline-nightly/label=SLF6/lastBuild/artifact/copyBack
-ARTIFACT=https://buildmaster.fnal.gov/view/mu2e/job/mu2e-offline-nightly/label=SLF6/lastBuild/artifact/copyBack
+ARTIFACT=https://buildmaster.fnal.gov/buildmaster/view/mu2e/job/mu2e-offline-nightly/label=SLF6/lastBuild/artifact/copyBack
 DATE=`date +"%Y-%m-%d"`
 FN=nightly-build-${DATE}.txt
 
 # wait up to 6 hours for the log file to appear
 I=0
 DONE=false
-while [[ $I -lt 24 && "$DONE" == "false" ]];
+while [[ $I -lt 30 && "$DONE" == "false" ]];
 do
   echo "[`date`] wget $FN"
   wget -q "$ARTIFACT/$FN"
@@ -30,6 +33,15 @@ do
     I=$(($I+1))
   fi
 done
+
+if ! ls $NDIR ; then 
+  echo "ERROR could not read web area "
+  /usr/krb5/bin/klist
+  echo "ERROR cron/val/jenkinsNightlyReport could not read web area " \
+    | mail -r valJenkinsReportError \
+    -s "error mu2epro accessing web area" \
+    rlc@fnal.gov
+fi
 
 if [ ! -r "$FN" ]; then
   echo "[`date`] No build report found " > $FN
