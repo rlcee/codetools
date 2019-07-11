@@ -46,11 +46,18 @@ echo "testBuild=$TB"
 echo "buildname=$BN"
 
 echo "triggering jenkins"
-curl -X POST "https://buildmaster.fnal.gov//view/mu2e/job/mu2e-branch-test/buildWithParameters?token=02345&BASE_BUILD=${BB}&TEST_BUILD=$TB&BUILD_NAME=$BN"
+curl -X POST "https://buildmaster.fnal.gov/buildmaster/view/mu2e/job/mu2e-branch-test/buildWithParameters?token=02345&BASE_BUILD=${BB}&TEST_BUILD=$TB&BUILD_NAME=$BN"
+RC=$?
+
+if [ $RC -ne 0 ]; then
+  echo "ERROR curl command to start jenkins project had return code " $RC
+  exit
+fi
+
 
 echo
 echo "You can watch the build at this link:"
-echo "https://buildmaster.fnal.gov/view/mu2e/job/mu2e-branch-test"
+echo "https://buildmaster.fnal.gov/buildmaster/view/mu2e/job/mu2e-branch-test"
 
 # the file names
 VFLOG=`echo log_${BB}_${TB}_${BN}.log | tr ":" "-"`
@@ -75,7 +82,7 @@ LFTEST="${OUTDIR}$VFTEST"
 COUNTDOWN=18 # 18*5min = 90 min
 
 # the files should appear here
-URLBASE="https://buildmaster.fnal.gov/view/mu2e/job/mu2e-branch-test/BUILDTYPE=prof,label=SLF6/lastBuild/artifact/copyBack"
+URLBASE="https://buildmaster.fnal.gov/buildmaster/view/mu2e/job/mu2e-branch-test/BUILDTYPE=prof,label=SLF6/lastBuild/artifact/copyBack"
 
 while [[ $COUNTDOWN -gt 0 ]]; 
 do
