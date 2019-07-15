@@ -71,6 +71,20 @@ if [ $RC -ne 0  ]; then
     exit $RC
 fi
 
+# make deps
+scons -Q --tree=prune | deps -i > deps.txt
+local N=$( cat deps.txt | grep HDR | \
+    awk 'BEGIN{N=0}{if (NF>2) N=N+1}END{print N}' )
+echo "[$(date)] found $N deps"      
+
+# set the remote to the writeable url
+git remote set-url origin  ssh://p-mu2eofflinesoftwaremu2eoffline@cdcvs.fnal.gov/cvs/projects/mu2eofflinesoftwaremu2eoffline/Offline.git
+
+# make sure .git is packed
+git repack -d -l
+
+# run tests
+
 echo "[`date`] run g4test_03"
 mu2e -c Mu2eG4/fcl/g4test_03.fcl
 RC=$?
@@ -103,6 +117,13 @@ echo "[`date`] remove genReco"
 rm -f genReco*
 rm -f debug.log error.log
 
+# cleanup
+echo "[$(date)][$BRANCH] run cleanup"
+rm -rf tmp
+rm -f .sconsign.dblite
+find . -name "*.os" -delete
+find . -name "*.o"  -delete
+
 echo "["`date`"] making tarballs"
 # back to the top of the working directory
 cd $LOCAL_DIR
@@ -112,7 +133,10 @@ echo "["`date`"] ls of local dir"
 ls -al
 
 echo "["`date`"] tar of Offline"
-tar -czf copyBack/Offline_${BUILD_NAME}_${label}_${BUILDTYPE}.tgz Offline
+mv Offline/deps.txt .
+tar -czf copyBack/Offline_${BUILD_NAME}_${label}_${BUILDTYPE}.tgz \
+  Offline deps.txt
+rm -f deps.txt
 
 echo "["`date`"] done tarball"
 
