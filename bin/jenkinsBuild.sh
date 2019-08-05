@@ -21,11 +21,7 @@ ls -al
 echo "[`date`] cpuinfo"
 cat /proc/cpuinfo | head -30
 
-echo "[`date`] source products common"
-source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
-#echo "[`date`] setup mu2e"
-#setup mu2e
-echo "[`date`] setup experimentla mu2e setup script "
+echo "[`date`] source setupmu2e-art.sh"
 source /cvmfs/mu2e.opensciencegrid.org/setupmu2e-art.sh
 setup codetools
 
@@ -38,23 +34,17 @@ git clone http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline/Offline.
 echo "[`date`] cd Offline"
 cd Offline
 
-if [ "$MU2E_RELEASE_TAG" != "" ]; then
-  CHECKOUT_COM="git checkout tags/$MU2E_RELEASE_TAG"
-  BUILD_NAME="$MU2E_RELEASE_TAG"
-elif [ "MU2E_BRANCH" != "" ]; then
-  CHECKOUT_COM="git checkout $MU2E_BRANCH"
-  BUILD_NAME="$MU2E_BRANCH"
-else 
-  echo MU2E_RELEASE_TAG = $MU2E_RELEASE_TAG
-  echo MU2E_BRANCH = $MU2E_BRANCH
-  echo "Error - tag and branch not set - exiting"
+if [ "$MU2E_TAG" == "" ]; then
+  echo "Error - MU2E_TAG not set - exiting"
   exit 1
 fi
+
 echo "[`date`]checkout command: $CHECKOUT_COM"
 $CHECKOUT_COM
+git checkout $MU2E_TAG
 
 echo "[`date`] show what is checked out"
-git show-ref $MU2E_RELEASE_TAG $MU2E_BRANCH
+git show-ref $MU2E_TAG
 git status
 
 echo "[`date`] source setup"
@@ -71,58 +61,15 @@ if [ $RC -ne 0  ]; then
     exit $RC
 fi
 
-# make deps
-scons -Q --tree=prune | deps -i > deps.txt
-local N=$( cat deps.txt | grep HDR | \
-    awk 'BEGIN{N=0}{if (NF>2) N=N+1}END{print N}' )
-echo "[$(date)] found $N deps"      
-
-# set the remote to the writeable url
-git remote set-url origin  ssh://p-mu2eofflinesoftwaremu2eoffline@cdcvs.fnal.gov/cvs/projects/mu2eofflinesoftwaremu2eoffline/Offline.git
-
-# make sure .git is packed
-git repack -d -l
-
-# run tests
-
-echo "[`date`] run g4test_03"
-mu2e -c Mu2eG4/fcl/g4test_03.fcl
+# make deps.txt, gdml, validation files, etc
+scons RELEASE
 RC=$?
-echo "[`date`] g4test_03 return code $RC"
-rm -f data_03.root g4test_03.root
+echo "["`date`"] scons RELEASE return code=$RC"
 
-echo "[`date`] run rootOverlaps"
-rootOverlaps.sh
-RC=$?
-echo "[`date`] rootOverlaps return code $RC"
-
-echo "[`date`] run genReco"
-mu2e -n 5000 -c Analyses/test/genReco.fcl
-#mu2e -n 5000 -c Validation/fcl/genReco.fcl
-RC=$?
-echo "["`date`"] genReco return code=$RC"
-
-echo "[`date`] run validation"
-mu2e -n 1000 -s genReco.art -c Validation/fcl/val.fcl
-RC=$?
-echo "["`date`"] validation 1000 return code=$RC"
-mv validation.root ../copyBack/val-genReco-1000-${BUILD_NAME}.root
-
-mu2e -n 5000 -s genReco.art -c Validation/fcl/val.fcl
-RC=$?
-echo "["`date`"] validation 5000 return code=$RC"
-mv validation.root ../copyBack/val-genReco-5000-${BUILD_NAME}.root
-
-echo "[`date`] remove genReco"
-rm -f genReco*
-rm -f debug.log error.log
-
-# cleanup
-echo "[$(date)][$BRANCH] run cleanup"
-rm -rf tmp
-rm -f .sconsign.dblite
-find . -name "*.os" -delete
-find . -name "*.o"  -delete
+if [ $RC -ne 0  ]; then
+    echo "["`date`"] exiting after scons RELEASE with return code=$RC"
+    exit $RC
+fi
 
 echo "["`date`"] making tarballs"
 # back to the top of the working directory
@@ -132,16 +79,19 @@ pwd
 echo "["`date`"] ls of local dir"
 ls -al
 
+mkdir -p Offline/gen/log
+cp build.log Offline/gen/log/build.log
+
 echo "["`date`"] tar of Offline"
-mv Offline/deps.txt .
-tar -czf copyBack/Offline_${BUILD_NAME}_${label}_${BUILDTYPE}.tgz \
-  Offline deps.txt
-rm -f deps.txt
+tar -czf copyBack/Offline_${MU2E_TAG}_${label}_${BUILDTYPE}.tgz Offline
+RC=$?
 
-echo "["`date`"] done tarball"
+echo "["`date`"] done tarball, RC=$RC"
+if [ $RC -ne 0  ]; then
+    echo "["`date`"] exiting after tarball with return code=$RC"
+    exit $RC
+fi
 
-ls -1 copyBack > copyBack/listing.txt
+echo "["`date`"] exiting success"
 
-echo "["`date`"] exiting with RC=$RC"
-
-exit $RC
+exit 0
