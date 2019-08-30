@@ -29,7 +29,9 @@ echo "[`date`] printenv after setup"
 printenv
 
 echo "[`date`] clone offline"
-git clone http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline/Offline.git
+#git clone http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline/Offline.git
+git clone https://github.com/mu2e/Offline
+
 
 echo "[`date`] cd Offline"
 cd Offline

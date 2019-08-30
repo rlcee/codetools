@@ -21,7 +21,8 @@ setup mu2e
 setup codetools
 
 # pull the main repo
-git clone http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline/Offline.git
+#git clone http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline/Offline.git
+git clone https://github.com/mu2e/Offline
 cd Offline
 
 # dump the rev
