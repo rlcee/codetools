@@ -58,7 +58,7 @@ FLAG="-p"
 PFLAG=""
 [ -z "$PYTHON_VERSION" ] && PFLAG=":$PYTHON_VERSION"
 echo "[`date`] setup_for_development FLAG=$FLAG"
-source ../mu2e_artdaq-core/ups/setup_for_development $FLAG ${COMPILER}:${ART_VERSION}:${LOCATION}${PFLAG}
+source ../mu2e_artdaq-core/ups/setup_for_development $FLAG ${COMPILER}:${ART_VERSION}:${LOCATION}:${PFLAG}
 RC=$?
 [ $RC -ne 0 ] && exit $RC
 
