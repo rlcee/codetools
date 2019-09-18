@@ -9,6 +9,7 @@
 # export PACKAGE_VERSION=v1_02_00a
 # export COMPILER=e14
 # export ART_VERSION=s58
+# export PYTHON_VERSION=py3
 # to run locally, define these in the environment first
 #
 
@@ -54,8 +55,10 @@ cd $LOCAL_DIR/build
 
 FLAG="-p"
 [ "$BUILDTYPE" == "debug" ] && FLAG="-d"
+PFLAG=""
+[ -z "$PYTHON_VERSION" ] && PFLAG=":$PYTHON_VERSION"
 echo "[`date`] setup_for_development FLAG=$FLAG"
-source ../mu2e_artdaq-core/ups/setup_for_development $FLAG ${COMPILER}:${ART_VERSION}:${LOCATION}
+source ../mu2e_artdaq-core/ups/setup_for_development $FLAG ${COMPILER}:${ART_VERSION}:${LOCATION}${FLAG}
 RC=$?
 [ $RC -ne 0 ] && exit $RC
 
