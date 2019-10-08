@@ -13,11 +13,11 @@ NDIR=/web/sites/mu2e.fnal.gov/htdocs/atwork/computing/ops/nightlyBuild
 FDIR=/web/sites/mu2e.fnal.gov/htdocs/atwork/computing/ops/val/files
 PDIR=/web/sites/mu2e.fnal.gov/htdocs/atwork/computing/ops/val/plots
 #ARTIFACT=https://buildmaster.fnal.gov/job/mu2e-offline-nightly/label=SLF6/lastBuild/artifact/copyBack
-ARTIFACT=https://buildmaster.fnal.gov/buildmaster/view/mu2e/job/mu2e-offline-nightly/label=SLF6/lastBuild/artifact/copyBack
+ARTIFACT=https://buildmaster.fnal.gov/buildmaster/view/mu2e/job/mu2e-offline-nightly/label=SLF7/lastBuild/artifact/copyBack
 DATE=`date +"%Y-%m-%d"`
 FN=nightly-build-${DATE}.txt
 
-# wait up to 6 hours for the log file to appear
+# wait up to 7.5 hours for the log file to appear
 I=0
 DONE=false
 while [[ $I -lt 30 && "$DONE" == "false" ]];
@@ -34,13 +34,44 @@ do
   fi
 done
 
-if ! ls $NDIR ; then 
+if ! ls $NDIR >& /dev/null ; then 
   echo "ERROR could not read web area "
-  /usr/krb5/bin/klist
+  /usr/krb5/bin/klist -f
+  echo "show /proc/keys:"
+  cat /proc/keys
+  echo "show /proc/key-users:"
+  cat /proc/key-users
+  echo "Attempt to recreate ticket, run kcron "
+  echo "KRB5CCNAME=$KRB5CCNAME"
+  /usr/krb5/bin/kcron
+  echo "klist for new ticket "
+  /usr/krb5/bin/klist -f
+  if ! ls $NDIR >& /dev/null ; then 
+      echo "ERROR  ... still could not read web area "
+  else
+      echo "SUCCESS  ... can now read web area "
+  fi
+
   echo "ERROR cron/val/jenkinsNightlyReport could not read web area " \
     | mail -r valJenkinsReportError \
     -s "error mu2epro accessing web area" \
     rlc@fnal.gov
+
+  NFS_STATUS=1
+  NFS_SEC=0
+  while [[ $NFS_STATUS -ne 0 && $NFS_SEC -lt 3600 ]]; 
+  do
+      sleep 30
+      NFS_SEC=$(( $NFS_SEC + 30 ))
+      if ! ls $NDIR >& /dev/null ; then 
+	  echo "Failed in retry loop $NFS_SEC"
+      else
+	  echo "Succeeded in retry loop $NFS_SEC"
+	  NFS_STATUS=0
+      fi
+  done
+  echo "out of NFS loop: sec=$NFS_SEC status=$NFS_STATUS"
+
 fi
 
 if [ ! -r "$FN" ]; then
@@ -68,11 +99,11 @@ source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
 setup mu2e
 OVER=`ls -1 /cvmfs/mu2e.opensciencegrid.org/Offline | tail -1`
 echo "setting up offline $OVER"
-source /cvmfs/mu2e.opensciencegrid.org/Offline/${OVER}/SLF6/prof/Offline/setup.sh
+source /cvmfs/mu2e.opensciencegrid.org/Offline/${OVER}/SLF7/prof/Offline/setup.sh
 #
 # set up for validation plots
 #
-VAL=val-genReco-5000-nightly_${DATE}-0.root
+VAL=val-ceSimReco-5000-nightly_${DATE}-0.root
 echo "[`date`] wget $ARTIFACT/$VAL"
 wget -q "$ARTIFACT/$VAL"
 RC=$?
@@ -90,7 +121,7 @@ rm -f summary.txt
 if [ -r $VAL ]; then
 
   # find last version
-  VAL0=`ls -tr $FDIR/val-genReco-5000-nightly* | grep -v $DATE | tail -1`
+  VAL0=`ls -tr $FDIR/val-ceSimReco-5000-nightly* | grep -v $DATE | tail -1`
   VAL0=`basename $VAL0`
   cp $FDIR/$VAL0 .
 
