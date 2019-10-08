@@ -16,7 +16,7 @@ cat /proc/cpuinfo | head -30
 
 
 REPORT=nightly-build-`date +"%Y-%m-%d.txt"`
-VALFILE=val-genReco-5000-nightly_`date +"%Y-%m-%d"`-0.root
+VALFILE=val-ceSimReco-5000-nightly_`date +"%Y-%m-%d"`-0.root
 
 echo "[`date`] source products common"
 source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
@@ -88,14 +88,10 @@ mu2e -c JobConfig/beam/PS.fcl -n 100
 RC6=$?
 echo "[`date`] PS (POT) return code $RC6" | tee -a $REPORT
 
-# genReco
-cp Analyses/test/genReco.fcl .
-# switch to current geometry
-echo "services.GeometryService.inputFile : \"Mu2eG4/geom/geom_common_current.txt\"" >> genReco.fcl
-mu2e -n 5000 -c genReco.fcl
+# ceSimReco
+mu2e -n 5000 -c Validation/fcl/ceSimReco.fcl
 RC7=$?
-echo "[`date`] genReco exe return code $RC7" | tee -a $REPORT
-rm -f genReco.fcl
+echo "[`date`] ceSimReco exe return code $RC7" | tee -a $REPORT
 
 # g4study
 mu2e -n 5 -c Mu2eG4/fcl/g4study.fcl
@@ -109,7 +105,7 @@ echo "Return code before validation $RC" | tee -a $REPORT
 # validation hists
 #
 
-mu2e -s genReco.art -c Validation/fcl/val.fcl 
+mu2e -s mcs.owner.val-ceSimReco.dsconf.seq.art -c Validation/fcl/val.fcl 
 RC9=$?
 echo "[`date`] validation exe return code $RC9" | tee -a $REPORT
 
