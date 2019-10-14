@@ -42,9 +42,9 @@ scons -j 16
 RC1=$?
 echo "["`date`"] scons return code is $RC1"
 
-mu2e -n 10 -c Analyses/test/genReco.fcl
+mu2e -n 10 -c Validation/fcl/ceSimReco.fcl
 RC2=$?
-echo "["`date`"] genReco return code is $RC2"
+echo "["`date`"] ceSimReco return code is $RC2"
 
 #rootOverlaps.sh
 #RC3=$?

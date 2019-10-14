@@ -60,7 +60,7 @@ launch() {
     I=1
     while [ $I -le $N ]; 
     do
-	cp Offline/Analyses/test/genReco.fcl ./${I}.fcl
+	cp Offline/Validation/fcl/ceSimReco.fcl ./${I}.fcl
 	SEED=`sed "${I}q;d" ../seeds.txt`
 	echo "services.SeedService.baseSeed: $SEED" >> ${I}.fcl
 	mu2e -n 1000 -o ${I}.art -T ${I}.root -c ${I}.fcl >& ${I}.log &
