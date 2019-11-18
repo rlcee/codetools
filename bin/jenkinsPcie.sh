@@ -7,6 +7,8 @@
 # the following are defined as jenkins project parameters
 # export PACKAGE_VERSION=v2_02_02
 # export COMPILER=e17
+# export ART_VERSION=s58
+# export PYTHON_VERSION_TAG=py2
 # to run locally, define these in the environment first
 #
 
@@ -53,8 +55,10 @@ cd $LOCAL_DIR/build
 
 FLAG="-p"
 [ "$BUILDTYPE" == "debug" ] && FLAG="-d"
+PFLAG=""
+[ -n "$PYTHON_VERSION_TAG" ] && PFLAG=":$PYTHON_VERSION_TAG"
 echo "[`date`] setup_for_development FLAG=$FLAG"
-source ../pcie_linux_kernel_module/ups/setup_for_development $FLAG ${COMPILER}
+source ../pcie_linux_kernel_module/ups/setup_for_development $FLAG ${COMPILER}:${ART_VERSION}${PFLAG}
 RC=$?
 [ $RC -ne 0 ] && exit $RC
 
@@ -66,8 +70,10 @@ RC=$?
 echo "[`date`] buildtool RC=$RC"
 
 PACKAGE_VERSION_DOT=`echo $PACKAGE_VERSION | sed -e 's/v//' -e 's/_/\./g' `
+PYTHON_TAG=""
+[ -n "$PYTHON_VERSION_TAG" ] && PYTHON_TAG="-$PYTHON_VERSION_TAG"
 
-TBALL=pcie_linux_kernel_module-${PACKAGE_VERSION_DOT}-${OS}-x86_64-${COMPILER}-${BUILDTYPE}.tar.bz2
+TBALL=pcie_linux_kernel_module-${PACKAGE_VERSION_DOT}-${OS}-x86_64-${COMPILER}-${ART_VERSION}-${BUILDTYPE}${PYTHON_TAG}.tar.bz2
 
 cd $LOCAL_DIR
 
