@@ -1,4 +1,12 @@
 #!/bin/bash
+#
+# BASE_BUILD is of form github_repo:ref, like Mu2e/Offline:master or 
+#      Mu2e/Offline:v7_0_0 or rlc/Offline:dev_branch
+# TEST_BUILD same format
+# BUILD_NAME is a string to name the web output directory
+# NEV is the number of ceSimReco events to run
+#
+# output
 # LOG=copyBack/log_${BASE_BUILD}_${TEST_BUILD}.log
 
 build() {
@@ -9,34 +17,25 @@ build() {
     echo "[`date`] starting build $DIR $BUILD"
     mkdir $DIR
     cd $DIR
-    local TYPE=`echo $BUILD | awk -F: '{print $1}'`
-    local TEXT=`echo $BUILD | awk -F: '{print $2}'`
+    local REPO=`echo $BUILD | awk -F: '{print $1}'`
+    local REF=`echo $BUILD | awk -F: '{print $2}'`
 
-    git clone http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline/Offline.git
+    git clone https://github.com/$REPO
     RC=$?
-    echo "[`date`] clone return code $RC"
+    echo "[`date`] clone $REPO return code $RC"
     [ $RC -ne 0 ] && return 1
-    cd Offline
-    if [ "$TYPE" == "commit" ]; then
-	git checkout -b work $TEXT
-	RC=$?
-    elif [ "$TYPE" == "tag" ]; then
-	git checkout tags/$TEXT
-	RC=$?
-    elif [ "$TYPE" == "branch" ]; then
-	git checkout $TEXT
-	RC=$?
-    else
-	RC=2
-    fi
 
-    echo "[`date`] check return code $RC"
+    cd Offline
+    git checkout -b temp $REF
+    RC=$?
+    echo "[`date`] checkout $REF return code $RC"
     [ $RC -ne 0 ] && return $RC
 
     source setup.sh
 
     scons -j 16 
     RC=$?
+
     echo "[`date`] scons return code $RC"
     [ $RC -ne 0 ] && return 1
 
@@ -48,13 +47,11 @@ build() {
 launch() {
     local CWD=$PWD
     local DIR="$1"
-    local BUILD="$2"
-    shift 2
-    N=`cat seeds.txt | wc -l`
-    echo "[`date`] starting launch $DIR $BUILD $N seeds"
+    local N="$2"
+    local NEV="$3"
+    echo "[`date`] starting launch $DIR, $N jobs, $NE total events"
+    local NEJ=$(($NEV/$N))
     cd $DIR
-    local TYPE=`echo $BUILD | awk -F: '{print $1}'`
-    local TEXT=`echo $BUILD | awk -F: '{print $2}'`
 
     source Offline/setup.sh
     I=1
@@ -63,7 +60,7 @@ launch() {
 	cp Offline/Validation/fcl/ceSimReco.fcl ./${I}.fcl
 	SEED=`sed "${I}q;d" ../seeds.txt`
 	echo "services.SeedService.baseSeed: $SEED" >> ${I}.fcl
-	mu2e -n 1000 -o ${I}.art -T ${I}.root -c ${I}.fcl >& ${I}.log &
+	mu2e -n $NEJ -o ${I}.art -T ${I}.root -c ${I}.fcl >& ${I}.log &
 	I=$(($I+1))
     done
 
@@ -78,15 +75,16 @@ launch() {
     return 0
 }
 
+#
+# after jobs run in the background, collect all the art files
+# and run validation on them
+#
 collect() {
     local CWD=$PWD
     local DIR="$1"
     local BUILD="$2"
-    shift 2
     echo "[`date`] starting collect $DIR $BUILD"
     cd $DIR
-    local TYPE=`echo $BUILD | awk -F: '{print $1}'`
-    local TEXT=`echo $BUILD | awk -F: '{print $2}'`
 
     source Offline/setup.sh
     ls -l
@@ -100,7 +98,7 @@ collect() {
     RC=$?
     echo "[`date`] collect $DIR validation RC=$RC"
 
-    VF=`echo val_${BUILD}_${BUILD_NAME}.root | tr ":" "-"`
+    VF=`echo ${BUILD}.root | tr ":" "-"`
     cp validation.root ../copyBack/$VF
 
     cd $CWD
@@ -121,7 +119,8 @@ echo "[`date`] ls of local dir"
 ls -al
 echo "[`date`] cpuinfo"
 cat /proc/cpuinfo | head -30
-
+NPROC=$( cat /proc/cpuinfo | grep -c processor )
+echo "[`date`] processors: $NPROC"
 
 echo "["`date`"] setups"
 source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
@@ -135,14 +134,37 @@ RC=$?
 RC=$?
 [ $RC -ne 0 ] && exit 2
 
-NJOB=5
 echo -e "3112\n4438\n7204\n7864\n9578" > seeds.txt
+cat > seeds.txt <<EOL
+30218
+36206
+85310
+88793
+100178
+144414
+174149
+183993
+196008
+221444
+224649
+264192
+289045
+349600
+355653
+372201
+373387
+381716
+424644
+435399
+EOL
 
-(launch base $BASE_BUILD )
+NJOB=5
+
+(launch base $NJOB $NEV )
 RC=$?
 [ $RC -ne 0 ] && exit 11
 
-(launch test $TEST_BUILD )
+(launch test $NJOB $NEV )
 RC=$?
 [ $RC -ne 0 ] && exit 12
 
