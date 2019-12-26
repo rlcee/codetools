@@ -49,6 +49,7 @@ launch() {
     local DIR="$1"
     local N="$2"
     local NEV="$3"
+    shift 3
     echo "[`date`] starting launch $DIR, $N jobs, $NE total events"
     local NEJ=$(($NEV/$N))
     cd $DIR
@@ -58,8 +59,7 @@ launch() {
     while [ $I -le $N ]; 
     do
 	cp Offline/Validation/fcl/ceSimReco.fcl ./${I}.fcl
-	SEED=`sed "${I}q;d" ../seeds.txt`
-	echo "services.SeedService.baseSeed: $SEED" >> ${I}.fcl
+	echo "services.SeedService.baseSeed: $I" >> ${I}.fcl
 	mu2e -n $NEJ -o ${I}.art -T ${I}.root -c ${I}.fcl >& ${I}.log &
 	I=$(($I+1))
     done
@@ -83,6 +83,7 @@ collect() {
     local CWD=$PWD
     local DIR="$1"
     local BUILD="$2"
+    shift 2
     echo "[`date`] starting collect $DIR $BUILD"
     cd $DIR
 
@@ -114,6 +115,7 @@ compare() {
     local BN="$1"
     local BB="$2"
     local TB="$3"
+    shift 3
     cd copyBack
     mkdir $BN
     source base/Offline/setup.sh
@@ -155,6 +157,9 @@ echo "["`date`"] setups"
 source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
 setup mu2e
 
+
+# build code
+
 (build base $BASE_BUILD )
 RC=$?
 [ $RC -ne 0 ] && exit 1
@@ -163,29 +168,8 @@ RC=$?
 RC=$?
 [ $RC -ne 0 ] && exit 2
 
-echo -e "3112\n4438\n7204\n7864\n9578" > seeds.txt
-cat > seeds.txt <<EOL
-30218
-36206
-85310
-88793
-100178
-144414
-174149
-183993
-196008
-221444
-224649
-264192
-289045
-349600
-355653
-372201
-373387
-381716
-424644
-435399
-EOL
+
+# start validation jobs
 
 NJOB=5
 
@@ -197,9 +181,9 @@ RC=$?
 RC=$?
 [ $RC -ne 0 ] && exit 12
 
-#
+
 # wait for results
-#
+
 NTJOB=$((2*$NJOB))
 N=0
 I=0
@@ -207,13 +191,13 @@ while [[ $N -lt $NTJOB && $I -lt 50 ]];
 do
   sleep 60
   N=`grep "Art has completed" base/*.log test/*.log | wc -l`
-  echo "waiting: min $I logs $N"
+  M=$( jobs | wc -l )
+  echo "waiting: min $I logs $N, jobs=$M"
   I=$(($I+1))
 done
 
-#
+
 # make val files
-#
 
 (collect base $BASE_BUILD )
 RC=$?
@@ -223,9 +207,8 @@ RC=$?
 RC=$?
 [ $RC -ne 0 ] && exit 22
 
-#
 # make comparison tarball
-#
+
 compare
 
 echo "[`date`] ls one level down"
