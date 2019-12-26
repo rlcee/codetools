@@ -20,7 +20,7 @@ build() {
     local REPO=`echo $BUILD | awk -F: '{print $1}'`
     local REF=`echo $BUILD | awk -F: '{print $2}'`
 
-    git clone https://github.com/$REPO
+    git clone https://github.com/$REPO/Offline
     RC=$?
     echo "[`date`] clone $REPO return code $RC"
     [ $RC -ne 0 ] && return 1
