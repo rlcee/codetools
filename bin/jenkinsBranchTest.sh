@@ -26,7 +26,7 @@ build() {
     [ $RC -ne 0 ] && return 1
 
     cd Offline
-    git checkout -b temp $REF
+    git checkout --no-progress -b temp $REF
     RC=$?
     echo "[`date`] checkout $REF return code $RC"
     [ $RC -ne 0 ] && return $RC
@@ -105,6 +105,35 @@ collect() {
     return 0
 }
 
+#
+# run valcompare and make a tarball of the results
+#
+compare() {
+    echo "[`date`] starting compare"
+    local CWD=$PWD
+    local BN="$1"
+    local BB="$2"
+    local TB="$3"
+    cd copyBack
+    mkdir $BN
+    source base/Offline/setup.sh
+    VB=`echo ${BUILD}.root | tr ":" "-"`
+    VT=`echo ${BUILD}.root | tr ":" "-"`
+    valcompare -s $VB $VT
+    valcompare -w $BN/result.html $VB $VT
+    RC=$?
+
+    tar -czf result.tgz $BN
+
+    cd $CWD
+    return 0
+}
+
+
+
+#
+# start of main
+#
 
 echo "[`date`] printenv"
 printenv
@@ -194,7 +223,12 @@ RC=$?
 RC=$?
 [ $RC -ne 0 ] && exit 22
 
-echo "[`date`] done collect"
+#
+# make comparison tarball
+#
+compare
+
+echo "[`date`] ls one level down"
 
 ls -l *
 
