@@ -118,7 +118,7 @@ compare() {
     shift 3
     cd copyBack
     mkdir $BN
-    source base/Offline/setup.sh
+    source $CWD/base/Offline/setup.sh
     VB=`echo ${BUILD}.root | tr ":" "-"`
     VT=`echo ${BUILD}.root | tr ":" "-"`
     valcompare -s $VB $VT
