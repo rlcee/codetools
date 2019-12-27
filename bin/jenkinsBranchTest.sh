@@ -209,7 +209,9 @@ RC=$?
 
 # make comparison tarball
 
-compare
+(compare $BUILD_NAME $BASE_BUILD $TEST_BUILD)
+RC=$?
+[ $RC -ne 0 ] && exit 30
 
 echo "[`date`] ls one level down"
 
@@ -218,4 +220,4 @@ ls -l *
 echo "[`date`] exit"
 
 
-exit $RC
+exit 0
