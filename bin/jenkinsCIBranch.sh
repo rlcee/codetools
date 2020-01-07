@@ -40,7 +40,7 @@ getCode() {
 
     echo "[$(date)] clone"
   # pull the main repo
-    if ! git clone http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline/Offline.git ; then
+    if ! git clone https://github.com/mu2e/Offline ; then
 	echo "[$(date)] failed to clone"
 	return 1
     fi
@@ -132,7 +132,7 @@ buildBranch() (
     fi
 
   # set the remote to the writeable url
-    git remote set-url origin  ssh://p-mu2eofflinesoftwaremu2eoffline@cdcvs.fnal.gov/cvs/projects/mu2eofflinesoftwaremu2eoffline/Offline.git
+    git remote set-url origin  https://github.com/mu2e/Offline
 
   # make sure .git is packed
     git repack -d -l
