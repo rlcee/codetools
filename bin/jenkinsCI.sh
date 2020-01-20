@@ -38,7 +38,7 @@ ups active
 
 echo "["`date`"] build"
 
-scons -j 16
+scons -k -j 16
 RC1=$?
 echo "["`date`"] scons return code is $RC1"
 
