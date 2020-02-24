@@ -1,4 +1,4 @@
 # codetools
 Utility scripts for code management, such as Jenkins 
-continuous integration projects or night validation
+continuous integration projects or nightly validation
 
