@@ -52,10 +52,11 @@ function cmsbot_report() {
 function setup_offline() {
     # setup_offline Mu2e/Offline
     # clone Mu2e/Offline
+    cd "$WORKSPACE"
 
     export REPO=$(echo $1 | sed 's|^.*/||')
 
-    if [ -d ${CMS_BOT_DIR} ]; then
+    if [ -d ${REPO} ]; then
         rm -rf $REPO
     fi
 
