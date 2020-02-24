@@ -43,13 +43,20 @@ ups active
 echo "["$(date)"] build"
 do_buildstep
 
-export SCONS_RC=$?
+SCONS_RC=$?
 echo "["$(date)"] scons return code is $SCONS_RC"
 
 if [ $SCONS_RC -ne 0 ]; then
-  exit 1;
+  echo 1
 fi
 
+echo "["$(date)"] run test"
 do_runstep
-export CESIMRECO_RC=$?
+
+CESIMRECO_RC=$?
 echo "["$(date)"] ceSimReco return code is $CESIMRECO_RC"
+if [ $CESIMRECO_RC -ne 0 ]; then
+  echo 2
+fi
+
+echo 0
