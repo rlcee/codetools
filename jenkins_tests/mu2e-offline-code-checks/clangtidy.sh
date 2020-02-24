@@ -1,6 +1,9 @@
 #!/bin/bash
+function gen_compdb() {
+    python "$WORKSPACE/clangtools_utilities/gen_compdb.py"
+}
 
-python gen_compdb.py
+gen_compdb
 
 CLANG_TIDY_ARGS="-extra-arg=-isystem$CLANG_FQ_DIR/include/c++/v1 -p . -fix -format"
 CLANG_TIDY_RUNNER="${CLANG_FQ_DIR}/share/clang/run-clang-tidy.py"
@@ -40,16 +43,5 @@ git push
 The clang-tidy log can be [viewed here.](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy-log-${COMMIT_SHA}.log)
 
 EOM
-
-else
-  	cat > $WORKSPACE/gh-report.md <<- EOM
-${COMMIT_SHA}
-mu2e/codechecks
-success
-The code checks passed.
-${JOB_URL}/${BUILD_NUMBER}/console
-NOCOMMENT
-
-EOM
-
+    exit 1;
 fi

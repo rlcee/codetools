@@ -11,9 +11,6 @@ function do_setupstep() {
     return 0
 }
 
-function gen_compdb() {
-    python "$WORKSPACE/clangtools_utilities/gen_compdb.py"
-}
 
 echo "[$(date)] setup job environment"
 . setup.sh
@@ -52,3 +49,15 @@ if [ $? -ne 0 ]; then
 fi
 
 
+cat > $WORKSPACE/gh-report.md <<- EOM
+${COMMIT_SHA}
+mu2e/codechecks
+success
+The code checks passed.
+${JOB_URL}/${BUILD_NUMBER}/console
+NOCOMMENT
+
+EOM
+
+cmsbot_report $WORKSPACE/gh-report.md
+exit 0;
