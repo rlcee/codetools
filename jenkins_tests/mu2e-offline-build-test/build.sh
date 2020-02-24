@@ -47,7 +47,7 @@ SCONS_RC=$?
 echo "["$(date)"] scons return code is $SCONS_RC"
 
 if [ $SCONS_RC -ne 0 ]; then
-  echo 1
+  exit 1
 fi
 
 echo "["$(date)"] run test"
@@ -56,7 +56,7 @@ do_runstep
 CESIMRECO_RC=$?
 echo "["$(date)"] ceSimReco return code is $CESIMRECO_RC"
 if [ $CESIMRECO_RC -ne 0 ]; then
-  echo 2
+  exit 2
 fi
 
-echo 0
+exit 0

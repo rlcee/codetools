@@ -44,7 +44,10 @@ cmsbot_report gh-report.md
 
 
 echo "[$(date)] run build test"
-BUILDTEST_OUTCOME=$( source "${WORKSPACE}/jenkins_tests/mu2e-offline-build-test/build.sh" )
+(
+    source "${WORKSPACE}/jenkins_tests/mu2e-offline-build-test/build.sh"
+)
+BUILDTEST_OUTCOME=$?
 
 echo "[$(date)] report outcome"
 if [ "$BUILDTEST_OUTCOME" == 1 ]; then
