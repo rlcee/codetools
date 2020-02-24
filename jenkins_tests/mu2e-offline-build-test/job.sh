@@ -1,17 +1,17 @@
 #!/bin/bash
-cd "$WORKSPACE"
+cd "$WORKSPACE" || exit
 
 CISCRIPTS_DIR="$WORKSPACE/Mu2eCIScripts"
 
 
-echo "[`date`] setup job environment"
-. ${CISCRIPTS_DIR}/setup.sh
+echo "[$(date)] setup job environment"
+. "${CISCRIPTS_DIR}"/setup.sh
 
-echo "[`date`] setup CMS-BOT/mu2e"
+echo "[$(date)] setup CMS-BOT/mu2e"
 setup_cmsbot
 
-echo "[`date`] setup ${REPOSITORY} and merge"
-setup_offline ${REPOSITORY}
+echo "[$(date)] setup ${REPOSITORY} and merge"
+setup_offline "${REPOSITORY}"
 
 offline_domerge
 OFFLINE_MERGESTATUS=$?
@@ -28,9 +28,10 @@ http://github.com/${REPOSITORY}/pull/${PULL_REQUEST}
 
 EOM
     cmsbot_report gh-report.md
+    exit 1;
 fi
 
-cd "$WORKSPACE"
+cd "$WORKSPACE" || exit
 # report that the job script is now running
 
 cat > gh-report.md <<- EOM
@@ -45,12 +46,12 @@ EOM
 cmsbot_report gh-report.md
 
 
-echo "[`date`] run build test"
+echo "[$(date)] run build test"
 BUILDTEST_OUTCOME=$( source "${CISCRIPTS_DIR}/jenkins_tests/mu2e-offline-build-test/build.sh" )
 
-echo "[`date`] report outcome"
-if [ $BUILDTEST_OUTCOME == 1 ]; then
-    cat > $WORKSPACE/gh-report.md <<- EOM
+echo "[$(date)] report outcome"
+if [ "$BUILDTEST_OUTCOME" == 1 ]; then
+    cat > "$WORKSPACE"/gh-report.md <<- EOM
 ${COMMIT_SHA}
 mu2e/buildtest
 failure
@@ -65,8 +66,8 @@ For more information, please check [here](${JOB_URL}/${BUILD_NUMBER}/console).
 
 EOM
 
-elif [ $BUILDTEST_OUTCOME == 2 ]; then
-    cat > $WORKSPACE/gh-report.md <<- EOM
+elif [ "$BUILDTEST_OUTCOME" == 2 ]; then
+    cat > "$WORKSPACE"/gh-report.md <<- EOM
 ${COMMIT_SHA}
 mu2e/buildtest
 failure
@@ -83,7 +84,7 @@ For more information, please check [here](${JOB_URL}/${BUILD_NUMBER}/console).
 EOM
 
 else
-    cat > $WORKSPACE/gh-report.md <<- EOM
+    cat > "$WORKSPACE"/gh-report.md <<- EOM
 ${COMMIT_SHA}
 mu2e/buildtest
 success
@@ -95,10 +96,11 @@ The build test passed at ref ${COMMIT_SHA}. The build has been cached for valida
 For more details, please check [here](${JOB_URL}/${BUILD_NUMBER}/console).
 
 EOM
-    echo "[`date`] Now gzip the compiled build, saving this for validation if needed."
-    cd "$WORKSPACE"
-    tar -zcvf rev_${COMMIT_SHA}_pr_lib.tar.gz Offline/lib
+    echo "[$(date)] Now gzip the compiled build, saving this for validation if needed."
+    cd "$WORKSPACE" || exit
+    tar -zcvf rev_"${COMMIT_SHA}"_pr_lib.tar.gz Offline/lib
 
 fi
 
 cmsbot_report "$WORKSPACE/gh-report.md"
+exit 0;
