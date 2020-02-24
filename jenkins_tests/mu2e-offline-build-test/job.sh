@@ -1,11 +1,8 @@
 #!/bin/bash
 cd "$WORKSPACE" || exit
 
-CISCRIPTS_DIR="$WORKSPACE/Mu2eCIScripts"
-
-
 echo "[$(date)] setup job environment"
-. "${CISCRIPTS_DIR}"/setup.sh
+. setup.sh
 
 echo "[$(date)] setup CMS-BOT/mu2e"
 setup_cmsbot
@@ -47,7 +44,7 @@ cmsbot_report gh-report.md
 
 
 echo "[$(date)] run build test"
-BUILDTEST_OUTCOME=$( source "${CISCRIPTS_DIR}/jenkins_tests/mu2e-offline-build-test/build.sh" )
+BUILDTEST_OUTCOME=$( source "${WORKSPACE}/jenkins_tests/mu2e-offline-build-test/build.sh" )
 
 echo "[$(date)] report outcome"
 if [ "$BUILDTEST_OUTCOME" == 1 ]; then
