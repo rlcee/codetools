@@ -6,7 +6,7 @@ function do_setupstep() {
     setup codetools
 
     # building prof or debug
-    ./buildopts --build=$BUILDTYPE
+    ./buildopts --build="$BUILDTYPE"
     source setup.sh
 
     return 0
@@ -14,37 +14,37 @@ function do_setupstep() {
 
 function do_buildstep() {
     scons --debug=time -k -j 16 2>&1 | tee "${WORKSPACE}/scons.log"
-    return ${PIPESTATUS[0]}
+    return "${PIPESTATUS[0]}"
 }
 
 function do_runstep() {
     mu2e -n 10 -c Validation/fcl/ceSimReco.fcl 2>&1 | tee "${WORKSPACE}/ceSimReco.log"
-    return ${PIPESTATUS[0]}
+    return "${PIPESTATUS[0]}"
 }
 
 # dump the rev
 git show
 git rev-parse HEAD
 
-cd $WORKSPACE
-cd $REPO
+cd "$WORKSPACE" || exit
+cd "$REPO" || exit
 
 # dump the rev
 git show
 git rev-parse HEAD
 
-echo "["`date`"] setup"
+echo "["$(date)"] setup"
 
 do_setupstep
 
-echo "["`date`"] ups"
+echo "["$(date)"] ups"
 ups active
 
-echo "["`date`"] build"
+echo "["$(date)"] build"
 do_buildstep
 
 export SCONS_RC=$?
-echo "["`date`"] scons return code is $SCONS_RC"
+echo "["$(date)"] scons return code is $SCONS_RC"
 
 if [ $SCONS_RC -ne 0 ]; then
   exit 1;
@@ -52,4 +52,4 @@ fi
 
 do_runstep
 export CESIMRECO_RC=$?
-echo "["`date`"] ceSimReco return code is $CESIMRECO_RC"
+echo "["$(date)"] ceSimReco return code is $CESIMRECO_RC"
