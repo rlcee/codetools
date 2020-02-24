@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Usually called from a job.sh script.
+cd "$WORKSPACE" || exit 1;
+
 rm -rf *.log *.txt *.md > /dev/null 2>&1
 
 function print_jobinfo() {
