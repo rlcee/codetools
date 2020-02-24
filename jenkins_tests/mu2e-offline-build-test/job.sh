@@ -42,7 +42,6 @@ NOCOMMENT
 EOM
 cmsbot_report gh-report.md
 
-
 echo "[$(date)] run build test"
 (
     source "${WORKSPACE}/jenkins_tests/mu2e-offline-build-test/build.sh"
@@ -96,9 +95,6 @@ The build test passed at ref ${COMMIT_SHA}. The build has been cached for valida
 For more details, please check [here](${JOB_URL}/${BUILD_NUMBER}/console).
 
 EOM
-    echo "[$(date)] Now gzip the compiled build, saving this for validation if needed."
-    cd "$WORKSPACE" || exit
-    tar -zcvf rev_"${COMMIT_SHA}"_pr_lib.tar.gz Offline/lib
 
 fi
 

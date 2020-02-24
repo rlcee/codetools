@@ -22,6 +22,12 @@ function do_runstep() {
     return "${PIPESTATUS[0]}"
 }
 
+function do_archivestep() {
+    echo "[$(date)] Now gzip the compiled build, saving this for validation if needed."
+    cd "$WORKSPACE" || exit
+    tar -zcvf rev_"${COMMIT_SHA}"_pr_lib.tar.gz Offline/lib
+}
+
 # dump the rev
 git show
 git rev-parse HEAD
@@ -59,4 +65,5 @@ if [ $CESIMRECO_RC -ne 0 ]; then
   exit 2
 fi
 
+do_archivestep
 exit 0
