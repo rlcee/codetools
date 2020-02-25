@@ -3,6 +3,10 @@
 # runs TValCompare with only access to the Validation shared library
 # return code 0: success
 # return code 1: error
+set --
+
+setup mu2e
+. $WORKSPACE/master/Offline/setup.sh # will set up root...
 
 rm -rf $WORKSPACE/validation_web
 mkdir -p $WORKSPACE/validation_web
