@@ -7,8 +7,8 @@
 PATH=$WORKSPACE/clangtools_utilities:$PATH
 
 touch $WORKSPACE/iwyu-log-*.log
-run_iwyu.sh ${MODIFIED_PR_FILES} > $WORKSPACE/iwyu-log-${COMMIT_SHA}.log
-fix_includes.py < $WORKSPACE/iwyu-log-${COMMIT_SHA}.log
+. $WORKSPACE/clangtools_utilities/run_iwyu.sh ${MODIFIED_PR_FILES} > $WORKSPACE/iwyu-log-${COMMIT_SHA}.log
+python $WORKSPACE/clangtools_utilities/fix_includes.py < $WORKSPACE/iwyu-log-${COMMIT_SHA}.log
 clang-format -i ${MODIFIED_PR_FILES}
 
 # is the diff now nonempty?
