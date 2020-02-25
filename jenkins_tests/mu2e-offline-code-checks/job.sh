@@ -58,10 +58,12 @@ if [ $? -ne 0 ]; then
     cmsbot_report $WORKSPACE/gh-report.md
     exit 1;
 fi
-echo "[$(date)] include-what-you-use"
 
+echo "[$(date)] include-what-you-use"
 (
-    source $WORKSPACE/jenkins_tests/mu2e-offline-code-checks/iwyu.sh
+    echo "IWYU step has been switched off."
+    exit 0;
+    #source $WORKSPACE/jenkins_tests/mu2e-offline-code-checks/iwyu.sh
 )
 if [ $? -ne 0 ]; then
     cmsbot_report $WORKSPACE/gh-report.md
