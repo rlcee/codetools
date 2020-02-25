@@ -1,41 +1,37 @@
 #!/bin/bash
+PATH=$WORKSPACE/clangtools_utilities:$PATH
 
-CLANG_TIDY_ARGS="-extra-arg=-isystem$CLANG_FQ_DIR/include/c++/v1 -p . -fix -format"
-CLANG_TIDY_RUNNER="${CLANG_FQ_DIR}/share/clang/run-clang-tidy.py"
-
-touch $WORKSPACE/clang-tidy-log-*.log
-${CLANG_TIDY_RUNNER} ${CLANG_TIDY_ARGS} ${MODIFIED_PR_FILES} > $WORKSPACE/clang-tidy-log-${COMMIT_SHA}.log
+touch $WORKSPACE/iwyu-log-*.log
+run_iwyu.sh ${MODIFIED_PR_FILES} > $WORKSPACE/iwyu-log-${COMMIT_SHA}.log
+fix_includes.py < $WORKSPACE/iwyu-log-${COMMIT_SHA}.log
 clang-format -i ${MODIFIED_PR_FILES}
 
 # is the diff now nonempty?
-git diff HEAD $MODIFIED_FILES > $WORKSPACE/clang-tidy-pr${PULL_REQUEST}-${COMMIT_SHA}.patch
+git diff HEAD $MODIFIED_PR_FILES > $WORKSPACE/iwyu-pr${PULL_REQUEST}-${COMMIT_SHA}.patch
 
 if [ -s "$WORKSPACE/clang-tidy-pr${PULL_REQUEST}-${COMMIT_SHA}.patch" ]; then
-    PURL="${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy-pr${PULL_REQUEST}-${COMMIT_SHA}.patch"
+    PURL="${JOB_URL}/${BUILD_NUMBER}/artifact/iwyu-pr${PULL_REQUEST}-${COMMIT_SHA}.patch"
 
     cat > $WORKSPACE/gh-report.md <<- EOM
 ${COMMIT_SHA}
 mu2e/codechecks
-failure
-The code checks failed (clang-tidy).
+success
+The code checks succeeded with messages (IWYU).
 ${JOB_URL}/${BUILD_NUMBER}/console
-:-1: Clang tidy checks produced warnings at ref ${COMMIT_SHA}.
+:+1: Code checks succeeded with suggestions at ref ${COMMIT_SHA}.
 
-\`\`\`diff
-$(git diff HEAD ${MODIFIED_FILES})
-\`\`\`
+IWYU made suggestions for $(git diff --name-status master | grep "^M" | wc -l) files. These are not required, but recommended.
 
-
-Please \`git apply\` [this patch]($PURL) on your PR branch:
+Please review and \`git apply\` [this patch]($PURL) on your PR branch:
 
 \`\`\`
 curl $PURL | git apply -v --index
-git commit -am "Clang tidy patch on ${COMMIT_SHA}"
+# < review changes first! >
+git commit -am "IWYU patch on ${COMMIT_SHA}"
 git push
-
 \`\`\`
 
-The clang-tidy log can be [viewed here.](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy-log-${COMMIT_SHA}.log)
+The IWYU log file can be [viewed here.](${JOB_URL}/${BUILD_NUMBER}/artifact/iwyu-log-${COMMIT_SHA}.log)
 
 EOM
 
