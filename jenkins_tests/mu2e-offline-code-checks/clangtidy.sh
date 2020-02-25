@@ -1,9 +1,5 @@
 #!/bin/bash
-function gen_compdb() {
-    python "$WORKSPACE/clangtools_utilities/gen_compdb.py"
-}
 
-gen_compdb
 
 CLANG_TIDY_ARGS="-extra-arg=-isystem$CLANG_FQ_DIR/include/c++/v1 -p . -fix -format"
 CLANG_TIDY_RUNNER="${CLANG_FQ_DIR}/share/clang/run-clang-tidy.py"
