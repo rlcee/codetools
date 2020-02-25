@@ -7,12 +7,13 @@
 # return code 1: error
 
 WORKING_DIRECTORY="$WORKSPACE/$1/Offline"
-BUILDVER=$2
+BUILDVER=$1
 VALIDATION_JOB=$2
 
-cd "$WORKING_DIRECTORY" || exit 1
-
 (
+    cd "$WORKING_DIRECTORY" || exit 1
+    1=""
+    2=""
     source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
     setup mu2e
     source setup.sh
@@ -43,4 +44,4 @@ cd "$WORKING_DIRECTORY" || exit 1
 
     exit 0;
 )
-
+exit $?
