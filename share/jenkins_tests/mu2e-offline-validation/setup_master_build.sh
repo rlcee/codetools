@@ -29,7 +29,7 @@ if [ -f "$LIB_CACHE_FILE" ]; then
     echo "Found cached shared libraries from a previous build of master at the revision ${MASTER_COMMIT_SHA}."
 
     # this will extract the built shared libraries into master/Offline/lib
-    tar -xzvf $LIB_CACHE_FILE
+    tar -xzvf $LIB_CACHE_FILE 2>&1 > /dev/null
 
     if [ "$?" -eq 0 ] ; then
       echo "Skipping master build step!"
