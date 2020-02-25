@@ -186,9 +186,32 @@ EOM
     exit 1;
 fi
 
-
-
 echo "[$(date)] report successful outcome"
 
+VAL_COMP_SUMMARY=$(cat valCompareSummary.log | head -n 12)
+
+VALPLOT_LINK="${JOB_URL}/${BUILD_NUMBER}/artifact/valOutput_PR${PULL_REQUEST}_${COMMIT_SHA}_master_${MASTER_COMMIT_SHA}.tar.gz"
+
+cat > $WORKSPACE/gh-report.md <<- EOM
+${COMMIT_SHA}
+mu2e/validation
+success
+The validation ran successfully.
+${JOB_URL}/${BUILD_NUMBER}/console
+:+1: A validation comparison was generated between these revisions:
+- master build version: rev ${MASTER_COMMIT_SHA}
+- PR build version: rev ${COMMIT_SHA}
+
+#### valCompare Summary
+
+\`\`\`
+${VAL_COMP_SUMMARY}
+\`\`\`
+
+Validation plots are temporarily [viewable here](${JOB_URL}/ws/valOutput/pr${PULL_REQUEST}/rev${COMMIT_SHA}/result.html), and can be [downloaded here](${VALPLOT_LINK}).
+For full job output, please see [this link.](${JOB_URL}/${BUILD_NUMBER}).
+
+EOM
 cmsbot_report "$WORKSPACE/gh-report.md"
+
 exit 0;
