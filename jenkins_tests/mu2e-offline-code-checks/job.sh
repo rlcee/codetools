@@ -48,7 +48,10 @@ fi
 git reset --hard ${COMMIT_SHA}
 
 echo "[$(date)] setup compile_commands.json"
-gen_compdb
+(
+    source setup.sh
+    gen_compdb
+)
 
 echo "[$(date)] clang-tidy"
 (
