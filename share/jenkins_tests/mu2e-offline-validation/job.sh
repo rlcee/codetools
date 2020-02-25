@@ -198,7 +198,7 @@ mu2e/validation
 success
 The validation ran successfully.
 ${JOB_URL}/${BUILD_NUMBER}/console
-:+1: A validation comparison was generated between these revisions:
+:+1: A comparison was generated between these revisions:
 - master build version: rev ${MASTER_COMMIT_SHA}
 - PR build version: rev ${COMMIT_SHA}
 
