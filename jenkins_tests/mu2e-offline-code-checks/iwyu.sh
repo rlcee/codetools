@@ -14,7 +14,7 @@ clang-format -i ${MODIFIED_PR_FILES}
 # is the diff now nonempty?
 git diff HEAD $MODIFIED_PR_FILES > $WORKSPACE/iwyu-pr${PULL_REQUEST}-${COMMIT_SHA}.patch
 
-if [ -s "$WORKSPACE/clang-tidy-pr${PULL_REQUEST}-${COMMIT_SHA}.patch" ]; then
+if [ -s "$WORKSPACE/iwyu-pr${PULL_REQUEST}-${COMMIT_SHA}.patch" ]; then
     PURL="${JOB_URL}/${BUILD_NUMBER}/artifact/iwyu-pr${PULL_REQUEST}-${COMMIT_SHA}.patch"
 
     cat > $WORKSPACE/gh-report.md <<- EOM
