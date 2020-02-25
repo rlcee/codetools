@@ -55,7 +55,7 @@ cd "$WORKSPACE" || exit 1
 
 cat > gh-report.md <<- EOM
 ${COMMIT_SHA}
-mu2e/buildtest
+mu2e/validation
 pending
 Validation is running in Jenkins.
 ${JOB_URL}/${BUILD_NUMBER}/console
