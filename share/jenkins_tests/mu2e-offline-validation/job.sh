@@ -119,10 +119,10 @@ echo "[$(date)] PR and master builds are ready. generate plots..."
 
 # run validation jobs for each build version in parallel.
 (
-    . ${TESTSCRIPT_DIR}/valplot.sh master ceSimReco &
+    . ${TESTSCRIPT_DIR}/valplot.sh master ceSimReco ${MASTER_COMMIT_SHA} &
     MASTER_VAL_PID=$!
 
-    . ${TESTSCRIPT_DIR}/valplot.sh pr ceSimReco &
+    . ${TESTSCRIPT_DIR}/valplot.sh pr ceSimReco ${COMMIT_SHA} &
     PR_VAL_PID=$!
 
     wait $PR_VAL_PID;

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# e.g. valplot.sh master ceSimReco
+# e.g. valplot.sh master ceSimReco <commit sha specific to that build>
 # Sets up the build in $WORKSPACE/$1/Offline and runs validation according to Validation/fcl/$2.fcl
 # then makes validation plots, and moves the rootfile back to workspace.
 # return code 0: success
@@ -9,6 +9,13 @@
 WORKING_DIRECTORY="$WORKSPACE/$1/Offline"
 BUILDVER=$1
 VALIDATION_JOB=$2
+COMMIT_SHA_V=$3
+
+if [ -f "$WORKSPACE/rev_${COMMIT_SHA_V}_${BUILDVER}_validation.root" ]; then
+    echo "Found cached validation rootfile for the ${BUILDVER} version at ${COMMIT_SHA_V}."
+    exit 0;
+fi
+
 
 (
     set --
@@ -40,7 +47,7 @@ VALIDATION_JOB=$2
 
     echo "[$(date)] ($WORKING_DIRECTORY) move validation.root to $WORKSPACE"
 
-    mv validation.root "$WORKSPACE/rev_${COMMIT_SHA}_${BUILDVER}_validation.root" || exit 1;
+    mv validation.root "$WORKSPACE/rev_${COMMIT_SHA_V}_${BUILDVER}_validation.root" || exit 1;
 
     exit 0;
 )
