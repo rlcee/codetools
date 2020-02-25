@@ -39,7 +39,7 @@ export MODIFIED_PR_FILES=`git diff --name-status master | grep "^M" | sed -e 's/
 
 echo "[$(date)] check formatting"
 (
-    source jenkins_tests/mu2e-offline-code-checks/formatting.sh
+    source $WORKSPACE/jenkins_tests/mu2e-offline-code-checks/formatting.sh
 )
 if [ $? -ne 0 ]; then
     cmsbot_report $WORKSPACE/gh-report.md
