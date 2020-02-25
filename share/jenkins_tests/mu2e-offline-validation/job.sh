@@ -106,7 +106,9 @@ mu2e/validation
 error
 An error occured during the setup of master and PR build versions.
 ${JOB_URL}/${BUILD_NUMBER}/console
-NOCOMMENT
+:-1: An error occured in the validation job.
+
+Please review the (logfile)[${JOB_URL}/${BUILD_NUMBER}/console] and try again.
 
 EOM
     cmsbot_report gh-run-report.md
