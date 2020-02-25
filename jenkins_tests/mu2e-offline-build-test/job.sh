@@ -3,11 +3,7 @@
 # roneil@fnal.gov
 # ryunosuke.oneil@postgrad.manchester.ac.uk
 
-
 cd "$WORKSPACE" || exit
-
-echo "[$(date)] setup job environment"
-. setup.sh
 
 echo "[$(date)] setup CMS-BOT/mu2e"
 setup_cmsbot

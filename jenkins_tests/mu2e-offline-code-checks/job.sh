@@ -20,10 +20,7 @@ function gen_compdb() {
     python "$WORKSPACE/clangtools_utilities/gen_compdb.py"
 }
 
-echo "[$(date)] setup job environment"
-. setup.sh
-
-echo "[$(date)] setup python env + CMS-BOT/mu2e"
+echo "[$(date)] setup CMS-BOT/mu2e"
 setup_cmsbot
 
 echo "[$(date)] setup ${REPOSITORY}"

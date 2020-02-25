@@ -3,8 +3,42 @@
 # roneil@fnal.gov
 # ryunosuke.oneil@postgrad.manchester.ac.uk
 
-# Usually called from a job.sh script.
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+# sets up job environment and calls the job.sh script in the relevant directory
+
 cd "$WORKSPACE" || exit 1;
+
+
+function check_set() {
+    if [ -z "$1" ]; then
+        return 1; # not set!
+    fi
+
+    return 0;
+}
+
+echo "Checking we're in the expected Jenkins environment...";
+
+check_set $REPOSITORY || exit 1;
+check_set $PULL_REQUEST || exit 1;
+check_set $COMMIT_SHA || exit 1;
+check_set $MASTER_COMMIT_SHA || exit 1;
+
+echo "OK!"
+
+echo "Bootstrapping job $1..."
+
+
+JOB_SCRIPT="${DIR}/jenkins_tests/$1/job.sh"
+
+if [ ! -f "$JOB_SCRIPT" ]; then
+    echo "Fatal error running job type $1 - could not find $JOB_SCRIPT."
+    exit 1;
+fi
+
+echo "Setting up job environment..."
+
 
 rm -rf *.log *.txt *.md > /dev/null 2>&1
 
@@ -98,3 +132,13 @@ function offline_domerge() {
     return 0
 
 }
+
+echo "Running job now."
+
+(
+    source $JOB_SCRIPT
+)
+JOB_STATUS=$?
+
+echo "Job finished with status $JOB_STATUS."
+exit $?
