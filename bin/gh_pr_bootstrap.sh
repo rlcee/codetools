@@ -2,13 +2,13 @@
 # Ryunosuke O'Neil, 2020
 # roneil@fnal.gov
 # ryunosuke.oneil@postgrad.manchester.ac.uk
+# sets up job environment and calls the job.sh script in the relevant directory
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 export JENKINS_TESTS_DIR="$DIR/../share/jenkins_tests"
 export CLANGTOOLS_UTIL_DIR="$DIR/../share/clangtools_utilities"
 export TESTSCRIPT_DIR="$JENKINS_TESTS_DIR/$1"
 
-# sets up job environment and calls the job.sh script in the relevant directory
 
 cd "$WORKSPACE" || exit 1;
 
