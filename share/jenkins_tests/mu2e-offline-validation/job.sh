@@ -84,12 +84,12 @@ cmsbot_report gh-report.md
     wait $MASTER_BUILD_PID;
     MASTER_BUILD_OUTCOME=$?
 
-    if [ $PR_BUILD_PID -ne 0 ]; then
+    if [ $PR_RESTORE_OUTCOME -ne 0 ]; then
         echo "[$(date)] PR build could not be restored - abort."
         exit 1;
     fi
 
-    if [ $MASTER_BUILD_PID -ne 0 ]; then
+    if [ $MASTER_BUILD_OUTCOME -ne 0 ]; then
         echo "[$(date)] master build could not be restored or built - abort."
         exit 1;
     fi
@@ -108,16 +108,68 @@ An error occured during the setup of master and PR build versions.
 ${JOB_URL}/${BUILD_NUMBER}/console
 :-1: An error occured in the validation job.
 
-Please review the (logfile)[${JOB_URL}/${BUILD_NUMBER}/console] and try again.
+Please review the [logfile](${JOB_URL}/${BUILD_NUMBER}/console) and try again.
 
 EOM
     cmsbot_report gh-run-report.md
     exit 1;
 fi
 
-echo "[$(date)] PR and master builds are ready"
+echo "[$(date)] PR and master builds are ready. generate plots..."
 
 # run validation jobs for each build version in parallel.
+(
+    (
+        . ${TESTSCRIPT_DIR}/valplot.sh master ceSimReco
+    ) &
+    MASTER_VAL_PID=$!
+
+    (
+        . ${TESTSCRIPT_DIR}/valplot.sh pr ceSimReco
+    ) &
+    PR_VAL_PID=$!
+
+    wait $PR_VAL_PID;
+    PR_VAL_OUTCOME=$?
+
+    wait $MASTER_VAL_PID;
+    MASTER_VAL_OUTCOME=$?
+
+
+    if [ $PR_VAL_OUTCOME -ne 0 ]; then
+        echo "[$(date)] PR validation plots not made - abort."
+        exit 1;
+    fi
+
+    if [ $MASTER_VAL_OUTCOME -ne 0 ]; then
+        echo "[$(date)] master validation plots not made - abort."
+        exit 1;
+    fi
+    exit 0;
+)
+
+if [ $? -ne 0 ]; then
+    echo "[$(date)] Failure while generating validation plots - abort."
+
+    cat > gh-run-report.md <<- EOM
+${COMMIT_SHA}
+mu2e/validation
+error
+An error occured during the ceSimReco and val plot generation step.
+${JOB_URL}/${BUILD_NUMBER}/console
+:-1: An error occured in validation during the ceSimReco and val plot generation step.
+
+Please review the [logfile](${JOB_URL}/${BUILD_NUMBER}/console) and try again.
+
+EOM
+    cmsbot_report gh-run-report.md
+    exit 1;
+fi
+
+echo "[$(date)] PR and master validation plots are ready - generate comparison..."
+
+
+
 
 
 

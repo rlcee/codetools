@@ -7,7 +7,7 @@
 
 NJOBS=16
 export REPO=$(echo $REPOSITORY | sed 's|^.*/||')
-export WORKING_DIRECTORY_PR="$WORKSPACE/pr_build"
+export WORKING_DIRECTORY_PR="$WORKSPACE/pr"
 
 rm -rf $WORKING_DIRECTORY_PR
 mkdir -p $WORKING_DIRECTORY_PR
