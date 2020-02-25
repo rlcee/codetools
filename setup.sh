@@ -1,4 +1,7 @@
 #!/bin/bash
+# Ryunosuke O'Neil, 2020
+# roneil@fnal.gov
+# ryunosuke.oneil@postgrad.manchester.ac.uk
 
 # Usually called from a job.sh script.
 cd "$WORKSPACE" || exit 1;

@@ -1,4 +1,8 @@
 #!/bin/bash
+# Ryunosuke O'Neil, 2020
+# roneil@fnal.gov
+# ryunosuke.oneil@postgrad.manchester.ac.uk
+
 
 function do_setupstep() {
     source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups

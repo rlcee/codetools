@@ -1,4 +1,9 @@
 #!/bin/bash
+# Ryunosuke O'Neil, 2020
+# roneil@fnal.gov
+# ryunosuke.oneil@postgrad.manchester.ac.uk
+
+
 cd "$WORKSPACE" || exit
 
 function do_setupstep() {

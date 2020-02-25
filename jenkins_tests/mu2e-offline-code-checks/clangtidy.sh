@@ -1,4 +1,7 @@
 #!/bin/bash
+# Ryunosuke O'Neil, 2020
+# roneil@fnal.gov
+# ryunosuke.oneil@postgrad.manchester.ac.uk
 
 
 CLANG_TIDY_ARGS="-extra-arg=-isystem$CLANG_FQ_DIR/include/c++/v1 -p . -fix -format"
