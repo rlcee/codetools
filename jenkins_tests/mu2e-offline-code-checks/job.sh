@@ -29,7 +29,6 @@ setup_cmsbot
 echo "[$(date)] setup ${REPOSITORY}"
 setup_offline "${REPOSITORY}"
 
-cd $REPO || exit 1
 git checkout ${COMMIT_SHA}
 
 
