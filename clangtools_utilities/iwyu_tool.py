@@ -118,7 +118,7 @@ def run_iwyu(dbentry, iwyu_args, verbose):
         clang_args = []
     clang_args += ['-I${CLANG_FQ_DIR}/lib/clang/5.0.1/include','-isystem${CLANG_FQ_DIR}/include/c++/v1']
     iwyu_args = ['-Xiwyu ' + a for a in iwyu_args]
-    command = ['include-what-you-use'] + clang_args + iwyu_args
+    command = ['iwyu'] + clang_args + iwyu_args
     command = '%s %s' % (' '.join(command), compile_args.strip())
 
     if verbose:
