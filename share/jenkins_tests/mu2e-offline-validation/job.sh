@@ -119,14 +119,10 @@ echo "[$(date)] PR and master builds are ready. generate plots..."
 
 # run validation jobs for each build version in parallel.
 (
-    (
-        . ${TESTSCRIPT_DIR}/valplot.sh master ceSimReco
-    ) &
+    . ${TESTSCRIPT_DIR}/valplot.sh master ceSimReco &
     MASTER_VAL_PID=$!
 
-    (
-        . ${TESTSCRIPT_DIR}/valplot.sh pr ceSimReco
-    ) &
+    . ${TESTSCRIPT_DIR}/valplot.sh pr ceSimReco &
     PR_VAL_PID=$!
 
     wait $PR_VAL_PID;
@@ -137,12 +133,12 @@ echo "[$(date)] PR and master builds are ready. generate plots..."
 
 
     if [ $PR_VAL_OUTCOME -ne 0 ]; then
-        echo "[$(date)] PR validation plots not made - abort."
+        echo "[$(date)] PR validation rootfile not made - abort."
         exit 1;
     fi
 
     if [ $MASTER_VAL_OUTCOME -ne 0 ]; then
-        echo "[$(date)] master validation plots not made - abort."
+        echo "[$(date)] master validation rootfile not made - abort."
         exit 1;
     fi
     exit 0;
@@ -168,12 +164,31 @@ fi
 
 echo "[$(date)] PR and master validation plots are ready - generate comparison..."
 
+(
+    source ${TESTSCRIPT_DIR}/valcompare.sh
+)
+
+if [ $? -ne 0 ]; then
+    echo "[$(date)] Failure while generating comparison - abort."
+
+    cat > gh-run-report.md <<- EOM
+${COMMIT_SHA}
+mu2e/validation
+error
+An error occured during comparison (valCompare).
+${JOB_URL}/${BUILD_NUMBER}/console
+:-1: An error occured in validation during comparison (valCompare).
+
+Please review the [logfile](${JOB_URL}/${BUILD_NUMBER}/console) and try again.
+
+EOM
+    cmsbot_report gh-run-report.md
+    exit 1;
+fi
 
 
 
-
-
-echo "[$(date)] report outcome"
+echo "[$(date)] report successful outcome"
 
 cmsbot_report "$WORKSPACE/gh-report.md"
 exit 0;
