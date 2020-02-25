@@ -52,7 +52,7 @@ gen_compdb
 
 echo "[$(date)] clang-tidy"
 (
-    source jenkins_tests/mu2e-offline-code-checks/clangtidy.sh
+    source $WORKSPACE/jenkins_tests/mu2e-offline-code-checks/clangtidy.sh
 )
 if [ $? -ne 0 ]; then
     cmsbot_report $WORKSPACE/gh-report.md
@@ -61,7 +61,7 @@ fi
 echo "[$(date)] include-what-you-use"
 
 (
-    source jenkins_tests/mu2e-offline-code-checks/iwyu.sh
+    source $WORKSPACE/jenkins_tests/mu2e-offline-code-checks/iwyu.sh
 )
 if [ $? -ne 0 ]; then
     cmsbot_report $WORKSPACE/gh-report.md

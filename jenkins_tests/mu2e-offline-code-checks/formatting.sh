@@ -25,15 +25,7 @@ git diff --compact-summary
 $(git diff --compact-summary)
 \`\`\`
 
-\`clang-format\` made changes to files modified by this PR. Please run:
-\`\`\`
-clang-format -i ${MODIFIED_PR_FILES}
-git commit -am "Code formatting on ${COMMIT_SHA}"
-git push
-\`\`\`
-
-
-Alternatively, please review and \`git apply\` [this patch]($PURL) on your PR branch:
+Please review and \`git apply\` [this patch]($PURL) on your PR branch:
 \`\`\`
 curl $PURL | git apply -v --index
 git commit -am "Code formatting patch on ${COMMIT_SHA}"

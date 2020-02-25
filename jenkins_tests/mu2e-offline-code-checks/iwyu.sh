@@ -31,7 +31,7 @@ Please review and \`git apply\` [this patch]($PURL) on your PR branch:
 
 \`\`\`
 curl $PURL | git apply -v --index
-# < review changes first! >
+# < review changes ! >
 git commit -am "IWYU patch on ${COMMIT_SHA}"
 git push
 \`\`\`
