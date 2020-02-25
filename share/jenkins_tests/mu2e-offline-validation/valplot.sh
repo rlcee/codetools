@@ -18,7 +18,7 @@ cd "$WORKING_DIRECTORY" || exit 1
     source setup.sh
 
     echo "[$(date)] ($WORKING_DIRECTORY) ${VALIDATION_JOB} (1000 events)"
-    mu2e -n 1000 -c Validation/fcl/"${VALIDATION_JOB}".fcl 2>&1 | tee "$WORKING_DIRECTORY"/../ceSimReco.log
+    mu2e -n 1000 -c Validation/fcl/${VALIDATION_JOB}.fcl 2>&1 | tee "$WORKING_DIRECTORY"/../ceSimReco.log
     RC2=${PIPESTATUS[0]}
     echo "[$(date)] ($WORKING_DIRECTORY) ${VALIDATION_JOB} return code is $RC2"
 
