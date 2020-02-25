@@ -11,6 +11,8 @@ setup_cmsbot
 echo "[$(date)] setup ${REPOSITORY} and merge"
 setup_offline "${REPOSITORY}"
 
+cd "$WORKSPACE/$REPO" || exit 1
+
 offline_domerge
 OFFLINE_MERGESTATUS=$?
 
@@ -45,7 +47,7 @@ cmsbot_report gh-report.md
 
 echo "[$(date)] run build test"
 (
-    source "${WORKSPACE}/jenkins_tests/mu2e-offline-build-test/build.sh"
+    source "${TESTSCRIPT_DIR}/build.sh"
 )
 BUILDTEST_OUTCOME=$?
 

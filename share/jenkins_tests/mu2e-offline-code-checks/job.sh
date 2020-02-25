@@ -17,7 +17,7 @@ function do_setupstep() {
 }
 
 function gen_compdb() {
-    python "$WORKSPACE/clangtools_utilities/gen_compdb.py"
+    python "${CLANGTOOLS_UTIL_DIR}/gen_compdb.py"
 }
 
 echo "[$(date)] setup CMS-BOT/mu2e"
@@ -36,7 +36,7 @@ export MODIFIED_PR_FILES=`git diff --name-status master | grep "^M" | sed -e 's/
 
 echo "[$(date)] check formatting"
 (
-    source $WORKSPACE/jenkins_tests/mu2e-offline-code-checks/formatting.sh
+    source ${TESTSCRIPT_DIR}/formatting.sh
 )
 if [ $? -ne 0 ]; then
     cmsbot_report $WORKSPACE/gh-report.md
@@ -52,7 +52,7 @@ echo "[$(date)] setup compile_commands.json"
 
 echo "[$(date)] clang-tidy"
 (
-    source $WORKSPACE/jenkins_tests/mu2e-offline-code-checks/clangtidy.sh
+    source ${TESTSCRIPT_DIR}/clangtidy.sh
 )
 if [ $? -ne 0 ]; then
     cmsbot_report $WORKSPACE/gh-report.md
@@ -63,7 +63,7 @@ echo "[$(date)] include-what-you-use"
 (
     echo "IWYU step has been switched off."
     exit 0;
-    #source $WORKSPACE/jenkins_tests/mu2e-offline-code-checks/iwyu.sh
+    #source ${TESTSCRIPT_DIR}/iwyu.sh
 )
 if [ $? -ne 0 ]; then
     cmsbot_report $WORKSPACE/gh-report.md

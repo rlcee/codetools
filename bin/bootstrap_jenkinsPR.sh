@@ -4,7 +4,9 @@
 # ryunosuke.oneil@postgrad.manchester.ac.uk
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-
+export JENKINS_TESTS_DIR="$DIR/jenkins_tests"
+export CLANGTOOLS_UTIL_DIR="$DIR/clangtools_utilities"
+export TESTSCRIPT_DIR="$JENKINS_TESTS_DIR/$1"
 # sets up job environment and calls the job.sh script in the relevant directory
 
 cd "$WORKSPACE" || exit 1;
@@ -30,7 +32,7 @@ echo "OK!"
 echo "Bootstrapping job $1..."
 
 
-JOB_SCRIPT="${DIR}/jenkins_tests/$1/job.sh"
+JOB_SCRIPT="${TESTSCRIPT_DIR}/job.sh"
 
 if [ ! -f "$JOB_SCRIPT" ]; then
     echo "Fatal error running job type $1 - could not find $JOB_SCRIPT."
@@ -69,12 +71,16 @@ function setup_cmsbot() {
     export CMS_BOT_DIR="$WORKSPACE/cms-bot"
 
     if [ ! -d ${CMS_BOT_DIR} ]; then
-        cd "$WORKSPACE"
-        git clone -b master git@github.com:FNALbuild/cms-bot
+        (
+            cd "$WORKSPACE"
+            git clone -b master git@github.com:FNALbuild/cms-bot
+        )
     else
-        cd ${CMS_BOT_DIR}
-        git fetch; git pull
-        cd -
+        (
+            cd ${CMS_BOT_DIR}
+            git fetch; git pull
+            cd -
+        )
     fi
 
 }
@@ -92,29 +98,26 @@ function cmsbot_report() {
 function setup_offline() {
     # setup_offline Mu2e/Offline
     # clone Mu2e/Offline
-    cd "$WORKSPACE"
 
     export REPO=$(echo $1 | sed 's|^.*/||')
+    export REPO_FULLNAME=$1
+    (
 
-    if [ -d ${REPO} ]; then
-        rm -rf $REPO
-    fi
+        if [ -d ${REPO} ]; then
+            rm -rf $REPO
+        fi
 
-    git clone "https://github.com/$1"
+        git clone "https://github.com/$REPO_FULLNAME"
 
-    cd $REPO
+        cd $REPO
 
-    git config user.email "you@example.com"
-    git config user.name "Your Name"
+        git config user.email "you@example.com"
+        git config user.name "Your Name"
+    )
 }
 
 
 function offline_domerge() {
-
-    REPO=$(echo $REPOSITORY | sed 's|^.*/||')
-
-    cd "${WORKSPACE}/${REPO}"
-
     git fetch origin pull/${PULL_REQUEST}/head:pr${PULL_REQUEST}
     git checkout ${MASTER_COMMIT_SHA}
 
@@ -134,7 +137,6 @@ function offline_domerge() {
 }
 
 echo "Running job now."
-
 (
     source $JOB_SCRIPT
 )
