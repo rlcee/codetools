@@ -66,17 +66,17 @@ cmsbot_report gh-report.md
 
 # parallelise for speed.
 (
-    echo "[$(date)] set up master"
-    (
-        source "${TESTSCRIPT_DIR}/setup_master_build.sh"
-    ) &
-    MASTER_BUILD_PID=$!
-
     echo "[$(date)] set up PR version"
     (
         source "${TESTSCRIPT_DIR}/setup_pr_build.sh"
     ) &
     PR_BUILD_PID=$!
+
+    echo "[$(date)] set up master"
+    (
+        source "${TESTSCRIPT_DIR}/setup_master_build.sh"
+    ) &
+    MASTER_BUILD_PID=$!
 
     wait $PR_BUILD_PID;
     PR_RESTORE_OUTCOME=$?
