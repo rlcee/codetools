@@ -9,12 +9,13 @@
 WORKING_DIRECTORY="$WORKSPACE/$1/Offline"
 BUILDVER=$1
 VALIDATION_JOB=$2
-set -- "${@:2}"
 
 (
+    set --
     cd "$WORKING_DIRECTORY" || exit 1
     source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
     setup mu2e
+
     source setup.sh
 
     echo "[$(date)] ($WORKING_DIRECTORY) ${VALIDATION_JOB} (1000 events)"
