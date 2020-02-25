@@ -9,11 +9,10 @@
 WORKING_DIRECTORY="$WORKSPACE/$1/Offline"
 BUILDVER=$1
 VALIDATION_JOB=$2
+set -- "${@:2}"
 
 (
     cd "$WORKING_DIRECTORY" || exit 1
-    1=""
-    2=""
     source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
     setup mu2e
     source setup.sh
