@@ -115,7 +115,7 @@ fi
 
 echo "[$(date)] PR and master builds are ready"
 
-# parallelise validation jobs for each build version.
+# run validation jobs for each build version in parallel.
 
 
 
