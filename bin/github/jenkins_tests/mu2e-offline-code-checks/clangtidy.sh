@@ -8,8 +8,8 @@ CLANG_TIDY_ARGS="-extra-arg=-isystem$CLANG_FQ_DIR/include/c++/v1 -p . -fix -form
 CLANG_TIDY_RUNNER="${CLANG_FQ_DIR}/share/clang/run-clang-tidy.py"
 
 touch $WORKSPACE/clang-tidy-log-*.log
-${CLANG_TIDY_RUNNER} ${CLANG_TIDY_ARGS} ${MODIFIED_PR_FILES} > $WORKSPACE/clang-tidy-log-${COMMIT_SHA}.log
-clang-format -i ${MODIFIED_PR_FILES}
+${CLANG_TIDY_RUNNER} ${CLANG_TIDY_ARGS} ${MODIFIED_PR_FILES} > $WORKSPACE/clang-tidy-log-${COMMIT_SHA}.log || exit 1
+clang-format -i ${MODIFIED_PR_FILES} || exit 1
 
 # is the diff now nonempty?
 git diff HEAD $MODIFIED_FILES > $WORKSPACE/clang-tidy-pr${PULL_REQUEST}-${COMMIT_SHA}.patch

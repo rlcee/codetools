@@ -74,6 +74,17 @@ echo "[$(date)] clang-tidy"
     source ${TESTSCRIPT_DIR}/clangtidy.sh
 )
 if [ $? -ne 0 ]; then
+    cat > gh-report.md <<- EOM
+${COMMIT_SHA}
+mu2e/codechecks
+error
+clang-tidy failed to run.
+http://github.com/${REPOSITORY}/pull/${PULL_REQUEST}
+:x: Clang-tidy failed to run. Please check the job output.
+http://github.com/${REPOSITORY}/pull/${PULL_REQUEST}
+
+EOM
+
     cmsbot_report $WORKSPACE/gh-report.md
     exit 1;
 fi
