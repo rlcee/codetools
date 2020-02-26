@@ -6,7 +6,7 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 export JENKINS_TESTS_DIR="$DIR/github/jenkins_tests"
-export CLANGTOOLS_UTIL_DIR="$DIR/github/clangtools_utilities"
+export CLANGTOOLS_UTIL_DIR="$DIR/../clangtools_utilities"
 export TESTSCRIPT_DIR="$JENKINS_TESTS_DIR/$1"
 
 
