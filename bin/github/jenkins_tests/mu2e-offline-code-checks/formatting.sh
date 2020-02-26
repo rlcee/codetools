@@ -20,6 +20,7 @@ failure
 The code checks failed.
 ${JOB_URL}/${BUILD_NUMBER}/console
 :-1: Code formatting checks have failed at ref ${COMMIT_SHA}.
+#### `clang-format` changed these files:
 \`\`\`
 git diff --compact-summary
 $(git diff --compact-summary)
