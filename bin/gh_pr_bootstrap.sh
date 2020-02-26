@@ -114,12 +114,13 @@ function setup_offline() {
 
         git config user.email "you@example.com"
         git config user.name "Your Name"
+
+        git fetch origin pull/${PULL_REQUEST}/head:pr${PULL_REQUEST}
     )
 }
 
 
 function offline_domerge() {
-    git fetch origin pull/${PULL_REQUEST}/head:pr${PULL_REQUEST}
     git checkout ${MASTER_COMMIT_SHA}
 
     git merge --no-ff ${COMMIT_SHA} -m "merged ${REPOSITORY} PR#${PULL_REQUEST} into ${REPOSITORY}/master at ${MASTER_COMMIT_SHA}."
