@@ -64,6 +64,7 @@ git reset --hard ${COMMIT_SHA}
 
 echo "[$(date)] setup compile_commands.json"
 (
+    set --
     source setup.sh
     gen_compdb
 )
