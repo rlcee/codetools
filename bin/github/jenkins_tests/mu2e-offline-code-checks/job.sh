@@ -28,13 +28,29 @@ setup_offline "${REPOSITORY}"
 
 cd $WORKSPACE/$REPO || exit 1;
 
-git checkout pr${PULL_REQUEST}
-git checkout ${COMMIT_SHA}
+offline_domerge
+OFFLINE_MERGESTATUS=$?
+
+if [ $OFFLINE_MERGESTATUS -ne 0 ];
+then
+    cat > gh-report.md <<- EOM
+${COMMIT_SHA}
+mu2e/codechecks
+error
+The PR branch could not be merged.
+http://github.com/${REPOSITORY}/pull/${PULL_REQUEST}
+:x: The build test could not run due to merge conflicts, or otherwise. Please resolve this first and try again.
+
+EOM
+    cmsbot_report gh-report.md
+    exit 1;
+fi
+
 
 echo "[$(date)] setups"
 do_setupstep
 
-export MODIFIED_PR_FILES=`git diff --name-status master | grep "^M" | sed -e 's/^\w*\ *//' | awk '{$1=$1;print}'`
+export MODIFIED_PR_FILES=`git diff --name-status master | grep "^M" | grep -E '(.*\.cc$|\.hh$)' | sed -e 's/^\w*\ *//' | awk '{$1=$1;print}'`
 
 echo "[$(date)] check formatting"
 (
