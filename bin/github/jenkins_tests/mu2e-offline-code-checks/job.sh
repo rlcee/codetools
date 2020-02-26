@@ -50,7 +50,7 @@ fi
 echo "[$(date)] setups"
 do_setupstep
 
-export MODIFIED_PR_FILES=`git diff --name-status master | grep "^M" | grep -E '(.*\.cc$|\.hh$)' | sed -e 's/^\w*\ *//' | awk '{$1=$1;print}'`
+export MODIFIED_PR_FILES=`git diff --name-only ${MASTER_COMMIT_SHA} HEAD | grep "^M" | grep -E '(.*\.cc$|\.hh$)' | sed -e 's/^\w*\ *//' | awk '{$1=$1;print}'`
 
 echo "[$(date)] check formatting"
 (
