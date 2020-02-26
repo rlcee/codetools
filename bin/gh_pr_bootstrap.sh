@@ -5,8 +5,8 @@
 # sets up job environment and calls the job.sh script in the relevant directory
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-export JENKINS_TESTS_DIR="$DIR/../share/jenkins_tests"
-export CLANGTOOLS_UTIL_DIR="$DIR/../share/clangtools_utilities"
+export JENKINS_TESTS_DIR="$DIR/github/jenkins_tests"
+export CLANGTOOLS_UTIL_DIR="$DIR/github/clangtools_utilities"
 export TESTSCRIPT_DIR="$JENKINS_TESTS_DIR/$1"
 
 
@@ -43,7 +43,7 @@ fi
 echo "Setting up job environment..."
 
 
-rm -rf *.log *.txt *.md > /dev/null 2>&1
+rm -rf *.log *.md *.patch > /dev/null 2>&1
 
 function print_jobinfo() {
     echo "[`date`] printenv"
