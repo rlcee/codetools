@@ -145,4 +145,4 @@ echo "Running job now."
 JOB_STATUS=$?
 
 echo "Job finished with status $JOB_STATUS."
-exit $?
+exit $JOB_STATUS
