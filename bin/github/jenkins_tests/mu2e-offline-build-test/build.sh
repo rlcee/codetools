@@ -43,28 +43,28 @@ cd "$REPO" || exit
 git show
 git rev-parse HEAD
 
-echo "["$(date)"] setup"
+echo "[$(date)] setup"
 
 do_setupstep
 
-echo "["$(date)"] ups"
+echo "[$(date)] ups"
 ups active
 
-echo "["$(date)"] build"
+echo "[$(date)] build"
 do_buildstep
 
 SCONS_RC=$?
-echo "["$(date)"] scons return code is $SCONS_RC"
+echo "[$(date)] scons return code is $SCONS_RC"
 
 if [ $SCONS_RC -ne 0 ]; then
   exit 1
 fi
 
-echo "["$(date)"] run test"
+echo "[$(date)] run test"
 do_runstep
 
 CESIMRECO_RC=$?
-echo "["$(date)"] ceSimReco return code is $CESIMRECO_RC"
+echo "[$(date)] ceSimReco return code is $CESIMRECO_RC"
 if [ $CESIMRECO_RC -ne 0 ]; then
   exit 2
 fi
