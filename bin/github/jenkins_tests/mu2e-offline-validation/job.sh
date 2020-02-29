@@ -89,15 +89,24 @@ cmsbot_report gh-report.md
         exit 1;
     fi
 
-    if [ $MASTER_BUILD_OUTCOME -ne 0 ]; then
-        echo "[$(date)] master build could not be restored or built - abort."
-        exit 1;
+    if [ $MASTER_BUILD_OUTCOME -ne 2 ]; then
+        if [ $MASTER_BUILD_OUTCOME -ne 0 ]; then
+            echo "[$(date)] master build could not be restored or built - abort."
+            exit 1;
+        fi
+    else
+        exit 2;
     fi
-
     exit 0;
 )
+RESTORE_BUILD_OUTCOME=$?
+DO_MASTER_VALPLOT=1
+if [ $RESTORE_BUILD_OUTCOME == 2 ]; then
+    RESTORE_BUILD_OUTCOME=0
+    DO_MASTER_VALPLOT=0
+fi
 
-if [ $? -ne 0 ]; then
+if [ $RESTORE_BUILD_OUTCOME -ne 0 ]; then
     echo "[$(date)] Failure while setting up master and PR build versions - abort."
 
     cat > gh-run-report.md <<- EOM
@@ -119,8 +128,10 @@ echo "[$(date)] PR and master builds are ready. generate plots..."
 
 # run validation jobs for each build version in parallel.
 (
-    . ${TESTSCRIPT_DIR}/valplot.sh master ceSimReco ${MASTER_COMMIT_SHA} &
-    MASTER_VAL_PID=$!
+    if [ $DO_MASTER_VALPLOT -ne 0 ]; then
+        . ${TESTSCRIPT_DIR}/valplot.sh master ceSimReco ${MASTER_COMMIT_SHA} &
+        MASTER_VAL_PID=$!
+    fi
 
     . ${TESTSCRIPT_DIR}/valplot.sh pr ceSimReco ${COMMIT_SHA} &
     PR_VAL_PID=$!
@@ -128,9 +139,12 @@ echo "[$(date)] PR and master builds are ready. generate plots..."
     wait $PR_VAL_PID;
     PR_VAL_OUTCOME=$?
 
-    wait $MASTER_VAL_PID;
-    MASTER_VAL_OUTCOME=$?
-
+    if [ $DO_MASTER_VALPLOT -ne 0 ]; then
+        wait $MASTER_VAL_PID;
+        MASTER_VAL_OUTCOME=$?
+    else
+        MASTER_VAL_OUTCOME=0
+    fi
 
     if [ $PR_VAL_OUTCOME -ne 0 ]; then
         echo "[$(date)] PR validation rootfile not made - abort."
