@@ -12,6 +12,7 @@ echo "[$(date)] setup ${REPOSITORY} and merge"
 setup_offline "${REPOSITORY}"
 
 cd "$WORKSPACE/$REPO" || exit 1
+git rev-parse HEAD > master-commit-sha.txt
 
 offline_domerge
 OFFLINE_MERGESTATUS=$?
