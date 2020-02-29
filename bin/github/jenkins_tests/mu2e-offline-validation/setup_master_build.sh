@@ -10,13 +10,6 @@ NJOBS=16
 export REPO=$(echo $REPOSITORY | sed 's|^.*/||')
 export WORKING_DIRECTORY_MASTER="$WORKSPACE/master"
 
-# check if we have validation.root for this revision from a previous build
-CACHE_FILE="$WORKSPACE/rev_${MASTER_COMMIT_SHA}_master_validation.root"
-if [ -f "$CACHE_FILE" ]; then
-    echo "Found a cached validation.root from a previous build of master at the revision ${MASTER_COMMIT_SHA}."
-    echo "Skipping master build step!"
-    exit 2;
-fi
 
 mkdir -p $WORKING_DIRECTORY_MASTER
 cd "$WORKING_DIRECTORY_MASTER" || exit 1
@@ -33,6 +26,15 @@ if [ -f "$LIB_CACHE_FILE" ]; then
 
     if [ "$?" -eq 0 ] ; then
       echo "Skipping master build step!"
+
+      # check if we have validation.root for this revision from a previous build
+      CACHE_FILE="$WORKSPACE/rev_${MASTER_COMMIT_SHA}_master_validation.root"
+      if [ -f "$CACHE_FILE" ]; then
+          echo "Found a cached validation.root from a previous build of master at the revision ${MASTER_COMMIT_SHA}."
+          echo "Skipping master build step!"
+          exit 2;
+      fi
+
       exit 0;
     else
       echo "Building master from scratch - something went wrong extracting the archive..."
