@@ -6,7 +6,14 @@
 set --
 
 setup mu2e
-. $WORKSPACE/master/Offline/setup.sh # will set up root...
+
+# choose a version of Offline with a 'good' Validation shared lib available.
+# We do it this way since we know tagged releases should have a stable TValCompare
+# and, sometimes master doesn't get built if i.e. we have a cached rootfile
+# and, we don't want to rely on the PR version (since that came from elsewhere)
+
+IMPARTIAL_OFFLINE_LOC="/cvmfs/mu2e.opensciencegrid.org/Offline/v8_0_3/SLF7/prof/Offline"
+source "$IMPARTIAL_OFFLINE_LOC/setup.sh"
 
 rm -rf $WORKSPACE/validation_web
 mkdir -p $WORKSPACE/validation_web
@@ -14,7 +21,7 @@ mkdir -p $WORKSPACE/validation_web
 
 cat > $WORKSPACE/validation-script <<- EOM
 
-.L ${WORKSPACE}/master/${REPO}/lib/libmu2e_Validation_root.so
+.L ${IMPARTIAL_OFFLINE_LOC}/lib/libmu2e_Validation_root.so
 
 TValCompare c;
 c.SetFile1("${WORKSPACE}/rev_${MASTER_COMMIT_SHA}_master_validation.root");
