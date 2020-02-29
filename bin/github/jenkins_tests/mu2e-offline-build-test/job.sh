@@ -94,7 +94,7 @@ success
 The build test succeeded.
 ${JOB_URL}/${BUILD_NUMBER}/console
 :+1:
-The build test passed at ref ${COMMIT_SHA}. The build has been cached for validation, if required.
+The build test passed at ref ${COMMIT_SHA}. The validation job has been queued.
 
 For more details, please check [here](${JOB_URL}/${BUILD_NUMBER}/console).
 
