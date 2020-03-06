@@ -68,7 +68,7 @@ echo "[$(date)] setup compile_commands.json"
     exit 0;
     set --
     source setup.sh
-    gen_compdb
+    scons -Q compiledb
 )
 
 echo "[$(date)] clang-tidy"
