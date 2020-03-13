@@ -22,7 +22,7 @@ def fix_file(input_file):
     
 
     with open(input_file, 'w') as f:
-        f.write('\n'.join(fixed_lines))
+        f.write('\n'.join(fixed_lines) + '\n')
     
     changed_lines = sum([1 for before, after in zip(file_lines, fixed_lines) if before != after])
     print ('removed trailing whitespace on %d lines' % changed_lines_trailing)
