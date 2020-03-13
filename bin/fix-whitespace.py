@@ -7,11 +7,8 @@ def remove_trailing(lines):
 def replace_hardtabs(lines):
     return [l.lstrip("\t") for l in lines]
 
-def main():
-    if len(sys.argv) < 2:
-        print ('%s: no input file' % sys.argv[0])
-        return
-    input_file = sys.argv[1]
+
+def fix_file(input_file):
     file_lines = []
     
     with open(input_file, 'r') as f:
@@ -31,6 +28,17 @@ def main():
     print ('removed trailing whitespace on %d lines' % changed_lines_trailing)
     print ('removed leading hard tabs on %d lines' % changed_lines_tabs)
     print ('changed %d lines' % changed_lines)
+
+
+def main():
+    if len(sys.argv) < 2:
+        print ('%s: no input files' % sys.argv[0])
+        return
+    print ('checking %d files...' % len(sys.argv[1:]))
+
+    for fi in sys.argv[1:]:
+        fix_file(fi)
+
 
 if __name__ == '__main__':
     main()
