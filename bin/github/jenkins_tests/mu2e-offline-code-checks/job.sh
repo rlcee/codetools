@@ -27,9 +27,10 @@ echo "[$(date)] setup ${REPOSITORY}"
 setup_offline "${REPOSITORY}"
 
 cd $WORKSPACE/$REPO || exit 1;
+git checkout ${COMMIT_SHA}
 
-offline_domerge
-OFFLINE_MERGESTATUS=$?
+#offline_domerge
+OFFLINE_MERGESTATUS=0
 
 if [ $OFFLINE_MERGESTATUS -ne 0 ];
 then
@@ -47,8 +48,6 @@ EOM
 fi
 
 
-echo "[$(date)] setups"
-do_setupstep
 
 #export MODIFIED_PR_FILES=`git diff --name-only ${MASTER_COMMIT_SHA} HEAD | grep "^M" | grep -E '(.*\.cc$|\.hh$)' | sed -e 's/^\w*\ *//' | awk '{$1=$1;print}'`
 export MODIFIED_PR_FILES=$(git --no-pager diff --name-only FETCH_HEAD $(git merge-base FETCH_HEAD master))
@@ -62,6 +61,9 @@ if [ $? -ne 0 ]; then
     exit 1;
 fi
 git reset --hard ${COMMIT_SHA}
+
+echo "[$(date)] setups"
+do_setupstep
 
 echo "[$(date)] setup compile_commands.json"
 (
