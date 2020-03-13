@@ -29,6 +29,10 @@ setup_offline "${REPOSITORY}"
 cd $WORKSPACE/$REPO || exit 1;
 git checkout ${COMMIT_SHA}
 
+echo "[$(date)] setups"
+do_setupstep
+
+
 #offline_domerge
 OFFLINE_MERGESTATUS=0
 
@@ -61,9 +65,6 @@ if [ $? -ne 0 ]; then
     exit 1;
 fi
 git reset --hard ${COMMIT_SHA}
-
-echo "[$(date)] setups"
-do_setupstep
 
 echo "[$(date)] setup compile_commands.json"
 (

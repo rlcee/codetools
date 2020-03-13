@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+import os
 
 def remove_trailing(lines):
     return [l.rstrip() for l in lines]
@@ -37,8 +38,10 @@ def main():
     print ('checking %d files...' % len(sys.argv[1:]))
 
     for fi in sys.argv[1:]:
-        fix_file(fi)
-
+        if os.path.exists(fi):
+            fix_file(fi)
+        else:
+            print ("skipping non-existent path: %s" % fi)
 
 if __name__ == '__main__':
     main()
