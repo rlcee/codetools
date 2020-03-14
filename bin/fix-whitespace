@@ -6,7 +6,12 @@ def remove_trailing(lines):
     return [l.rstrip() for l in lines]
 
 def replace_hardtabs(lines):
-    return [l.lstrip("\t") for l in lines]
+    fixed = []
+    for l in lines:
+        lstrip = l.lstrip()
+        l_ws = l[:len(l)-len(lstrip)]
+        fixed.append(l_ws.replace('\t',' ' * 4) + lstrip)
+    return fixed
 
 
 def fix_file(input_file):
