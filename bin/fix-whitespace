@@ -43,7 +43,7 @@ def main():
     print ('checking %d files...' % len(sys.argv[1:]))
 
     for fi in sys.argv[1:]:
-        if os.path.exists(fi):
+        if os.path.exists(fi) and not os.path.isdir(fi):
             fix_file(fi)
         else:
             print ("skipping non-existent path: %s" % fi)
