@@ -51,7 +51,7 @@ echo "[$(date)] run build test"
     source "${TESTSCRIPT_DIR}/build.sh"
 )
 BUILDTEST_OUTCOME=$?
-
+ERROR_OUTPUT=$(grep "scons: \*\*\*" scons.log)
 echo "[$(date)] report outcome"
 if [ "$BUILDTEST_OUTCOME" == 1 ]; then
     cat > "$WORKSPACE"/gh-report.md <<- EOM
@@ -60,11 +60,14 @@ mu2e/buildtest
 failure
 SCons failed to build ${BUILDTYPE}.
 ${JOB_URL}/${BUILD_NUMBER}/console
-:-1: The build test failed at ref ${COMMIT_SHA}.
+:-1: 
+The build test failed at ref ${COMMIT_SHA}.
 ### Test Report
 - The build (${BUILDTYPE}) was unsuccessful.
 - ceSimReco (run test) was skipped.
-
+\`\`\`
+${ERROR_OUTPUT}
+\`\`\`
 For more information, please check [here](${JOB_URL}/${BUILD_NUMBER}/console).
 
 EOM
@@ -94,7 +97,7 @@ success
 The build test succeeded.
 ${JOB_URL}/${BUILD_NUMBER}/console
 :+1:
-The build test passed at ref ${COMMIT_SHA}. The validation job has been queued.
+The build test passed at ref ${COMMIT_SHA}.
 
 For more details, please check [here](${JOB_URL}/${BUILD_NUMBER}/console).
 
@@ -103,4 +106,5 @@ EOM
 fi
 
 cmsbot_report "$WORKSPACE/gh-report.md"
-exit 0;
+exit $BUILDTEST_OUTCOME;
+

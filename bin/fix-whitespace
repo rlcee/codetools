@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+import sys
+import os
+
+def remove_trailing(lines):
+    return [l.rstrip() for l in lines]
+
+def replace_hardtabs(lines):
+    fixed = []
+    for l in lines:
+        lstrip = l.lstrip()
+        l_ws = l[:len(l)-len(lstrip)]
+        fixed.append(l_ws.replace('\t',' ' * 4) + lstrip)
+    return fixed
+
+
+def fix_file(input_file):
+    file_lines = []
+    
+    with open(input_file, 'r') as f:
+        file_lines = [l.rstrip('\n') for l in f.readlines()]
+    
+    t_fixed_lines = remove_trailing(file_lines)
+    changed_lines_trailing = sum([1 for before, after in zip(file_lines, t_fixed_lines) if before != after])
+    
+    fixed_lines = replace_hardtabs(t_fixed_lines)
+    changed_lines_tabs = sum([1 for before, after in zip(t_fixed_lines, fixed_lines) if before != after])
+    
+
+    with open(input_file, 'w') as f:
+        f.write('\n'.join(fixed_lines) + '\n')
+    
+    changed_lines = sum([1 for before, after in zip(file_lines, fixed_lines) if before != after])
+    print ('removed trailing whitespace on %d lines' % changed_lines_trailing)
+    print ('removed leading hard tabs on %d lines' % changed_lines_tabs)
+    print ('changed %d lines' % changed_lines)
+
+
+def main():
+    if len(sys.argv) < 2:
+        print ('%s: no input files' % sys.argv[0])
+        return
+    print ('checking %d files...' % len(sys.argv[1:]))
+
+    for fi in sys.argv[1:]:
+        if os.path.exists(fi) and not os.path.isdir(fi):
+            fix_file(fi)
+        else:
+            print ("skipping non-existent path: %s" % fi)
+
+if __name__ == '__main__':
+    main()

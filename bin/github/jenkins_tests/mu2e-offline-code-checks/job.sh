@@ -27,9 +27,14 @@ echo "[$(date)] setup ${REPOSITORY}"
 setup_offline "${REPOSITORY}"
 
 cd $WORKSPACE/$REPO || exit 1;
+git checkout ${COMMIT_SHA}
 
-offline_domerge
-OFFLINE_MERGESTATUS=$?
+echo "[$(date)] setups"
+do_setupstep
+
+
+#offline_domerge
+OFFLINE_MERGESTATUS=0
 
 if [ $OFFLINE_MERGESTATUS -ne 0 ];
 then
@@ -47,14 +52,13 @@ EOM
 fi
 
 
-echo "[$(date)] setups"
-do_setupstep
 
-export MODIFIED_PR_FILES=`git diff --name-only ${MASTER_COMMIT_SHA} HEAD | grep "^M" | grep -E '(.*\.cc$|\.hh$)' | sed -e 's/^\w*\ *//' | awk '{$1=$1;print}'`
+#export MODIFIED_PR_FILES=`git diff --name-only ${MASTER_COMMIT_SHA} HEAD | grep "^M" | grep -E '(.*\.cc$|\.hh$)' | sed -e 's/^\w*\ *//' | awk '{$1=$1;print}'`
+export MODIFIED_PR_FILES=$(git --no-pager diff --name-only FETCH_HEAD $(git merge-base FETCH_HEAD master))
 
 echo "[$(date)] check formatting"
 (
-    source ${TESTSCRIPT_DIR}/formatting.sh
+    source ${TESTSCRIPT_DIR}/simple-formatting.sh
 )
 if [ $? -ne 0 ]; then
     cmsbot_report $WORKSPACE/gh-report.md
@@ -64,6 +68,7 @@ git reset --hard ${COMMIT_SHA}
 
 echo "[$(date)] setup compile_commands.json"
 (
+    exit 0;
     set --
     source setup.sh
     scons -Q compiledb
@@ -71,6 +76,7 @@ echo "[$(date)] setup compile_commands.json"
 
 echo "[$(date)] clang-tidy"
 (
+    exit 0;
     source ${TESTSCRIPT_DIR}/clangtidy.sh
 )
 if [ $? -ne 0 ]; then

@@ -17,7 +17,7 @@ function do_setupstep() {
 }
 
 function do_buildstep() {
-    scons --debug=time -k -j 24 2>&1 | tee "${WORKSPACE}/scons.log"
+    scons --debug=time -k --max-drift=1 --implicit-deps-unchanged -j 24 2>&1 | tee "${WORKSPACE}/scons.log"
     return "${PIPESTATUS[0]}"
 }
 
