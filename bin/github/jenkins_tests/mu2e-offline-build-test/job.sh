@@ -60,7 +60,7 @@ mu2e/buildtest
 failure
 SCons failed to build ${BUILDTYPE}.
 ${JOB_URL}/${BUILD_NUMBER}/console
-:-1: 
+:umbrella: 
 The build test failed at ref ${COMMIT_SHA}.
 ### Test Report
 - The build (${BUILDTYPE}) was unsuccessful.
@@ -79,7 +79,7 @@ mu2e/buildtest
 failure
 The build succeeded, but ceSimReco failed.
 ${JOB_URL}/${BUILD_NUMBER}/console
-:-1:
+:umbrella:
 The build test failed for ref ${COMMIT_SHA}.
 ### Test Report
 - The build (${BUILDTYPE}) was successful.
@@ -96,8 +96,8 @@ mu2e/buildtest
 success
 The build test succeeded.
 ${JOB_URL}/${BUILD_NUMBER}/console
-:+1:
-The build test passed at ref ${COMMIT_SHA}.
+:sunny:
+The build test passed at ref ${commit_sha}.
 
 For more details, please check [here](${JOB_URL}/${BUILD_NUMBER}/console).
 
