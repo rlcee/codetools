@@ -6,7 +6,7 @@
 echo "[`date`] clang-format"
 
 
-CLANG_TIDY_ARGS="-extra-arg=-isystem$CLANG_FQ_DIR/include/c++/v1 -p ."
+CLANG_TIDY_ARGS="-extra-arg=-isystem$CLANG_FQ_DIR/include/c++/v1 -p . -quiet"
 CLANG_TIDY_RUNNER="${CLANG_FQ_DIR}/share/clang/run-clang-tidy.py"
 PATCH_FILE="$WORKSPACE/clang-format-pr${PULL_REQUEST}-${COMMIT_SHA}.patch"
 
@@ -26,7 +26,8 @@ do
         echo "skipped $MOD_FILE since not a cpp .hh or .cc file"    
     fi
 done
-
+git checkout -- .clang-tidy
+git checkout -- .clang-format # we do this so these configs do not show up in the diff.
 git diff > $PATCH_FILE
 
 if [ -s "$PATCH_FILE" ]; then
@@ -36,7 +37,7 @@ if [ -s "$PATCH_FILE" ]; then
 ${COMMIT_SHA}
 mu2e/codechecks
 success
-clang-format made suggestions...
+Code checks have finished.
 ${JOB_URL}/${BUILD_NUMBER}/console
 :cloud: clang-format generated a patch at ref ${COMMIT_SHA} on files you changed.
 #### clang-format suggests re-formatting these files:
@@ -56,6 +57,7 @@ git push
 
 #### clang-tidy
 The \`clang-tidy\` log file is [here](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy-log-${COMMIT_SHA}.log).
+
 EOM
 
     exit 1;
