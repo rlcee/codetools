@@ -99,8 +99,7 @@ success
 The build test succeeded.
 ${JOB_URL}/${BUILD_NUMBER}/console
 :sunny:
-The build test passed at ref ${commit_sha}.
-${TIME_BUILD_OUTPUT}.
+The build test passed at ref ${COMMIT_SHA}. ${TIME_BUILD_OUTPUT}.
 
 For more details, please check [here](${JOB_URL}/${BUILD_NUMBER}/console).
 
