@@ -54,6 +54,12 @@ fi
 echo "[$(date)] setup compile_commands.json and get configs"
 (
     set --
+
+    if [[ ! -d "site_scons" ]]; then
+        git checkout master -- site_scons/
+        git checkout master -- SConstruct
+    fi
+
     source setup.sh
     scons -Q compiledb
 
