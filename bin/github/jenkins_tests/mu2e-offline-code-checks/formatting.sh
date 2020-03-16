@@ -6,9 +6,10 @@
 echo "[`date`] clang-format"
 
 
-CLANG_TIDY_ARGS="-extra-arg=-isystem$CLANG_FQ_DIR/include/c++/v1 -p ."
+CLANG_TIDY_ARGS="-extra-arg=-isystem$CLANG_FQ_DIR/include/c++/v1 -p . -j 24"
 CLANG_TIDY_RUNNER="${CLANG_FQ_DIR}/share/clang/run-clang-tidy.py"
 PATCH_FILE="$WORKSPACE/clang-format-pr${PULL_REQUEST}-${COMMIT_SHA}.patch"
+CT_FILES="" # files to run in clang tidy
 
 for MOD_FILE in $MODIFIED_PR_FILES
 do
@@ -17,17 +18,18 @@ do
         echo "clang-format on $MOD_FILE"
 
         if [[ "$MOD_FILE" == *.cc ]]; then
-            echo "clang-tidy running"
-            echo "" >> $WORKSPACE/clang-tidy-log-${COMMIT_SHA}.log
-            echo "====== $MOD_FILE ==========================" >> $WORKSPACE/clang-tidy-log-${COMMIT_SHA}.log
-            ${CLANG_TIDY_RUNNER} ${CLANG_TIDY_ARGS} ${MOD_FILE} >> $WORKSPACE/clang-tidy-log-${COMMIT_SHA}.log || exit 1
+            CT_FILES="$MOD_FILE $CT_FILES"
         fi
     else
         echo "skipped $MOD_FILE since not a cpp .hh or .cc file"    
     fi
 done
+
+${CLANG_TIDY_RUNNER} ${CLANG_TIDY_ARGS} ${CT_FILES} >> $WORKSPACE/clang-tidy-log-${COMMIT_SHA}.log || exit 1
+
 git checkout -- .clang-tidy
 git checkout -- .clang-format # we do this so these configs do not show up in the diff.
+git checkout -- SConstruct
 git diff > $PATCH_FILE
 
 if [ -s "$PATCH_FILE" ]; then
