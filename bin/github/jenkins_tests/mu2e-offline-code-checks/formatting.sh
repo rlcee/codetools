@@ -28,8 +28,8 @@ mu2e/codechecks
 success
 clang-format made suggestions...
 ${JOB_URL}/${BUILD_NUMBER}/console
-:cloudy: clang-format generated a patch at ref ${COMMIT_SHA} on files you changed.
-#### `clang-format` suggests re-formatting these files:
+:cloud: clang-format generated a patch at ref ${COMMIT_SHA} on files you changed.
+#### clang-format suggests re-formatting these files:
 \`\`\`
 git diff --compact-summary
 $(git diff --compact-summary)
