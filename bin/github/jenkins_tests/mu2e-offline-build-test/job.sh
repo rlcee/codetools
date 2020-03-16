@@ -90,6 +90,8 @@ For more information, please check [here](${JOB_URL}/${BUILD_NUMBER}/console).
 EOM
 
 else
+
+    TIME_BUILD_OUTPUT=$(grep "Total build time: " scons.log)
     cat > "$WORKSPACE"/gh-report.md <<- EOM
 ${COMMIT_SHA}
 mu2e/buildtest
@@ -98,6 +100,7 @@ The build test succeeded.
 ${JOB_URL}/${BUILD_NUMBER}/console
 :sunny:
 The build test passed at ref ${commit_sha}.
+${TIME_BUILD_OUTPUT}.
 
 For more details, please check [here](${JOB_URL}/${BUILD_NUMBER}/console).
 
