@@ -63,4 +63,17 @@ EOM
     exit 1;
 fi
 
+
+  cat > $WORKSPACE/gh-report.md <<- EOM
+${COMMIT_SHA}
+mu2e/codechecks
+success
+Code checks have finished.
+${JOB_URL}/${BUILD_NUMBER}/console
+:sunny: Formatting is OK at ref ${COMMIT_SHA} on files you changed.
+
+#### clang-tidy
+The \`clang-tidy\` log file is [here](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy-log-${COMMIT_SHA}.log).
+
+EOM
 exit 0;

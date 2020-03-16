@@ -108,15 +108,15 @@ if [ $? -ne 0 ]; then
     exit 0;
 fi
 
-cat > $WORKSPACE/gh-report.md <<- EOM
-${COMMIT_SHA}
-mu2e/codechecks
-success
-The code checks passed.
-${JOB_URL}/${BUILD_NUMBER}/console
-NOCOMMENT
-
-EOM
+#cat > $WORKSPACE/gh-report.md <<- EOM
+#3${COMMIT_SHA}
+#mu2e/codechecks
+#success
+#The code checks passed.
+#${JOB_URL}/${BUILD_NUMBER}/console
+#NOCOMMENT
+#
+#EOM
 
 cmsbot_report $WORKSPACE/gh-report.md
 exit 0;
