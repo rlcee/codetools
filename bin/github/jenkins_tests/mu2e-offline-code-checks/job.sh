@@ -51,6 +51,13 @@ EOM
     exit 1;
 fi
 
+echo "[$(date)] setup compile_commands.json"
+(
+    exit 0;
+    set --
+    source setup.sh
+    scons -Q compiledb
+)
 
 
 #export MODIFIED_PR_FILES=`git diff --name-only ${MASTER_COMMIT_SHA} HEAD | grep "^M" | grep -E '(.*\.cc$|\.hh$)' | sed -e 's/^\w*\ *//' | awk '{$1=$1;print}'`
@@ -66,13 +73,6 @@ if [ $? -ne 0 ]; then
 fi
 git reset --hard ${COMMIT_SHA}
 
-echo "[$(date)] setup compile_commands.json"
-(
-    exit 0;
-    set --
-    source setup.sh
-    scons -Q compiledb
-)
 
 echo "[$(date)] clang-tidy"
 (
