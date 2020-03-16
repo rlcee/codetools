@@ -9,7 +9,7 @@ PATCH_FILE="$WORKSPACE/clang-format-pr${PULL_REQUEST}-${COMMIT_SHA}.patch"
 
 for MOD_FILE in $MODIFIED_PR_FILES
 do
-    if [ "$MOD_FILE" == *.cc ] || [ "$MOD_FILE" == *.hh ]; then
+    if [[ "$MOD_FILE" == *.cc ] || [ "$MOD_FILE" == *.hh ]]; then
         clang-format -i $MOD_FILE
         echo "clang-format on $MOD_FILE"
     else
