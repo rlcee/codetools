@@ -58,7 +58,7 @@ export MODIFIED_PR_FILES=$(git --no-pager diff --name-only FETCH_HEAD $(git merg
 
 echo "[$(date)] check formatting"
 (
-    source ${TESTSCRIPT_DIR}/simple-formatting.sh
+    source ${TESTSCRIPT_DIR}/formatting.sh
 )
 if [ $? -ne 0 ]; then
     cmsbot_report $WORKSPACE/gh-report.md
