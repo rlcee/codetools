@@ -25,7 +25,7 @@ do
     fi
 done
 
-${CLANG_TIDY_RUNNER} ${CLANG_TIDY_ARGS} ${CT_FILES} >> $WORKSPACE/clang-tidy-log-${COMMIT_SHA}.log || exit 1
+${CLANG_TIDY_RUNNER} ${CLANG_TIDY_ARGS} ${CT_FILES} > $WORKSPACE/clang-tidy-log-${COMMIT_SHA}.log || exit 1
 
 git checkout -- .clang-tidy
 git checkout -- .clang-format # we do this so these configs do not show up in the diff.
