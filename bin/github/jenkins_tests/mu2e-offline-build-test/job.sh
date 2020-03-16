@@ -109,5 +109,6 @@ EOM
 fi
 
 cmsbot_report "$WORKSPACE/gh-report.md"
+wait;
 exit $BUILDTEST_OUTCOME;
 
