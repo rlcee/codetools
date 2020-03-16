@@ -53,7 +53,6 @@ fi
 
 echo "[$(date)] setup compile_commands.json"
 (
-    exit 0;
     set --
     source setup.sh
     scons -Q compiledb
