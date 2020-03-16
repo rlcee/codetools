@@ -51,11 +51,14 @@ EOM
     exit 1;
 fi
 
-echo "[$(date)] setup compile_commands.json"
+echo "[$(date)] setup compile_commands.json and get configs"
 (
     set --
     source setup.sh
     scons -Q compiledb
+
+    git checkout master -- .clang-tidy
+    git checkout master -- .clang-format
 )
 
 
