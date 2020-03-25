@@ -74,7 +74,7 @@ cmsbot_report gh-report.md
     MASTER_BUILD_OUTCOME=$?
 
     if [ $PR_RESTORE_OUTCOME -ne 0 ]; then
-        echo "[$(date)] PR build could not be restored - abort."
+        echo "[$(date)] PR build could not be restored (return code $PR_RESTORE_OUTCOME) - abort."
         exit 1;
     fi
 
