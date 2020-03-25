@@ -28,7 +28,7 @@ if [ -f "$LIB_CACHE_FILE" ]; then
     echo "Found cached shared libraries for the PR version."
 
     # this will extract the built shared libraries into master/Offline/lib
-    tar -xzvf $LIB_CACHE_FILE  2>&1 > /dev/null || exit 1;
+    tar -xzvf $LIB_CACHE_FILE 2>&1 > $WORKSPACE/pr_build_unzip.log || exit 1;
 
     echo "Build restored successfully."
 fi
