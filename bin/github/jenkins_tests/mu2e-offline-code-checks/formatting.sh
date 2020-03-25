@@ -21,7 +21,7 @@ do
             CT_FILES="$MOD_FILE $CT_FILES"
         fi
     else
-        echo "skipped $MOD_FILE since not a cpp .hh or .cc file"    
+        echo "skipped $MOD_FILE since not a cpp .hh or .cc file"
     fi
 done
 
@@ -42,22 +42,16 @@ success
 Code checks have finished.
 ${JOB_URL}/${BUILD_NUMBER}/console
 :cloud: clang-format generated a patch at ref ${COMMIT_SHA} on files you changed.
-#### clang-format suggests re-formatting these files:
-\`\`\`
-git diff --compact-summary
-$(git diff --compact-summary)
-\`\`\`
-
+#### clang-format suggests re-formatting files:
 Please review the patch [here]($PURL).
 
-You can apply the proposed changes like this:
+If it is convenient to do so, you can apply the patch like this:
 \`\`\`
 curl $PURL | git apply -v --index
-git commit -am "Code formatting patch on ${COMMIT_SHA}"
-git push
+git commit -am "Code formatting patch on ${COMMIT_SHA}" && git push
 \`\`\`
 
-#### clang-tidy
+#### clang-tidy results
 The \`clang-tidy\` log file is [here](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy-log-${COMMIT_SHA}.log).
 
 EOM
@@ -72,9 +66,9 @@ mu2e/codechecks
 success
 Code checks have finished.
 ${JOB_URL}/${BUILD_NUMBER}/console
-:sunny: Formatting is OK at ref ${COMMIT_SHA} on files you changed.
+:sunny: No re-formatting is required at ref ${COMMIT_SHA} on files you changed.
 
-#### clang-tidy
+#### clang-tidy results
 The \`clang-tidy\` log file is [here](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy-log-${COMMIT_SHA}.log).
 
 EOM
