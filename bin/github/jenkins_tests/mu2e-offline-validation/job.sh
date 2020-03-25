@@ -29,7 +29,7 @@ Validation cannot be run before a build test.
 ${JOB_URL}/${BUILD_NUMBER}/console
 The archived shared libraries from build test at ${COMMIT_SHA} cannot be found.
 
-I've you've just run a build test, you should wait at least 2 minutes before triggering this job.
+If you've just run a build test, you should wait at least 2 minutes before triggering this job.
 
 EOM
     cmsbot_report gh-run-report.md
