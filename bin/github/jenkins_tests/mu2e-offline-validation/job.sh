@@ -192,6 +192,7 @@ echo "[$(date)] report successful outcome"
 VAL_COMP_SUMMARY=$(cat valCompareSummary.log | head -n 12)
 
 VALPLOT_LINK="${JOB_URL}/${BUILD_NUMBER}/artifact/valOutput_PR${PULL_REQUEST}_${COMMIT_SHA}_master_${MASTER_COMMIT_SHA}.tar.gz"
+VALPLOT_LINKTWO="${JOB_URL}/${BUILD_NUMBER}/artifact/result.html"
 
 cat > $WORKSPACE/gh-report.md <<- EOM
 ${COMMIT_SHA}
@@ -209,7 +210,7 @@ ${JOB_URL}/${BUILD_NUMBER}/console
 ${VAL_COMP_SUMMARY}
 \`\`\`
 
-Validation plots are temporarily [viewable here](${JOB_URL}/ws/valOutput/pr${PULL_REQUEST}/rev${COMMIT_SHA}/result.html), and can be [downloaded here](${VALPLOT_LINK}).
+Validation plots are [viewable here](${VALPLOT_LINKTWO}), and can be [downloaded here](${VALPLOT_LINK}).
 For full job output, please see [this link.](${JOB_URL}/${BUILD_NUMBER}).
 
 EOM
