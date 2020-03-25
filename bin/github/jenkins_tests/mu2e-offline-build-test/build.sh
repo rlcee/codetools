@@ -67,4 +67,5 @@ if [ $CESIMRECO_RC -ne 0 ]; then
   exit 2
 fi
 
+wait;
 exit 0
