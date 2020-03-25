@@ -27,25 +27,12 @@ mu2e/validation
 error
 Validation cannot be run before a build test.
 ${JOB_URL}/${BUILD_NUMBER}/console
-The archived shared libraries from build test at ${COMMIT_SHA} cannot be found. Archived builds are deleted after 5 days.
+The archived shared libraries from build test at ${COMMIT_SHA} cannot be found.
 
-If this is the case, please try re-running the build test.
+I've you've just run a build test, you should wait at least 2 minutes before triggering this job.
 
 EOM
     cmsbot_report gh-run-report.md
-
-	cat > gh-run-report.md <<- EOM
-${COMMIT_SHA}
-mu2e/buildtest
-pending
-The test has not been triggered yet.
-http://github.com/$REPOSITORY/pull/${PULL_REQUEST}
-NOCOMMENT
-
-EOM
-	sleep 2;
-    cmsbot_report gh-run-report.md
-
     exit 1;
 fi
 
