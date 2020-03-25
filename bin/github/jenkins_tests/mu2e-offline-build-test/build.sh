@@ -26,11 +26,7 @@ function do_runstep() {
     return "${PIPESTATUS[0]}"
 }
 
-function do_archivestep() {
-    echo "[$(date)] Now gzip the compiled build, saving this for validation if needed."
-    cd "$WORKSPACE" || exit
-    tar -zcvf rev_"${COMMIT_SHA}"_pr_lib.tar.gz Offline/lib > /dev/null &
-}
+
 
 cd "$WORKSPACE" || exit
 cd "$REPO" || exit
@@ -56,7 +52,11 @@ if [ $SCONS_RC -ne 0 ]; then
   exit 1
 fi
 
-do_archivestep
+echo "[$(date)] Now gzip the compiled build, saving this for validation if needed."
+(
+  cd "$WORKSPACE" || exit
+  tar -zcvf rev_"${COMMIT_SHA}"_pr_lib.tar.gz Offline/lib > /dev/null
+) &
 
 echo "[$(date)] run test"
 do_runstep
@@ -68,4 +68,5 @@ if [ $CESIMRECO_RC -ne 0 ]; then
 fi
 
 wait;
+
 exit 0
