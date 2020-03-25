@@ -31,6 +31,8 @@ The archived shared libraries from build test at ${COMMIT_SHA} cannot be found.
 
 If you've just run a build test, you should wait at least 2 minutes before triggering this job.
 
+If it's been more than 5 days since the build test was run, you should run it again.
+
 EOM
     cmsbot_report gh-run-report.md
     exit 1;
