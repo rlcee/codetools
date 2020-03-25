@@ -51,7 +51,7 @@ EOM
     exit 1;
 fi
 
-echo "[$(date)] setup compile_commands.json and get configs"
+echo "[$(date)] setup compile_commands.json and get latest clang tool configs"
 (
     set --
 
@@ -63,6 +63,10 @@ echo "[$(date)] setup compile_commands.json and get configs"
     source setup.sh
     scons -Q compiledb
 
+    # make sure clang tools can find this file
+    # in an obvious location
+    mv gen/compile_commands.json .
+
     git checkout master -- .clang-tidy
     git checkout master -- .clang-format
 )
@@ -71,7 +75,7 @@ echo "[$(date)] setup compile_commands.json and get configs"
 #export MODIFIED_PR_FILES=`git diff --name-only ${MASTER_COMMIT_SHA} HEAD | grep "^M" | grep -E '(.*\.cc$|\.hh$)' | sed -e 's/^\w*\ *//' | awk '{$1=$1;print}'`
 export MODIFIED_PR_FILES=$(git --no-pager diff --name-only FETCH_HEAD $(git merge-base FETCH_HEAD master))
 
-echo "[$(date)] check formatting"
+echo "[$(date)] check formatting and run clang-tidy"
 (
     source ${TESTSCRIPT_DIR}/formatting.sh
 )
@@ -81,27 +85,6 @@ if [ $? -ne 0 ]; then
 fi
 git reset --hard ${COMMIT_SHA}
 
-
-echo "[$(date)] clang-tidy"
-(
-    exit 0;
-    source ${TESTSCRIPT_DIR}/clangtidy.sh
-)
-if [ $? -ne 0 ]; then
-    cat > gh-report.md <<- EOM
-${COMMIT_SHA}
-mu2e/codechecks
-error
-clang-tidy failed to run.
-http://github.com/${REPOSITORY}/pull/${PULL_REQUEST}
-:x: Clang-tidy failed to run. Please check the job output.
-http://github.com/${REPOSITORY}/pull/${PULL_REQUEST}
-
-EOM
-
-    cmsbot_report $WORKSPACE/gh-report.md
-    exit 1;
-fi
 
 echo "[$(date)] include-what-you-use"
 (
@@ -113,16 +96,6 @@ if [ $? -ne 0 ]; then
     cmsbot_report $WORKSPACE/gh-report.md
     exit 0;
 fi
-
-#cat > $WORKSPACE/gh-report.md <<- EOM
-#3${COMMIT_SHA}
-#mu2e/codechecks
-#success
-#The code checks passed.
-#${JOB_URL}/${BUILD_NUMBER}/console
-#NOCOMMENT
-#
-#EOM
 
 cmsbot_report $WORKSPACE/gh-report.md
 exit 0;
