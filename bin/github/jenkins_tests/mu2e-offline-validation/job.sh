@@ -194,7 +194,7 @@ echo "[$(date)] report successful outcome"
 VAL_COMP_SUMMARY=$(cat valCompareSummary.log | head -n 12)
 
 VALPLOT_LINK="${JOB_URL}/${BUILD_NUMBER}/artifact/valOutput_PR${PULL_REQUEST}_${COMMIT_SHA}_master_${MASTER_COMMIT_SHA}.tar.gz"
-VALPLOT_LINKTWO="${JOB_URL}/${BUILD_NUMBER}/artifact/result.html"
+VALPLOT_LINKTWO="${JOB_URL}/${BUILD_NUMBER}/artifact/valOutput/pr${PULL_REQUEST}/rev${COMMIT_SHA}/result.html"
 
 cat > $WORKSPACE/gh-report.md <<- EOM
 ${COMMIT_SHA}
