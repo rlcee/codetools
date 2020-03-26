@@ -81,7 +81,7 @@ echo "[$(date)] check formatting and run clang-tidy"
 )
 if [ $? -ne 0 ]; then
     cmsbot_report $WORKSPACE/gh-report.md
-    exit 1;
+    exit 0;
 fi
 git reset --hard ${COMMIT_SHA}
 
