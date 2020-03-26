@@ -42,6 +42,9 @@ success
 Code checks have finished.
 ${JOB_URL}/${BUILD_NUMBER}/console
 :cloud: clang-format generated a patch at ref ${COMMIT_SHA} on files you changed.
+#### clang-tidy results
+The \`clang-tidy\` log file is [here](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy-log-${COMMIT_SHA}.log).
+
 #### clang-format suggests re-formatting files:
 Please review the patch [here]($PURL).
 
@@ -50,9 +53,6 @@ If it is convenient to do so, you can apply the patch like this:
 curl $PURL | git apply -v --index
 git commit -am "Code formatting patch on ${COMMIT_SHA}" && git push
 \`\`\`
-
-#### clang-tidy results
-The \`clang-tidy\` log file is [here](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy-log-${COMMIT_SHA}.log).
 
 EOM
 
