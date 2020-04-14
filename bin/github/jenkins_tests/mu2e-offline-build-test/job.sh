@@ -97,13 +97,15 @@ EOM
 else
 
     TIME_BUILD_OUTPUT=$(grep "Total build time: " scons.log)
+    TIME_BUILD_OUTPUT=$(echo "$TIME_BUILD_OUTPUT" | grep -o -E '[0-9\.]+')
+
     cat > "$WORKSPACE"/gh-report.md <<- EOM
 ${COMMIT_SHA}
 mu2e/buildtest
 success
 The tests passed.
 ${JOB_URL}/${BUILD_NUMBER}/console
-:sunny: The tests passed at ref ${COMMIT_SHA}. ${TIME_BUILD_OUTPUT}.
+:sunny: The tests passed at ref ${COMMIT_SHA}. Total build time: $(date -d@$TIME_BUILD_OUTPUT -u '+%M min %S sec').
 
 | Test          | Result        |
 | ------------- |:-------------:|
