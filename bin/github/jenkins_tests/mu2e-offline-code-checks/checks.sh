@@ -68,7 +68,7 @@ mu2e/codechecks
 success
 Code checks have finished.
 ${JOB_URL}/${BUILD_NUMBER}/console
-Clang-tidy was run on $(echo "$CT_FILES" | wc -w) of $($MODIFIED_PR_FILES | wc -w) modified files, at ref ${COMMIT_SHA}.
+Clang-tidy was run on $(echo "$CT_FILES" | wc -w) of $(echo "$MODIFIED_PR_FILES" | wc -w) modified files, at ref ${COMMIT_SHA}.
 Please review the log file [here](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy-log-${COMMIT_SHA}.log).
 
 EOM
