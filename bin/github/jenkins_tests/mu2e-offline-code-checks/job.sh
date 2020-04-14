@@ -16,9 +16,6 @@ function do_setupstep() {
     return 0
 }
 
-function gen_compdb() {
-    python "${CLANGTOOLS_UTIL_DIR}/gen_compdb.py"
-}
 
 echo "[$(date)] setup CMS-BOT/mu2e"
 setup_cmsbot
