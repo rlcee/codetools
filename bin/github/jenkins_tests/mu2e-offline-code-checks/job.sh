@@ -74,7 +74,7 @@ export MODIFIED_PR_FILES=$(git --no-pager diff --name-only FETCH_HEAD $(git merg
 
 echo "[$(date)] check formatting and run clang-tidy"
 (
-    source ${TESTSCRIPT_DIR}/formatting.sh
+    source ${TESTSCRIPT_DIR}/checks.sh
 )
 if [ $? -ne 0 ]; then
     cmsbot_report $WORKSPACE/gh-report.md
