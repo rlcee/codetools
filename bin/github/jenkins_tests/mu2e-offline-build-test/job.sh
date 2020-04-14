@@ -66,7 +66,7 @@ ${JOB_URL}/${BUILD_NUMBER}/console
 :umbrella: The build failed at ref ${COMMIT_SHA}.
 | Test          | Result        |
 | ------------- |:-------------:|
-| scons build (prof) | :heavy_check_mark: |
+| scons build (prof) | :x: |
 | ceSimReco (-n 10) | :wavy_dash: |
 
 \`\`\`
