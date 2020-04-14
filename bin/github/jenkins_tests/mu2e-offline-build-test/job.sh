@@ -25,8 +25,11 @@ mu2e/buildtest
 error
 The PR branch could not be merged.
 http://github.com/${REPOSITORY}/pull/${PULL_REQUEST}
-:x: The build test could not run due to merge conflicts, or otherwise. Please resolve this first and try again.
-
+:bangbang: The build test could not run due to merge conflicts. Please resolve these first and try again.
+\`\`\`
+> git diff --check | grep -i conflict
+$(git diff --check | grep -i conflict)
+\`\`\`
 EOM
     cmsbot_report gh-report.md
     exit 1;
@@ -39,7 +42,7 @@ cat > gh-report.md <<- EOM
 ${COMMIT_SHA}
 mu2e/buildtest
 pending
-The build test is running in Jenkins.
+The build is running in Jenkins...
 ${JOB_URL}/${BUILD_NUMBER}/console
 NOCOMMENT
 
@@ -58,13 +61,14 @@ if [ "$BUILDTEST_OUTCOME" == 1 ]; then
 ${COMMIT_SHA}
 mu2e/buildtest
 failure
-SCons failed to build ${BUILDTYPE}.
+The build failed (${BUILDTYPE})
 ${JOB_URL}/${BUILD_NUMBER}/console
-:umbrella: 
-The build test failed at ref ${COMMIT_SHA}.
-### Test Report
-- The build (${BUILDTYPE}) was unsuccessful.
-- ceSimReco (run test) was skipped.
+:umbrella: The build failed at ref ${COMMIT_SHA}.
+| Test          | Result        |
+| ------------- |:-------------:|
+| scons build (prof) | :heavy_check_mark: |
+| ceSimReco (-n 10) | :wavy_dash: |
+
 \`\`\`
 ${ERROR_OUTPUT}
 \`\`\`
@@ -77,13 +81,14 @@ elif [ "$BUILDTEST_OUTCOME" == 2 ]; then
 ${COMMIT_SHA}
 mu2e/buildtest
 failure
-The build succeeded, but ceSimReco failed.
+The build succeeded, but other tests failed.
 ${JOB_URL}/${BUILD_NUMBER}/console
-:umbrella:
-The build test failed for ref ${COMMIT_SHA}.
-### Test Report
-- The build (${BUILDTYPE}) was successful.
-- ceSimReco completed unsuccessfully.
+:umbrella: The tests failed for ref ${COMMIT_SHA}.
+
+| Test          | Result        |
+| ------------- |:-------------:|
+| scons build (prof) | :heavy_check_mark: |
+| ceSimReco (-n 10) | :x: |
 
 For more information, please check [here](${JOB_URL}/${BUILD_NUMBER}/console).
 
@@ -96,12 +101,16 @@ else
 ${COMMIT_SHA}
 mu2e/buildtest
 success
-The build test succeeded.
+The tests passed.
 ${JOB_URL}/${BUILD_NUMBER}/console
-:sunny:
-The build test passed at ref ${COMMIT_SHA}. ${TIME_BUILD_OUTPUT}.
+:sunny: The tests passed at ref ${COMMIT_SHA}. ${TIME_BUILD_OUTPUT}.
 
-For more details, please check [here](${JOB_URL}/${BUILD_NUMBER}/console).
+| Test          | Result        |
+| ------------- |:-------------:|
+| scons build (prof) | :heavy_check_mark: |
+| ceSimReco (-n 10) | :heavy_check_mark: |
+
+For more information, please check [here](${JOB_URL}/${BUILD_NUMBER}/console).
 
 EOM
 
