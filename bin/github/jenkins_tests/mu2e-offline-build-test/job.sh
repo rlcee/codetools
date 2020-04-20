@@ -17,8 +17,6 @@ git rev-parse HEAD > master-commit-sha.txt
 git checkout ${COMMIT_SHA} || exit 1
 
 export MODIFIED_PR_FILES=$(git --no-pager diff --name-only FETCH_HEAD $(git merge-base FETCH_HEAD master))
-CLANG_TIDY_ARGS="-extra-arg=-isystem$CLANG_FQ_DIR/include/c++/v1 -p . -j 24"
-CLANG_TIDY_RUNNER="${CLANG_FQ_DIR}/share/clang/run-clang-tidy.py"
 CT_FILES="" # files to run in clang tidy
 
 
@@ -124,6 +122,9 @@ CT_STATUS=":heavy_check_mark:"
     mv gen/compile_commands.json .
 
     # run clang-tidy
+    CLANG_TIDY_ARGS="-extra-arg=-isystem$CLANG_FQ_DIR/include/c++/v1 -p . -j 24"
+    CLANG_TIDY_RUNNER="${CLANG_FQ_DIR}/share/clang/run-clang-tidy.py"
+
     ${CLANG_TIDY_RUNNER} ${CLANG_TIDY_ARGS} ${CT_FILES} > $WORKSPACE/clang-tidy.log || exit 1
 )
 
