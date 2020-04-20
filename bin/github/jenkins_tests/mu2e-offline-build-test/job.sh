@@ -158,7 +158,7 @@ echo "[$(date)] report outcome"
 
 TESTS_FAILED=0
 MU2E_POSTBUILDTEST_STATUSES=""
-declare -a ART_TESTJOBS=("ceSimReco" "g4test_03MT" "transportOnly" "PS" "g4study2" "cosmicSimReco")
+declare -a ART_TESTJOBS=("ceSimReco" "g4test_03MT" "transportOnly" "PS" "g4study" "cosmicSimReco")
 for i in "${ART_TESTJOBS[@]}"
 do
     STATUS_temp=":wavy_dash:"
