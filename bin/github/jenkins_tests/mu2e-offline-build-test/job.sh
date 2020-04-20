@@ -147,6 +147,11 @@ if grep -q error: "$WORKSPACE/clang-tidy.log"; then
     CT_STATUS=":wavy_dash:"
 fi
 
+CT_ERROR_COUNT=$(grep -c error: "$WORKSPACE/clang-tidy.log")
+CT_WARN_COUNT=$(grep -c warning: "$WORKSPACE/clang-tidy.log")
+
+CT_STAT_STRING="$CT_ERROR_COUNT errors $CT_WARN_COUNT warnings"
+echo $CT_STAT_STRING
 
 echo "[$(date)] report outcome"
 if [ "$BUILDTEST_OUTCOME" == 1 ]; then
