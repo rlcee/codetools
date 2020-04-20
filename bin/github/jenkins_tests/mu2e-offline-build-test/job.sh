@@ -171,7 +171,8 @@ do
         STATUS_temp=":x:"
         TESTS_FAILED=1
     fi
-    MU2E_POSTBUILDTEST_STATUSES="${MU2E_POSTBUILDTEST_STATUSES}| $i (-n 1) | ${STATUS_temp} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/$i.log) |\n"
+    MU2E_POSTBUILDTEST_STATUSES="${MU2E_POSTBUILDTEST_STATUSES}
+| $i (-n 1) | ${STATUS_temp} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/$i.log) |"
 done
 
 # | ceSimReco (-n 1) | ${CE_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/ceSimReco.log) |
@@ -195,8 +196,8 @@ ${JOB_URL}/${BUILD_NUMBER}/console
 
 | Test          | Result        | Details |
 | ------------- |:-------------:| ------- |
-| scons build (prof) | ${BUILD_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log) |
-${MU2E_POSTBUILDTEST_STATUSES}| FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files.](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
+| scons build (prof) | ${BUILD_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log) |${MU2E_POSTBUILDTEST_STATUSES}
+| FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files.](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
 | clang-tidy | ${CT_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log) |
 
 \`\`\`
@@ -218,8 +219,8 @@ ${JOB_URL}/${BUILD_NUMBER}/console
 
 | Test          | Result        | Details |
 | ------------- |:-------------:| ------- |
-| scons build (prof) | ${BUILD_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log) |
-${MU2E_POSTBUILDTEST_STATUSES}| FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files.](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
+| scons build (prof) | ${BUILD_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log) |${MU2E_POSTBUILDTEST_STATUSES}
+| FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files.](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
 | clang-tidy | ${CT_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log) |
 
 For more information, please check the job page [here](${JOB_URL}/${BUILD_NUMBER}/console).
@@ -243,8 +244,8 @@ ${JOB_URL}/${BUILD_NUMBER}/console
 
 | Test          | Result        | Details |
 | ------------- |:-------------:| ------- |
-| scons build (prof) | ${BUILD_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log) |
-${MU2E_POSTBUILDTEST_STATUSES}| FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files.](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
+| scons build (prof) | ${BUILD_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log) |${MU2E_POSTBUILDTEST_STATUSES}
+| FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files.](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
 | clang-tidy | ${CT_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log) |
 
 For more information, please check the job page [here](${JOB_URL}/${BUILD_NUMBER}/console).
