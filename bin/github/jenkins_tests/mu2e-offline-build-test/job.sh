@@ -143,9 +143,9 @@ if grep -q warning: "$WORKSPACE/clang-tidy.log"; then
     CT_STATUS=":wavy_dash:"
 fi
 
-if grep -q error: "$WORKSPACE/clang-tidy.log"; then
-    CT_STATUS=":x:"
-fi
+# if grep -q error: "$WORKSPACE/clang-tidy.log"; then
+#     CT_STATUS=":x:"
+# fi
 
 
 echo "[$(date)] report outcome"
