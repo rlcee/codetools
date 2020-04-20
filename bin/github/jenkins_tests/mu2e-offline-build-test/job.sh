@@ -4,6 +4,7 @@
 # ryunosuke.oneil@postgrad.manchester.ac.uk
 
 cd "$WORKSPACE" || exit
+rm -f *.log
 
 echo "[$(date)] setup CMS-BOT/mu2e"
 setup_cmsbot
@@ -154,6 +155,33 @@ CT_STAT_STRING="$CT_ERROR_COUNT errors $CT_WARN_COUNT warnings"
 echo $CT_STAT_STRING
 
 echo "[$(date)] report outcome"
+
+TESTS_FAILED=0
+MU2E_POSTBUILDTEST_STATUSES=""
+declare -a ART_TESTJOBS=("ceSimReco" "g4test_03" "transportOnly" "PS" "g4study")
+for i in "${ART_TESTJOBS[@]}"
+do
+    STATUS_temp=":wavy_dash:"
+
+    # as a crude way to see if we have completed a check, we grep
+    # this string on the corresp. logfile!
+    if grep -q "++REPORT_STATUS_OK++" "$WORKSPACE/$i.log"; then
+        STATUS_temp=":heavy_check_mark:"
+    elif [ -f "$WORKSPACE/$i.log" ]; then
+        STATUS_temp=":x:"
+        TESTS_FAILED=1
+    fi
+    MU2E_POSTBUILDTEST_STATUSES="${MU2E_POSTBUILDTEST_STATUSES}| $i (-n 1) | ${STATUS_temp} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/$i.log) |\n"
+done
+
+# | ceSimReco (-n 1) | ${CE_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/ceSimReco.log) |
+# | g4test_03 (-n 1) | ${G4TEST3_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/g4test_03.log) |
+# | surfaceCheck | ${SURFACECHECK_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/surfaceCheck.log) |
+# | transportOnly (-n 1) | ${TRANSP_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/transportOnly.log) |
+# | PS (-n 1) | ${PS_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/PS.log) |
+# | g4study (-n 1) | ${G4S_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/g4study.log) |
+
+
 if [ "$BUILDTEST_OUTCOME" == 1 ]; then
     BUILD_STATUS=":x:"
 
@@ -168,8 +196,7 @@ ${JOB_URL}/${BUILD_NUMBER}/console
 | Test          | Result        | Details |
 | ------------- |:-------------:| ------- |
 | scons build (prof) | ${BUILD_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log) |
-| ceSimReco (-n 10) | ${CE_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/ceSimReco.log) |
-| FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files.](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
+${MU2E_POSTBUILDTEST_STATUSES}| FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files.](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
 | clang-tidy | ${CT_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log) |
 
 \`\`\`
@@ -179,7 +206,7 @@ For more information, please check the job page [here](${JOB_URL}/${BUILD_NUMBER
 
 EOM
 
-elif [ "$BUILDTEST_OUTCOME" == 2 ]; then
+elif [ "$TESTS_FAILED" == 1 ]; then
     BUILD_STATUS=":heavy_check_mark:"
     cat > "$WORKSPACE"/gh-report.md <<- EOM
 ${COMMIT_SHA}
@@ -192,8 +219,7 @@ ${JOB_URL}/${BUILD_NUMBER}/console
 | Test          | Result        | Details |
 | ------------- |:-------------:| ------- |
 | scons build (prof) | ${BUILD_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log) |
-| ceSimReco (-n 10) | ${CE_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/ceSimReco.log) |
-| FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files.](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
+${MU2E_POSTBUILDTEST_STATUSES}| FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files.](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
 | clang-tidy | ${CT_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log) |
 
 For more information, please check the job page [here](${JOB_URL}/${BUILD_NUMBER}/console).
@@ -217,9 +243,8 @@ ${JOB_URL}/${BUILD_NUMBER}/console
 
 | Test          | Result        | Details |
 | ------------- |:-------------:| ------- |
-| scons build (prof) | ${BUILD_STATUS} | Total build time: $(date -d@$TIME_BUILD_OUTPUT -u '+%M min %S sec'). [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log) |
-| ceSimReco (-n 10) | ${CE_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/ceSimReco.log) |
-| FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files.](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
+| scons build (prof) | ${BUILD_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log) |
+${MU2E_POSTBUILDTEST_STATUSES}| FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files.](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
 | clang-tidy | ${CT_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log) |
 
 For more information, please check the job page [here](${JOB_URL}/${BUILD_NUMBER}/console).
