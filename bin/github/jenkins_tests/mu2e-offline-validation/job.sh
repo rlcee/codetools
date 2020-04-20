@@ -27,25 +27,14 @@ mu2e/validation
 error
 Validation cannot be run before a build test.
 ${JOB_URL}/${BUILD_NUMBER}/console
-The archived shared libraries from build test at ${COMMIT_SHA} cannot be found. Archived builds are deleted after 5 days.
+The archived shared libraries from build test at ${COMMIT_SHA} cannot be found.
 
-If this is the case, please try re-running the build test.
+If you've just run a build test, you should wait at least 2 minutes before triggering this job.
+
+If it's been more than 5 days since the build test was run, you should run it again.
 
 EOM
     cmsbot_report gh-run-report.md
-
-	cat > gh-run-report.md <<- EOM
-${COMMIT_SHA}
-mu2e/buildtest
-pending
-The test has not been triggered yet.
-http://github.com/$REPOSITORY/pull/${PULL_REQUEST}
-NOCOMMENT
-
-EOM
-	sleep 2;
-    cmsbot_report gh-run-report.md
-
     exit 1;
 fi
 
@@ -85,7 +74,7 @@ cmsbot_report gh-report.md
     MASTER_BUILD_OUTCOME=$?
 
     if [ $PR_RESTORE_OUTCOME -ne 0 ]; then
-        echo "[$(date)] PR build could not be restored - abort."
+        echo "[$(date)] PR build could not be restored (return code $PR_RESTORE_OUTCOME) - abort."
         exit 1;
     fi
 
@@ -205,6 +194,7 @@ echo "[$(date)] report successful outcome"
 VAL_COMP_SUMMARY=$(cat valCompareSummary.log | head -n 12)
 
 VALPLOT_LINK="${JOB_URL}/${BUILD_NUMBER}/artifact/valOutput_PR${PULL_REQUEST}_${COMMIT_SHA}_master_${MASTER_COMMIT_SHA}.tar.gz"
+VALPLOT_LINKTWO="${JOB_URL}/${BUILD_NUMBER}/artifact/valOutput/pr${PULL_REQUEST}/rev${COMMIT_SHA}/result.html"
 
 cat > $WORKSPACE/gh-report.md <<- EOM
 ${COMMIT_SHA}
@@ -222,7 +212,7 @@ ${JOB_URL}/${BUILD_NUMBER}/console
 ${VAL_COMP_SUMMARY}
 \`\`\`
 
-Validation plots are temporarily [viewable here](${JOB_URL}/ws/valOutput/pr${PULL_REQUEST}/rev${COMMIT_SHA}/result.html), and can be [downloaded here](${VALPLOT_LINK}).
+Validation plots are [viewable here](${VALPLOT_LINKTWO}), and can be [downloaded here](${VALPLOT_LINK}).
 For full job output, please see [this link.](${JOB_URL}/${BUILD_NUMBER}).
 
 EOM

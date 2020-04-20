@@ -16,9 +16,6 @@ function do_setupstep() {
     return 0
 }
 
-function gen_compdb() {
-    python "${CLANGTOOLS_UTIL_DIR}/gen_compdb.py"
-}
 
 echo "[$(date)] setup CMS-BOT/mu2e"
 setup_cmsbot
@@ -51,49 +48,40 @@ EOM
     exit 1;
 fi
 
+echo "[$(date)] setup compile_commands.json and get latest clang tool configs"
+(
+    set --
+
+    if [[ ! -d "site_scons" ]]; then
+        git checkout master -- site_scons/
+        git checkout master -- SConstruct
+    fi
+
+    source setup.sh
+    scons -Q compiledb
+
+    # make sure clang tools can find this file
+    # in an obvious location
+    mv gen/compile_commands.json .
+
+    git checkout master -- .clang-tidy
+    git checkout master -- .clang-format
+)
 
 
 #export MODIFIED_PR_FILES=`git diff --name-only ${MASTER_COMMIT_SHA} HEAD | grep "^M" | grep -E '(.*\.cc$|\.hh$)' | sed -e 's/^\w*\ *//' | awk '{$1=$1;print}'`
 export MODIFIED_PR_FILES=$(git --no-pager diff --name-only FETCH_HEAD $(git merge-base FETCH_HEAD master))
 
-echo "[$(date)] check formatting"
+echo "[$(date)] check formatting and run clang-tidy"
 (
-    source ${TESTSCRIPT_DIR}/simple-formatting.sh
+    source ${TESTSCRIPT_DIR}/checks.sh
 )
 if [ $? -ne 0 ]; then
     cmsbot_report $WORKSPACE/gh-report.md
-    exit 1;
+    exit 0;
 fi
 git reset --hard ${COMMIT_SHA}
 
-echo "[$(date)] setup compile_commands.json"
-(
-    exit 0;
-    set --
-    source setup.sh
-    scons -Q compiledb
-)
-
-echo "[$(date)] clang-tidy"
-(
-    exit 0;
-    source ${TESTSCRIPT_DIR}/clangtidy.sh
-)
-if [ $? -ne 0 ]; then
-    cat > gh-report.md <<- EOM
-${COMMIT_SHA}
-mu2e/codechecks
-error
-clang-tidy failed to run.
-http://github.com/${REPOSITORY}/pull/${PULL_REQUEST}
-:x: Clang-tidy failed to run. Please check the job output.
-http://github.com/${REPOSITORY}/pull/${PULL_REQUEST}
-
-EOM
-
-    cmsbot_report $WORKSPACE/gh-report.md
-    exit 1;
-fi
 
 echo "[$(date)] include-what-you-use"
 (
@@ -105,16 +93,6 @@ if [ $? -ne 0 ]; then
     cmsbot_report $WORKSPACE/gh-report.md
     exit 0;
 fi
-
-cat > $WORKSPACE/gh-report.md <<- EOM
-${COMMIT_SHA}
-mu2e/codechecks
-success
-The code checks passed.
-${JOB_URL}/${BUILD_NUMBER}/console
-NOCOMMENT
-
-EOM
 
 cmsbot_report $WORKSPACE/gh-report.md
 exit 0;

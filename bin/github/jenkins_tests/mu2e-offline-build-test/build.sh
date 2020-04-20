@@ -22,19 +22,29 @@ function do_buildstep() {
 }
 
 function do_runstep() {
-    mu2e -n 10 -c Validation/fcl/ceSimReco.fcl 2>&1 | tee "${WORKSPACE}/ceSimReco.log"
-    return "${PIPESTATUS[0]}"
+    declare -a JOBNAMES=("ceSimReco" "g4test_03MT" "transportOnly" "PS" "g4study2" "cosmicSimReco")
+    declare -a FCLFILES=("Validation/fcl/ceSimReco.fcl" "Mu2eG4/fcl/g4test_03MT.fcl" "Mu2eG4/fcl/transportOnly.fcl" "JobConfig/beam/PS.fcl" "Mu2eG4/fcl/g4study2.fcl" "Validation/fcl/cosmicSimReco.fcl")
+
+    arraylength=${#JOBNAMES[@]}
+
+    for (( i=1; i<arraylength+1; i++ ));
+    do
+      (
+        mu2e -n 1 -c ${FCLFILES[$i-1]} 2>&1 | tee "${WORKSPACE}/${JOBNAMES[$i-1]}.log"
+
+        if [ ${PIPESTATUS[0]} -eq 0 ]; then
+          echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/${JOBNAMES[$i-1]}.log"
+        fi
+
+        echo "[$(date)] ${JOBNAMES[$i-1]} return code is ${PIPESTATUS[0]}"
+
+      ) &
+    done
+
+    wait;
 }
 
-function do_archivestep() {
-    echo "[$(date)] Now gzip the compiled build, saving this for validation if needed."
-    cd "$WORKSPACE" || exit
-    tar -zcvf rev_"${COMMIT_SHA}"_pr_lib.tar.gz Offline/lib
-}
 
-# dump the rev
-git show
-git rev-parse HEAD
 
 cd "$WORKSPACE" || exit
 cd "$REPO" || exit
@@ -60,14 +70,15 @@ if [ $SCONS_RC -ne 0 ]; then
   exit 1
 fi
 
-echo "[$(date)] run test"
+echo "[$(date)] Now gzip the compiled build, saving this for validation if needed."
+(
+  cd "$WORKSPACE" || exit
+  tar -zcvf rev_"${COMMIT_SHA}"_pr_lib.tar.gz Offline/lib > /dev/null
+) &
+
+echo "[$(date)] run tests"
 do_runstep
 
-CESIMRECO_RC=$?
-echo "[$(date)] ceSimReco return code is $CESIMRECO_RC"
-if [ $CESIMRECO_RC -ne 0 ]; then
-  exit 2
-fi
+wait;
 
-do_archivestep
 exit 0
