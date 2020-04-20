@@ -197,11 +197,11 @@ mu2e/buildtest
 success
 The tests passed.
 ${JOB_URL}/${BUILD_NUMBER}/console
-:sunny: The tests passed at ref ${COMMIT_SHA}. Total build time: $(date -d@$TIME_BUILD_OUTPUT -u '+%M min %S sec').
+:sunny: The tests passed at ref ${COMMIT_SHA}.
 
 | Test          | Result        | Details |
 | ------------- |:-------------:| ------- |
-| scons build (prof) | ${BUILD_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log) |
+| scons build (prof) | ${BUILD_STATUS} | Total build time: $(date -d@$TIME_BUILD_OUTPUT -u '+%M min %S sec'). [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log) |
 | ceSimReco (-n 10) | ${CE_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/ceSimReco.log) |
 | FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files.](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
 | clang-tidy | ${CT_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log) |
