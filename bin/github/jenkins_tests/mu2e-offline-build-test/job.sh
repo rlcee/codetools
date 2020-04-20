@@ -104,20 +104,18 @@ BUILDTEST_OUTCOME=$?
 ERROR_OUTPUT=$(grep "scons: \*\*\*" scons.log)
 
 
-echo "[$(date)] setup compile_commands.json and run clang tidy"
+echo "[$(date)] run clang tidy"
 (
     cd $WORKSPACE/$REPO || exit 1;
     set --
 
+    # make sure clang tools can find the compdb
+    # in an obvious location
+    mv gen/compile_commands.json .
+
     source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
     setup mu2e
     setup clang v5_0_1
-    source setup.sh
-
-    scons -Q compiledb
-    # make sure clang tools can find this file
-    # in an obvious location
-    mv gen/compile_commands.json .
 
     # run clang-tidy
     CLANG_TIDY_ARGS="-extra-arg=-isystem$CLANG_FQ_DIR/include/c++/v1 -p . -j 24"
@@ -125,6 +123,7 @@ echo "[$(date)] setup compile_commands.json and run clang tidy"
 
     ${CLANG_TIDY_RUNNER} ${CLANG_TIDY_ARGS} ${CT_FILES} > $WORKSPACE/clang-tidy.log || exit 1
 )
+
 if [ $? -ne 1 ]; then
     CT_STATUS=":heavy_check_mark:"
 fi
