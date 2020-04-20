@@ -26,7 +26,7 @@ TD_COUNT=0
 BUILD_NECESSARY=0
 FILES_SCANNED=0
 
-TD_FIXM_STATUS=":heavy_check_mark:"
+TD_FIXM_STATUS=":wavy_dash:"
 CE_STATUS=":wavy_dash:"
 BUILD_STATUS=":wavy_dash:"
 CT_STATUS=":wavy_dash:"
@@ -36,7 +36,6 @@ for MOD_FILE in $MODIFIED_PR_FILES
 do
     if [[ "$MOD_FILE" == *.cc ]] || [[ "$MOD_FILE" == *.hh ]]; then
         BUILD_NECESSARY=1
-        TD_FIXM_STATUS=":wavy_dash:"
         FILES_SCANNED=$((FILES_SCANNED + 1))
         TD_temp=$(grep -c TODO "${MOD_FILE}")
         TD_COUNT=$((TD_temp + TD_COUNT))
@@ -58,6 +57,12 @@ do
         echo "skipped $MOD_FILE since not a cpp file"
     fi
 done
+
+TD_FIXM_COUNT=$((FIXM_COUNT + TD_COUNT))
+
+if [ $TD_FIXM_COUNT == 0 ]; then
+    TD_FIXM_STATUS=":heavy_check_mark:"
+fi
 
 echo "[$(date)] setup ${REPOSITORY}: perform merge"
 
