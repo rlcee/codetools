@@ -103,31 +103,36 @@ echo "[$(date)] run build test"
 BUILDTEST_OUTCOME=$?
 ERROR_OUTPUT=$(grep "scons: \*\*\*" scons.log)
 
-
-echo "[$(date)] run clang tidy"
-(
-    cd $WORKSPACE/$REPO || exit 1;
-    set --
-
-    # make sure clang tools can find the compdb
-    # in an obvious location
-    mv gen/compile_commands.json .
-
-    source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
-    setup mu2e
-    setup clang v5_0_1
-
-    # run clang-tidy
-    CLANG_TIDY_ARGS="-extra-arg=-isystem$CLANG_FQ_DIR/include/c++/v1 -p . -j 24"
-    CLANG_TIDY_RUNNER="${CLANG_FQ_DIR}/share/clang/run-clang-tidy.py"
-
-    ${CLANG_TIDY_RUNNER} ${CLANG_TIDY_ARGS} ${CT_FILES} > $WORKSPACE/clang-tidy.log || exit 1
-)
-
-if [ $? -ne 1 ]; then
+if [[ -z $CT_FILES ]]; then
+    echo "[$(date)] skip clang tidy step - no CPP files modified."
+    echo "No CPP files modified." > $WORKSPACE/clang-tidy.log
     CT_STATUS=":heavy_check_mark:"
-fi
+else
 
+    echo "[$(date)] run clang tidy"
+    (
+        cd $WORKSPACE/$REPO || exit 1;
+        set --
+
+        # make sure clang tools can find the compdb
+        # in an obvious location
+        mv gen/compile_commands.json .
+
+        source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
+        setup mu2e
+        setup clang v5_0_1
+
+        # run clang-tidy
+        CLANG_TIDY_ARGS="-extra-arg=-isystem$CLANG_FQ_DIR/include/c++/v1 -p . -j 24"
+        CLANG_TIDY_RUNNER="${CLANG_FQ_DIR}/share/clang/run-clang-tidy.py"
+
+        ${CLANG_TIDY_RUNNER} ${CLANG_TIDY_ARGS} ${CT_FILES} > $WORKSPACE/clang-tidy.log || exit 1
+    )
+
+    if [ $? -ne 1 ]; then
+        CT_STATUS=":heavy_check_mark:"
+    fi
+fi
 
 if grep -q warning: "$WORKSPACE/clang-tidy.log"; then
     CT_STATUS=":wavy_dash:"
