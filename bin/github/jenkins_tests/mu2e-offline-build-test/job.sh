@@ -105,8 +105,6 @@ ERROR_OUTPUT=$(grep "scons: \*\*\*" scons.log)
 
 
 echo "[$(date)] setup compile_commands.json and run clang tidy"
-CT_STATUS=":heavy_check_mark:"
-
 (
     cd $WORKSPACE/$REPO || exit 1;
     set --
@@ -127,6 +125,10 @@ CT_STATUS=":heavy_check_mark:"
 
     ${CLANG_TIDY_RUNNER} ${CLANG_TIDY_ARGS} ${CT_FILES} > $WORKSPACE/clang-tidy.log || exit 1
 )
+if [ $? -ne 1 ]; then
+    CT_STATUS=":heavy_check_mark:"
+fi
+
 
 if grep -q warning: "$WORKSPACE/clang-tidy.log"; then
     CT_STATUS=":wavy_dash:"
