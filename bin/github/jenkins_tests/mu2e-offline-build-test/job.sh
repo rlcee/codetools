@@ -244,7 +244,7 @@ ${JOB_URL}/${BUILD_NUMBER}/console
 
 | Test          | Result        | Details |
 | ------------- |:-------------:| ------- |
-| scons build (prof) | ${BUILD_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log) |${MU2E_POSTBUILDTEST_STATUSES}
+| scons build (prof) | ${BUILD_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log). Total build time: $(date -d@$TIME_BUILD_OUTPUT -u '+%M min %S sec') |${MU2E_POSTBUILDTEST_STATUSES}
 | FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files.](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
 | clang-tidy | ${CT_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log) |
 
