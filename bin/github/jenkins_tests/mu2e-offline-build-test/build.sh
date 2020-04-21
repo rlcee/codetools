@@ -47,6 +47,8 @@ function do_runstep() {
           echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/${JOBNAME}.log"
         fi
 
+        echo "++RETURN CODE $RC++" >> "${WORKSPACE}/${JOBNAME}.log"
+
         echo "[$(date)] ${JOBNAME} return code is ${RC}"
 
       ) &

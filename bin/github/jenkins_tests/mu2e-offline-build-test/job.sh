@@ -250,8 +250,6 @@ For more information, please check the job page [here](${JOB_URL}/${BUILD_NUMBER
 
 EOM
 
-
-
 cmsbot_report "$WORKSPACE/gh-report.md"
 wait;
 exit $BUILDTEST_OUTCOME;
