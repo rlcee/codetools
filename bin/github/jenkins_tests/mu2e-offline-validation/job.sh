@@ -205,7 +205,7 @@ ${JOB_URL}/${BUILD_NUMBER}/console
 :+1: A comparison was generated between these revisions:
 - master build version: rev ${MASTER_COMMIT_SHA}
 - PR build version: rev ${COMMIT_SHA}
-- Events: ${VALIDATION_EVENTS}
+- ${VALIDATION_FCL} events: ${VALIDATION_EVENTS}
 \`\`\`
 ${VAL_COMP_SUMMARY}
 \`\`\`
