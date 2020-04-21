@@ -197,7 +197,7 @@ ${JOB_URL}/${BUILD_NUMBER}/console
 | Test          | Result        | Details |
 | ------------- |:-------------:| ------- |
 | scons build (prof) | ${BUILD_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log) |${MU2E_POSTBUILDTEST_STATUSES}
-| FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files.](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
+| FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
 | clang-tidy | ${CT_STATUS} | [${CT_STAT_STRING}](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log) |
 
 \`\`\`
@@ -220,7 +220,7 @@ ${JOB_URL}/${BUILD_NUMBER}/console
 | Test          | Result        | Details |
 | ------------- |:-------------:| ------- |
 | scons build (prof) | ${BUILD_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log) |${MU2E_POSTBUILDTEST_STATUSES}
-| FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files.](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
+| FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
 | clang-tidy | ${CT_STATUS} | [${CT_STAT_STRING}](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log) |
 
 For more information, please check the job page [here](${JOB_URL}/${BUILD_NUMBER}/console).
@@ -245,7 +245,7 @@ ${JOB_URL}/${BUILD_NUMBER}/console
 | Test          | Result        | Details |
 | ------------- |:-------------:| ------- |
 | scons build (prof) | ${BUILD_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log). Total build time: $(date -d@$TIME_BUILD_OUTPUT -u '+%M min %S sec') |${MU2E_POSTBUILDTEST_STATUSES}
-| FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files.](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
+| FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
 | clang-tidy | ${CT_STATUS} | [${CT_STAT_STRING}](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log) |
 
 For more information, please check the job page [here](${JOB_URL}/${BUILD_NUMBER}/console).
