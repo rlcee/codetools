@@ -182,6 +182,7 @@ done
 # | PS (-n 1) | ${PS_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/PS.log) |
 # | g4study (-n 1) | ${G4S_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/g4study.log) |
 
+BUILDTIME_STR=""
 
 if [ "$BUILDTEST_OUTCOME" == 1 ]; then
     BUILD_STATUS=":x:"
@@ -190,49 +191,40 @@ if [ "$BUILDTEST_OUTCOME" == 1 ]; then
 ${COMMIT_SHA}
 mu2e/buildtest
 failure
-The build failed (${BUILDTYPE})
+The build is failing (${BUILDTYPE})
 ${JOB_URL}/${BUILD_NUMBER}/console
-:umbrella: The build failed at ref ${COMMIT_SHA}.
-
-| Test          | Result        | Details |
-| ------------- |:-------------:| ------- |
-| scons build (prof) | ${BUILD_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log) |${MU2E_POSTBUILDTEST_STATUSES}
-| FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
-| clang-tidy | ${CT_STATUS} | [${CT_STAT_STRING}](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log) |
+:umbrella: The build is failing at ref ${COMMIT_SHA}.
 
 \`\`\`
 ${ERROR_OUTPUT}
 \`\`\`
-For more information, please check the job page [here](${JOB_URL}/${BUILD_NUMBER}/console).
 
 EOM
 
 elif [ "$TESTS_FAILED" == 1 ]; then
     BUILD_STATUS=":heavy_check_mark:"
+
+    TIME_BUILD_OUTPUT=$(grep "Total build time: " scons.log)
+    TIME_BUILD_OUTPUT=$(echo "$TIME_BUILD_OUTPUT" | grep -o -E '[0-9\.]+')
+    BUILDTIME_STR="Build time: $(date -d@$TIME_BUILD_OUTPUT -u '+%M min %S sec')"
+
     cat > "$WORKSPACE"/gh-report.md <<- EOM
 ${COMMIT_SHA}
 mu2e/buildtest
 failure
-The build succeeded, but other tests failed.
+The build succeeded, but other tests are failing.
 ${JOB_URL}/${BUILD_NUMBER}/console
 :umbrella: The tests failed for ref ${COMMIT_SHA}.
-
-| Test          | Result        | Details |
-| ------------- |:-------------:| ------- |
-| scons build (prof) | ${BUILD_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log) |${MU2E_POSTBUILDTEST_STATUSES}
-| FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
-| clang-tidy | ${CT_STATUS} | [${CT_STAT_STRING}](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log) |
-
-For more information, please check the job page [here](${JOB_URL}/${BUILD_NUMBER}/console).
 
 EOM
 
 else
     BUILD_STATUS=":heavy_check_mark:"
-    CE_STATUS=":heavy_check_mark:"
 
     TIME_BUILD_OUTPUT=$(grep "Total build time: " scons.log)
     TIME_BUILD_OUTPUT=$(echo "$TIME_BUILD_OUTPUT" | grep -o -E '[0-9\.]+')
+
+    BUILDTIME_STR="Build time: $(date -d@$TIME_BUILD_OUTPUT -u '+%M min %S sec')"
 
     cat > "$WORKSPACE"/gh-report.md <<- EOM
 ${COMMIT_SHA}
@@ -242,9 +234,15 @@ The tests passed.
 ${JOB_URL}/${BUILD_NUMBER}/console
 :sunny: The tests passed at ref ${COMMIT_SHA}.
 
+EOM
+
+fi
+
+cat >> "$WORKSPACE"/gh-report.md <<- EOM
+
 | Test          | Result        | Details |
 | ------------- |:-------------:| ------- |
-| scons build (prof) | ${BUILD_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log). Total build time: $(date -d@$TIME_BUILD_OUTPUT -u '+%M min %S sec') |${MU2E_POSTBUILDTEST_STATUSES}
+| scons build (prof) | ${BUILD_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log). ${BUILDTIME_STR} |${MU2E_POSTBUILDTEST_STATUSES}
 | FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
 | clang-tidy | ${CT_STATUS} | [${CT_STAT_STRING}](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log) |
 
@@ -252,7 +250,7 @@ For more information, please check the job page [here](${JOB_URL}/${BUILD_NUMBER
 
 EOM
 
-fi
+
 
 cmsbot_report "$WORKSPACE/gh-report.md"
 wait;
