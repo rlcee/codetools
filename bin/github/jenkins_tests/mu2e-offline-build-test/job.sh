@@ -250,6 +250,15 @@ For more information, please check the job page [here](${JOB_URL}/${BUILD_NUMBER
 
 EOM
 
+if [ $TRIGGER_VALIDATION -ne 0 ]; then
+
+cat >> "$WORKSPACE"/gh-report.md <<- EOM
+:hourglass: The validation job has been queued.
+
+EOM
+
+fi
+
 cmsbot_report "$WORKSPACE/gh-report.md"
 wait;
 exit $BUILDTEST_OUTCOME;
