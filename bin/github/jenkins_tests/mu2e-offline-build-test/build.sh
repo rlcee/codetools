@@ -30,13 +30,24 @@ function do_runstep() {
     for (( i=1; i<arraylength+1; i++ ));
     do
       (
-        mu2e -n 1 -c ${FCLFILES[$i-1]} 2>&1 | tee "${WORKSPACE}/${JOBNAMES[$i-1]}.log"
+        JOBNAME=${JOBNAMES[$i-1]}
+        FCLFILE=${FCLFILES[$i-1]}
 
-        if [ ${PIPESTATUS[0]} -eq 0 ]; then
-          echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/${JOBNAMES[$i-1]}.log"
+        echo "[$(date)] ${JOBNAME} step. Output is being written to ${WORKSPACE}/${JOBNAME}.log"
+
+        mu2e -n 1 -c "${FCLFILE}" > "${WORKSPACE}/${JOBNAME}.log" 2>&1
+        RC=$?
+
+        if [ ${RC} -eq 0 ]; then
+          echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/${JOBNAME}.log"
         fi
 
-        echo "[$(date)] ${JOBNAMES[$i-1]} return code is ${PIPESTATUS[0]}"
+        # a failsafe....
+        if grep -q "Art has completed and will exit with status 0." "${WORKSPACE}/${JOBNAME}.log"; then
+          echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/${JOBNAME}.log"
+        fi
+
+        echo "[$(date)] ${JOBNAME} return code is ${RC}"
 
       ) &
     done
