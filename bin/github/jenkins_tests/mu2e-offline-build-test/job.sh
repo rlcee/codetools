@@ -163,6 +163,7 @@ for i in "${ART_TESTJOBS[@]}"
 do
     STATUS_temp=":wavy_dash:"
 
+
     # as a crude way to see if we have completed a check, we grep
     # this string on the corresp. logfile!
     if grep -q "++REPORT_STATUS_OK++" "$WORKSPACE/$i.log"; then
@@ -172,7 +173,7 @@ do
         TESTS_FAILED=1
     fi
     MU2E_POSTBUILDTEST_STATUSES="${MU2E_POSTBUILDTEST_STATUSES}
-| $i (-n 1) | ${STATUS_temp} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/$i.log) |"
+| $i | ${STATUS_temp} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/$i.log) |"
 done
 
 # | ceSimReco (-n 1) | ${CE_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/ceSimReco.log) |
