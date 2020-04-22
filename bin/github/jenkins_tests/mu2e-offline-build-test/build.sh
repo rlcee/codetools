@@ -24,6 +24,7 @@ function do_buildstep() {
 function do_runstep() {
     declare -a JOBNAMES=("ceSimReco" "g4test_03MT" "transportOnly" "PS" "g4study" "cosmicSimReco")
     declare -a FCLFILES=("Validation/fcl/ceSimReco.fcl" "Mu2eG4/fcl/g4test_03MT.fcl" "Mu2eG4/fcl/transportOnly.fcl" "JobConfig/beam/PS.fcl" "Mu2eG4/fcl/g4study.fcl" "Validation/fcl/cosmicSimReco.fcl")
+    declare -a NEVTS_TJ=("1" "10" "1" "1" "1" "1")
 
     arraylength=${#JOBNAMES[@]}
 
@@ -35,19 +36,14 @@ function do_runstep() {
 
         echo "[$(date)] ${JOBNAME} step. Output is being written to ${WORKSPACE}/${JOBNAME}.log"
 
-        mu2e -n 1 -c "${FCLFILE}" > "${WORKSPACE}/${JOBNAME}.log" 2>&1
+        mu2e -n "${NEVTS_TJ[$i-1]}" -c "${FCLFILE}" > "${WORKSPACE}/${JOBNAME}.log" 2>&1
         RC=$?
 
         if [ ${RC} -eq 0 ]; then
           echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/${JOBNAME}.log"
         fi
 
-        # a failsafe....
-        if grep -q "Art has completed and will exit with status 0." "${WORKSPACE}/${JOBNAME}.log"; then
-          echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/${JOBNAME}.log"
-        fi
-
-        echo "++RETURN CODE $RC++" >> "${WORKSPACE}/${JOBNAME}.log"
+        echo "++RETURN CODE++ $RC" >> "${WORKSPACE}/${JOBNAME}.log"
 
         echo "[$(date)] ${JOBNAME} return code is ${RC}"
 
