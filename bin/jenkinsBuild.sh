@@ -31,7 +31,13 @@ printenv
 echo "[`date`] clone offline"
 #git clone http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline/Offline.git
 git clone https://github.com/mu2e/Offline
+RC=$?
+echo "["`date`"] git clone code=$RC"
 
+if [ $RC -ne 0  ]; then
+    echo "["`date`"] exiting after git clone with return code=$RC"
+    exit $RC
+fi
 
 echo "[`date`] cd Offline"
 cd Offline
@@ -44,6 +50,13 @@ fi
 echo "[`date`]checkout command: $CHECKOUT_COM"
 $CHECKOUT_COM
 git checkout $MU2E_TAG
+RC=$?
+echo "["`date`"] git checkout code=$RC"
+
+if [ $RC -ne 0  ]; then
+    echo "["`date`"] exiting after git checkout with return code=$RC"
+    exit $RC
+fi
 
 echo "[`date`] show what is checked out"
 git show-ref $MU2E_TAG
