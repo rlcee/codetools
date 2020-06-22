@@ -118,11 +118,11 @@ echo "[$(date)] PR and master builds are ready. generate plots..."
 # run validation jobs for each build version in parallel.
 (
     if [ $DO_MASTER_VALPLOT -ne 0 ]; then
-        . ${TESTSCRIPT_DIR}/valplot.sh master ceSimReco ${MASTER_COMMIT_SHA} &
+        . ${TESTSCRIPT_DIR}/valplot.sh master ${VALIDATION_FCL} ${MASTER_COMMIT_SHA} &
         MASTER_VAL_PID=$!
     fi
 
-    . ${TESTSCRIPT_DIR}/valplot.sh pr ceSimReco ${COMMIT_SHA} &
+    . ${TESTSCRIPT_DIR}/valplot.sh pr ${VALIDATION_FCL} ${COMMIT_SHA} &
     PR_VAL_PID=$!
 
     wait $PR_VAL_PID;
@@ -154,9 +154,9 @@ if [ $? -ne 0 ]; then
 ${COMMIT_SHA}
 mu2e/validation
 error
-An error occured during the ceSimReco and val plot generation step.
+An error occured during the ${VALIDATION_FCL} and val plot generation step.
 ${JOB_URL}/${BUILD_NUMBER}/console
-:-1: An error occured in validation during the ceSimReco and val plot generation step.
+:-1: An error occured in validation during the ${VALIDATION_FCL} and val plot generation step.
 
 Please review the [logfile](${JOB_URL}/${BUILD_NUMBER}/console) and try again.
 
@@ -205,9 +205,7 @@ ${JOB_URL}/${BUILD_NUMBER}/console
 :+1: A comparison was generated between these revisions:
 - master build version: rev ${MASTER_COMMIT_SHA}
 - PR build version: rev ${COMMIT_SHA}
-
-#### valCompare Summary
-
+- ${VALIDATION_FCL} events: ${VALIDATION_EVENTS}
 \`\`\`
 ${VAL_COMP_SUMMARY}
 \`\`\`

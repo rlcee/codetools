@@ -22,21 +22,30 @@ function do_buildstep() {
 }
 
 function do_runstep() {
-    declare -a JOBNAMES=("ceSimReco" "g4test_03MT" "transportOnly" "PS" "g4study2" "cosmicSimReco")
-    declare -a FCLFILES=("Validation/fcl/ceSimReco.fcl" "Mu2eG4/fcl/g4test_03MT.fcl" "Mu2eG4/fcl/transportOnly.fcl" "JobConfig/beam/PS.fcl" "Mu2eG4/fcl/g4study2.fcl" "Validation/fcl/cosmicSimReco.fcl")
+    declare -a JOBNAMES=("ceSimReco" "g4test_03MT" "transportOnly" "PS" "g4study" "cosmicSimReco")
+    declare -a FCLFILES=("Validation/fcl/ceSimReco.fcl" "Mu2eG4/fcl/g4test_03MT.fcl" "Mu2eG4/fcl/transportOnly.fcl" "JobConfig/beam/PS.fcl" "Mu2eG4/fcl/g4study.fcl" "Validation/fcl/cosmicSimReco.fcl")
+    declare -a NEVTS_TJ=("1" "10" "1" "1" "1" "1")
 
     arraylength=${#JOBNAMES[@]}
 
     for (( i=1; i<arraylength+1; i++ ));
     do
       (
-        mu2e -n 1 -c ${FCLFILES[$i-1]} 2>&1 | tee "${WORKSPACE}/${JOBNAMES[$i-1]}.log"
+        JOBNAME=${JOBNAMES[$i-1]}
+        FCLFILE=${FCLFILES[$i-1]}
 
-        if [ ${PIPESTATUS[0]} -eq 0 ]; then
-          echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/${JOBNAMES[$i-1]}.log"
+        echo "[$(date)] ${JOBNAME} step. Output is being written to ${WORKSPACE}/${JOBNAME}.log"
+
+        mu2e -n "${NEVTS_TJ[$i-1]}" -c "${FCLFILE}" > "${WORKSPACE}/${JOBNAME}.log" 2>&1
+        RC=$?
+
+        if [ ${RC} -eq 0 ]; then
+          echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/${JOBNAME}.log"
         fi
 
-        echo "[$(date)] ${JOBNAMES[$i-1]} return code is ${PIPESTATUS[0]}"
+        echo "++RETURN CODE++ $RC" >> "${WORKSPACE}/${JOBNAME}.log"
+
+        echo "[$(date)] ${JOBNAME} return code is ${RC}"
 
       ) &
     done
