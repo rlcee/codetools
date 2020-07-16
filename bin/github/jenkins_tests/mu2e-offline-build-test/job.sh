@@ -204,7 +204,7 @@ EOM
 
 elif [ "$TESTS_FAILED" == 1 ]; then
     BUILD_STATUS=":heavy_check_mark:"
-
+    BUILDTEST_OUTCOME=1
     TIME_BUILD_OUTPUT=$(grep "Total build time: " scons.log)
     TIME_BUILD_OUTPUT=$(echo "$TIME_BUILD_OUTPUT" | grep -o -E '[0-9\.]+')
     BUILDTIME_STR="Build time: $(date -d@$TIME_BUILD_OUTPUT -u '+%M min %S sec')"
