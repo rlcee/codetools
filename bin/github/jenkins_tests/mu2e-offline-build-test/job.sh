@@ -76,7 +76,7 @@ then
 ${COMMIT_SHA}
 mu2e/buildtest
 error
-The PR branch could not be merged.
+The PR branch cannot be merged.
 http://github.com/${REPOSITORY}/pull/${PULL_REQUEST}
 :bangbang: The build test could not run due to merge conflicts. Please resolve these first and try again.
 \`\`\`
@@ -204,7 +204,7 @@ EOM
 
 elif [ "$TESTS_FAILED" == 1 ]; then
     BUILD_STATUS=":heavy_check_mark:"
-
+    BUILDTEST_OUTCOME=1
     TIME_BUILD_OUTPUT=$(grep "Total build time: " scons.log)
     TIME_BUILD_OUTPUT=$(echo "$TIME_BUILD_OUTPUT" | grep -o -E '[0-9\.]+')
     BUILDTIME_STR="Build time: $(date -d@$TIME_BUILD_OUTPUT -u '+%M min %S sec')"
@@ -243,11 +243,13 @@ cat >> "$WORKSPACE"/gh-report.md <<- EOM
 
 | Test          | Result        | Details |
 | ------------- |:-------------:| ------- |
+| merge | :heavy_check_mark: | Merged ${COMMIT_SHA} at ${MASTER_COMMIT_SHA} |
 | scons build (prof) | ${BUILD_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log). ${BUILDTIME_STR} |${MU2E_POSTBUILDTEST_STATUSES}
 | FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
 | clang-tidy | ${CT_STATUS} | [${CT_STAT_STRING}](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log) |
 
 For more information, please check the job page [here](${JOB_URL}/${BUILD_NUMBER}/console).
+Build artefacts are deleted after 5 days. If this is not desired, select `Keep this build forever` on the job page.
 
 EOM
 

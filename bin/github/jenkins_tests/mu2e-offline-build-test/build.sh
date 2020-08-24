@@ -35,8 +35,11 @@ function do_runstep() {
         FCLFILE=${FCLFILES[$i-1]}
 
         echo "[$(date)] ${JOBNAME} step. Output is being written to ${WORKSPACE}/${JOBNAME}.log"
+        echo "Test: mu2e -n ${NEVTS_TJ[$i-1]} -c ${FCLFILE}" > "${WORKSPACE}/${JOBNAME}.log" 2>&1
+        echo "Please see the EOF for job results." >> "${WORKSPACE}/${JOBNAME}.log" 2>&1
+        echo "-----------------------------------" >> "${WORKSPACE}/${JOBNAME}.log" 2>&1
 
-        mu2e -n "${NEVTS_TJ[$i-1]}" -c "${FCLFILE}" > "${WORKSPACE}/${JOBNAME}.log" 2>&1
+        mu2e -n "${NEVTS_TJ[$i-1]}" -c "${FCLFILE}" >> "${WORKSPACE}/${JOBNAME}.log" 2>&1
         RC=$?
 
         if [ ${RC} -eq 0 ]; then
