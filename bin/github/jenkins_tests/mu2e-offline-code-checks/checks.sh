@@ -47,7 +47,7 @@ mu2e/codechecks
 success
 Code checks have finished.
 ${JOB_URL}/${BUILD_NUMBER}/console
-NO_COMMENT
+NOCOMMENT
 
 EOM
 exit 0;
