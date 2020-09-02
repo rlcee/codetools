@@ -249,7 +249,7 @@ cat >> "$WORKSPACE"/gh-report.md <<- EOM
 | clang-tidy | ${CT_STATUS} | [${CT_STAT_STRING}](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log) |
 
 For more information, please check the job page [here](${JOB_URL}/${BUILD_NUMBER}/console).
-Build artefacts are deleted after 5 days. If this is not desired, select `Keep this build forever` on the job page.
+Build artefacts are deleted after 5 days. If this is not desired, select \`Keep this build forever\` on the job page.
 
 EOM
 
