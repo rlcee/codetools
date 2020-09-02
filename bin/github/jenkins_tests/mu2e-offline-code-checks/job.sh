@@ -10,8 +10,8 @@ function do_setupstep() {
     source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
     setup mu2e
     setup codetools
-    setup clang v5_0_1
-    setup iwyu
+    #setup clang v5_0_1
+    #setup iwyu
 
     return 0
 }
@@ -48,31 +48,31 @@ EOM
     exit 1;
 fi
 
-echo "[$(date)] setup compile_commands.json and get latest clang tool configs"
-(
-    set --
+# echo "[$(date)] setup compile_commands.json and get latest clang tool configs"
+# (
+#     set --
 
-    if [[ ! -d "site_scons" ]]; then
-        git checkout master -- site_scons/
-        git checkout master -- SConstruct
-    fi
+#     if [[ ! -d "site_scons" ]]; then
+#         git checkout master -- site_scons/
+#         git checkout master -- SConstruct
+#     fi
 
-    source setup.sh
-    scons -Q compiledb
+#     source setup.sh
+#     scons -Q compiledb
 
-    # make sure clang tools can find this file
-    # in an obvious location
-    mv gen/compile_commands.json .
+#     # make sure clang tools can find this file
+#     # in an obvious location
+#     mv gen/compile_commands.json .
 
-    git checkout master -- .clang-tidy
-    git checkout master -- .clang-format
-)
+#     git checkout master -- .clang-tidy
+#     git checkout master -- .clang-format
+# )
 
 
 #export MODIFIED_PR_FILES=`git diff --name-only ${MASTER_COMMIT_SHA} HEAD | grep "^M" | grep -E '(.*\.cc$|\.hh$)' | sed -e 's/^\w*\ *//' | awk '{$1=$1;print}'`
 export MODIFIED_PR_FILES=$(git --no-pager diff --name-only FETCH_HEAD $(git merge-base FETCH_HEAD master))
 
-echo "[$(date)] check formatting and run clang-tidy"
+echo "[$(date)] check formatting"
 (
     source ${TESTSCRIPT_DIR}/checks.sh
 )
