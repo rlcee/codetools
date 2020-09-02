@@ -29,7 +29,6 @@ def main():
     if len(sys.argv) < 2:
         print ('%s: no input files' % sys.argv[0])
         return
-    print ('checking %d files...' % len(sys.argv[1:]))
     bad_files = 0
     for fi in sys.argv[1:]:
         if os.path.exists(fi) and not os.path.isdir(fi):
