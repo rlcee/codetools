@@ -46,6 +46,7 @@ ${COMMIT_SHA}
 mu2e/codechecks
 success
 Code checks have finished.
+${JOB_URL}/${BUILD_NUMBER}/console
 NO_COMMENT
 
 EOM
