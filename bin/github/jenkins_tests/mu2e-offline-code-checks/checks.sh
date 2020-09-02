@@ -22,7 +22,7 @@ if [ -s "$PATCH_FILE" ]; then
   cat > $WORKSPACE/gh-report.md <<- EOM
 ${COMMIT_SHA}
 mu2e/codechecks
-failed
+failure
 Trailing whitespace was found in one or more header or source files.
 ${JOB_URL}/${BUILD_NUMBER}/console
 :cloud: Trailing whitespace characters were found at ${COMMIT_SHA} on files you changed.
