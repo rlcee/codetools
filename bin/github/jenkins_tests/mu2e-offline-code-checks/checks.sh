@@ -4,14 +4,13 @@
 # 
 
 echo "[`date`] find trailing whitespace"
-CT_FILES="" # files to run in clang tidy
 PATCH_FILE="$WORKSPACE/codechecks-pr${PULL_REQUEST}-${COMMIT_SHA}.patch"
 for MOD_FILE in $MODIFIED_PR_FILES
 do
-    if [[ "$MOD_FILE" == *.cc ]] || [[ "$MOD_FILE" == *.hh ]]; then
+    if [[ "$MOD_FILE" == *.cc ]] || [[ "$MOD_FILE" == *.hh ]] || [[ "$MOD_FILE" == *.fcl ]]; then
         sed -Ei 's/[ \t]+$//' "$MOD_FILE"
     else
-        echo "skipped $MOD_FILE since not a cpp file"
+        echo "skipped $MOD_FILE since not a cpp or fcl file"
     fi
 done
 git diff > $PATCH_FILE
@@ -23,9 +22,9 @@ if [ -s "$PATCH_FILE" ]; then
 ${COMMIT_SHA}
 mu2e/codechecks
 failure
-Trailing whitespace was found in one or more header or source files.
+Trailing whitespace was found in one or more header, source, or fcl files.
 ${JOB_URL}/${BUILD_NUMBER}/console
-:cloud: Trailing whitespace characters were found at ${COMMIT_SHA} on files you changed.
+:x: Trailing whitespace characters were found at ${COMMIT_SHA} on files you changed.
 
 You can review the generated patch [here]($PURL).
 
@@ -44,7 +43,7 @@ echo "[`date`] find hard tabs"
 HARD_TABS=0
 for MOD_FILE in $MODIFIED_PR_FILES
 do
-    if [[ "$MOD_FILE" == *.cc ]] || [[ "$MOD_FILE" == *.hh ]]; then
+    if [[ "$MOD_FILE" == *.cc ]] || [[ "$MOD_FILE" == *.hh ]] || [[ "$MOD_FILE" == *.fcl ]]; then
         detect-tab-indent "$MOD_FILE" >> ${WORKSPACE}/detect-tab-indent-${COMMIT_SHA}.log
         
         if [ $? -ne 0 ]; then
@@ -61,9 +60,9 @@ if [ $HARD_TABS -ne 0 ]; then
 ${COMMIT_SHA}
 mu2e/codechecks
 failure
-Hard tabs were found in one or more header or source files.
+Hard tabs were found in one or more header, source, or fcl files.
 ${JOB_URL}/${BUILD_NUMBER}/console
-:cloud: Hard tab indentations were found at ${COMMIT_SHA} on files you changed.
+:x: Hard tab indentations were found at ${COMMIT_SHA} on files you changed.
 
 Please remove any tab characters from code indentations, and re-indent with spaces where appropriate. 
 
@@ -80,7 +79,7 @@ fi
 ${COMMIT_SHA}
 mu2e/codechecks
 success
-Code checks have finished.
+Code checks were successful.
 ${JOB_URL}/${BUILD_NUMBER}/console
 NOCOMMENT
 
