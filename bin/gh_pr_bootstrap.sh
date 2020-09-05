@@ -69,12 +69,12 @@ function print_jobinfo() {
 
 function setup_cmsbot() {
     source $HOME/PyGithub/bin/activate
-    export CMS_BOT_DIR="$WORKSPACE/cms-bot"
+    export CMS_BOT_DIR="$WORKSPACE/CI"
 
     if [ ! -d ${CMS_BOT_DIR} ]; then
         (
             cd "$WORKSPACE"
-            git clone -b master git@github.com:FNALbuild/cms-bot
+            git clone -b master git@github.com:Mu2e/CI
         )
     else
         (
