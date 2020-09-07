@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+import sys
+import os
+
+def detect_hardtabs(lines):
+    bad_lines = 0
+    for l in lines:
+        lstrip = l.lstrip()
+        l_ws = l[:len(l)-len(lstrip)]
+        
+        if '\t' in l_ws:
+            bad_lines += 1
+        
+    return bad_lines
+
+
+def process_file(input_file):
+    file_lines = []
+    with open(input_file, 'r') as f:
+        file_lines = [l.rstrip('\n') for l in f.readlines()]
+        
+    n = detect_hardtabs(file_lines) 
+    if n > 0:
+        print("%s: %d lines with hard tab indents found" % (input_file, n))
+        return True
+    return False
+
+def main():
+    if len(sys.argv) < 2:
+        print ('%s: no input files' % sys.argv[0])
+        return
+    bad_files = 0
+    for fi in sys.argv[1:]:
+        if os.path.exists(fi) and not os.path.isdir(fi):
+            if process_file(fi):
+                bad_files = 1
+        else:
+            print ("skipping non-existent path: %s" % fi)
+    sys.exit(bad_files)
+    
+if __name__ == '__main__':
+    main()
