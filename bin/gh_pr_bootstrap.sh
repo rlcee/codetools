@@ -83,6 +83,8 @@ function setup_cmsbot() {
             cd -
         )
     fi
+    
+    chmod +x ${CMS_BOT_DIR}/upload-job-logfiles
 
 }
 
