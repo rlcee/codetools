@@ -68,9 +68,12 @@ function print_jobinfo() {
 }
 
 function setup_cmsbot() {
-    source $HOME/PyGithub/bin/activate
-    export PATH=$PATH:$HOME/.local/bin
     export CMS_BOT_DIR="$WORKSPACE/CI"
+
+    [ -d "$HOME/mu2e-gh-bot-venv/" ] || python3 -m venv $HOME/mu2e-gh-bot-venv/
+    source $HOME/mu2e-gh-bot-venv/bin/activate
+
+    python --version
 
     if [ ! -d ${CMS_BOT_DIR} ]; then
         (
@@ -84,7 +87,8 @@ function setup_cmsbot() {
             cd -
         )
     fi
-    python3 -m pip install --user -r ${CMS_BOT_DIR}/requirements.txt
+    pip install -U -r ${CMS_BOT_DIR}/requirements.txt
+    pip freeze
 }
 
 function cmsbot_report() {
