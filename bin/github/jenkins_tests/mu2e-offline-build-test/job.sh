@@ -271,6 +271,7 @@ EOM
 ${CMS_BOT_DIR}/upload-job-logfiles gh-report.md ${WORKSPACE}/*.log > gist-link.txt
 if [ $? -ne 0 ]; then
     # do nothing for now, but maybe add an error message in future
+    echo "Couldn't upload logfiles..."
 
 else
     GIST_LINK=$( cat gist-link.txt )
