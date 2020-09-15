@@ -13,7 +13,7 @@ echo "[$(date)] setup ${REPOSITORY}"
 setup_offline "${REPOSITORY}"
 
 cd "$WORKSPACE/$REPO" || exit 1
-git rev-parse HEAD > master-commit-sha.txt
+echo ${MASTER_COMMIT_SHA} > master-commit-sha.txt
 
 git checkout ${COMMIT_SHA} || exit 1
 
