@@ -69,6 +69,8 @@ function print_jobinfo() {
 
 function setup_cmsbot() {
     source $HOME/PyGithub/bin/activate
+    python3 -m pip install --user PyGithub
+    export PATH=$PATH:$HOME/.local/bin
     export CMS_BOT_DIR="$WORKSPACE/CI"
 
     if [ ! -d ${CMS_BOT_DIR} ]; then
