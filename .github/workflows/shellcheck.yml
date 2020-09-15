@@ -1,9 +1,12 @@
 on:
   push:
-    branch:
+    branches:
+      - master
+  pull_request:
+    branches: 
       - master
 
-name: 'Trigger: Push action'
+name: 'shellcheck'
 
 jobs:
   shellcheck:
@@ -13,3 +16,5 @@ jobs:
     - uses: actions/checkout@v2
     - name: Run ShellCheck
       uses: ludeeus/action-shellcheck@master
+      with:
+        check_together: 'yes'
