@@ -13,7 +13,7 @@ echo "[$(date)] setup ${REPOSITORY}"
 setup_offline "${REPOSITORY}"
 
 cd "$WORKSPACE/$REPO" || exit 1
-git rev-parse HEAD > master-commit-sha.txt
+echo ${MASTER_COMMIT_SHA} > master-commit-sha.txt
 
 git checkout ${COMMIT_SHA} || exit 1
 
@@ -248,9 +248,6 @@ cat >> "$WORKSPACE"/gh-report.md <<- EOM
 | FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
 | clang-tidy | ${CT_STATUS} | [${CT_STAT_STRING}](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log) |
 
-For more information, please check the job page [here](${JOB_URL}/${BUILD_NUMBER}/console).
-Build artefacts are deleted after 5 days. If this is not desired, select \`Keep this build forever\` on the job page.
-
 EOM
 
 if [ $TRIGGER_VALIDATION -ne 0 ]; then
@@ -261,6 +258,31 @@ cat >> "$WORKSPACE"/gh-report.md <<- EOM
 EOM
 
 fi
+
+
+
+cat >> "$WORKSPACE"/gh-report.md <<- EOM
+
+For more information, please check the job page [here](${JOB_URL}/${BUILD_NUMBER}/console).
+Build artefacts are deleted after 5 days. If this is not desired, select \`Keep this build forever\` on the job page.
+
+EOM
+
+${CMS_BOT_DIR}/upload-job-logfiles gh-report.md ${WORKSPACE}/*.log > gist-link.txt
+if [ $? -ne 0 ]; then
+    # do nothing for now, but maybe add an error message in future
+    echo "Couldn't upload logfiles..."
+
+else
+    GIST_LINK=$( cat gist-link.txt )
+    cat >> "$WORKSPACE"/gh-report.md <<- EOM
+
+    Logfiles may also be accessed (at this link.)[${GIST_LINK}]
+
+EOM
+
+fi
+
 
 cmsbot_report "$WORKSPACE/gh-report.md"
 wait;
