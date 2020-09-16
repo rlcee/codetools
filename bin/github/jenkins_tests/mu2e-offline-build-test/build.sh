@@ -22,10 +22,14 @@ function do_buildstep() {
 }
 
 function do_runstep() {
-    declare -a JOBNAMES=("ceSimReco" "g4test_03MT" "transportOnly" "PS" "g4study" "cosmicSimReco")
-    declare -a FCLFILES=("Validation/fcl/ceSimReco.fcl" "Mu2eG4/fcl/g4test_03MT.fcl" "Mu2eG4/fcl/transportOnly.fcl" "JobConfig/beam/PS.fcl" "Mu2eG4/fcl/g4study.fcl" "Validation/fcl/cosmicSimReco.fcl")
-    declare -a NEVTS_TJ=("1" "10" "1" "1" "1" "1")
-
+    if [ -f ".build-tests.sh" ]; then
+        source .build-tests.sh
+    else
+        declare -a JOBNAMES=("ceSimReco" "g4test_03MT" "transportOnly" "PS" "g4study" "cosmicSimReco")
+        declare -a FCLFILES=("Validation/fcl/ceSimReco.fcl" "Mu2eG4/fcl/g4test_03MT.fcl" "Mu2eG4/fcl/transportOnly.fcl" "JobConfig/beam/PS.fcl" "Mu2eG4/fcl/g4study.fcl" "Validation/fcl/cosmicSimReco.fcl")
+        declare -a NEVTS_TJ=("1" "10" "1" "1" "1" "1")
+    fi
+    
     arraylength=${#JOBNAMES[@]}
 
     for (( i=1; i<arraylength+1; i++ ));
