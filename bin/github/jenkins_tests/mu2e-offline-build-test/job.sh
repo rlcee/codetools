@@ -131,8 +131,11 @@ else
         # run clang-tidy
         CLANG_TIDY_ARGS="-extra-arg=-isystem$CLANG_FQ_DIR/include/c++/v1 -p . -j 24"
         CLANG_TIDY_RUNNER="${CLANG_FQ_DIR}/share/clang/run-clang-tidy.py"
-
-        ${CLANG_TIDY_RUNNER} ${CLANG_TIDY_ARGS} ${CT_FILES} > $WORKSPACE/clang-tidy.log || exit 1
+        
+        # 2to3
+        
+        2to3 ${CLANG_TIDY_RUNNER} -o . -n -w
+        python run-clang-tidy.py ${CLANG_TIDY_ARGS} ${CT_FILES} > $WORKSPACE/clang-tidy.log || exit 1
     )
 
     if [ $? -ne 1 ]; then
