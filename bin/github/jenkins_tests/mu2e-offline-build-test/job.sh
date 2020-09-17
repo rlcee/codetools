@@ -271,6 +271,10 @@ Build artefacts are deleted after 5 days. If this is not desired, select \`Keep 
 
 EOM
 
+# truncate scons logfile in place, removing time debug info
+sed -i '/Command execution time:/d' scons.log
+sed -i '/SConscript:/d' scons.log
+
 ${CMS_BOT_DIR}/upload-job-logfiles gh-report.md ${WORKSPACE}/*.log > gist-link.txt
 if [ $? -ne 0 ]; then
     # do nothing for now, but maybe add an error message in future
