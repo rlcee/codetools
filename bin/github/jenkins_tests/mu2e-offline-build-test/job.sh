@@ -134,7 +134,7 @@ else
         
         # 2to3
         
-        2to3 ${CLANG_TIDY_RUNNER} -o . -n -w
+        python -m lib2to3 ${CLANG_TIDY_RUNNER} -o . -n -w
         python run-clang-tidy.py ${CLANG_TIDY_ARGS} ${CT_FILES} > $WORKSPACE/clang-tidy.log || exit 1
     )
 
