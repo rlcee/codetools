@@ -83,7 +83,9 @@ function setup_cmsbot() {
     else
         (
             cd ${CMS_BOT_DIR}
-            git fetch; git pull
+            git reset --hard HEAD
+            git fetch; 
+            git pull
             cd -
         )
     fi
