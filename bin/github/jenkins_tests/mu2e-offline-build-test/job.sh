@@ -279,7 +279,7 @@ else
     GIST_LINK=$( cat gist-link.txt )
     cat >> "$WORKSPACE"/gh-report.md <<- EOM
 
-Logfiles may also be accessed (at this link.)[${GIST_LINK}]
+Logfiles may also be accessed [at this link.](${GIST_LINK})
 
 EOM
 
