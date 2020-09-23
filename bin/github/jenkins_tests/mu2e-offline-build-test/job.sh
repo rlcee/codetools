@@ -270,7 +270,8 @@ EOM
 sed -i '/Command execution time:/d' scons.log
 sed -i '/SConscript:/d' scons.log
 
-${CMS_BOT_DIR}/upload-job-logfiles gh-report.md ${WORKSPACE}/*.log > gist-link.txt
+${CMS_BOT_DIR}/upload-job-logfiles gh-report.md ${WORKSPACE}/*.log > gist-link.txt 2> upload_logfile_error_response.txt
+
 if [ $? -ne 0 ]; then
     # do nothing for now, but maybe add an error message in future
     echo "Couldn't upload logfiles..."
