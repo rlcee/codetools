@@ -36,7 +36,8 @@ source /cvmfs/mu2e.opensciencegrid.org/setupmu2e-art.sh
 
 T0=$(date +%s)
 echo_date "clone offline"
-git clone -q http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline/Offline.git
+#git clone -q http://cdcvs.fnal.gov/projects/mu2eofflinesoftwaremu2eoffline/Offline.git
+git clone -q https://github.com/mu2e/Offline
 RC=$?
 T1=$(date +%s)
 DT_CLONE=$(($T1-$T0))

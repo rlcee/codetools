@@ -38,7 +38,7 @@ define_potSim() {
     NINPUT[$NPROJ]=0
     NEV[$NPROJ]=500
     NJOB[$NPROJ]=20
-    MEM[$NPROJ]=1900MB
+    MEM[$NPROJ]=2500MB
     JOBID[$NPROJ]=none
     JID[$NPROJ]=0
     SEEDS[$NPROJ]=yes
@@ -59,7 +59,7 @@ define_ceSimReco() {
     NINPUT[$NPROJ]=0
     NEV[$NPROJ]=5000
     NJOB[$NPROJ]=20
-    MEM[$NPROJ]=1900MB
+    MEM[$NPROJ]=3000MB
     JOBID[$NPROJ]=none
     JID[$NPROJ]=0
     SEEDS[$NPROJ]=yes
@@ -80,7 +80,7 @@ define_cosmicSimReco() {
     NINPUT[$NPROJ]=0
     NEV[$NPROJ]=50000
     NJOB[$NPROJ]=20
-    MEM[$NPROJ]=8GB
+    MEM[$NPROJ]=4GB
     JOBID[$NPROJ]=none
     JID[$NPROJ]=0
     SEEDS[$NPROJ]=yes
@@ -98,10 +98,10 @@ define_reco() {
     TARBALL[$NPROJ]=$TBALL
     FCL[$NPROJ]=Validation/fcl/reco.fcl
     INPUT[$NPROJ]=recoInputFiles.txt
-    NINPUT[$NPROJ]=8
+    NINPUT[$NPROJ]=4
     NEV[$NPROJ]=999999
     NJOB[$NPROJ]=40
-    MEM[$NPROJ]=1900MB
+    MEM[$NPROJ]=1980MB
     JOBID[$NPROJ]=none
     JID[$NPROJ]=0
     SEEDS[$NPROJ]=no
@@ -195,12 +195,15 @@ submit_jobs() {
   #  if [ "${SEEDS[$I]}" != "no" ]; then
   #      SEED_STANZA=" -f $PWD/seeds.txt -e VALJOB_SEEDS=seeds.txt "
   #  fi
+# 8/5/2020 removed OS=sl7, added two singularity lines
     CMD="jobsub_submit -Q "
     CMD="$CMD -N ${NJOB[$I]}  "
     CMD="$CMD --role=Production --subgroup=monitor "
     CMD="$CMD --resource-provides=usage_model=DEDICATED,OPPORTUNISTIC "
-    CMD="$CMD --OS=SL6  --memory=${MEM[$I]} --disk=30GB --expected-lifetime=4h "
+    CMD="$CMD  --memory=${MEM[$I]} --disk=30GB --expected-lifetime=4h "
     CMD="$CMD --append_condor_requirements='(TARGET.CpuFamily==6)' "
+    CMD="$CMD --append_condor_requirements='(TARGET.HAS_SINGULARITY=?=true)' "
+    CMD="$CMD --lines  '+SingularityImage=\"/cvmfs/singularity.opensciencegrid.org/fermilab/fnal-wn-sl7:latest\"' "
     CMD="$CMD -e VALJOB_TARBALL=${TARBALL[$I]} "
     CMD="$CMD -e VALJOB_FCL=${FCL[$I]} "
     CMD="$CMD -e VALJOB_INPUT=${INPUT[$I]} "
@@ -254,20 +257,44 @@ count_done() {
 recover_jobs() {
   local I=$1
   echo_date "starting recovery for ${LABEL[$I]}"
-  # don't kill the job, we might get some info out of it
-  #echo_date "removing JOBID ${JOBID[$I]}"
-  #jobsub_rm --jobid=${JOBID[$I]} --role=Production
+  # kill the job, rely on watchdog for any info
+  echo_date "removing JOBID ${JOBID[$I]}"
+  TMPID=$( echo ${JOBID[$I]} | sed 's/\.0/\./' )
+  echo_date "Trying jobsub_q --jobid=$TMPID --role=Production"
+  jobsub_q --jobid=$TMPID --role=Production
+  echo_date "Trying jobsub_rm --jobid=$TMPID --role=Production"
+  jobsub_rm --jobid=$TMPID --role=Production
 
   local DD=$OUTDIR/${LABEL[$I]}
   local NMAX=${NJOB[$I]}
   local J=0
   local NREC=0
+  echo_date "Starting recovery loop ${LABEL[$I]} NMAX=$NMAX"
   while [ $J -lt $NMAX ]
   do
     local TT=$( printf "%02d" $J )
     local TS=$( ls -1 $DD/val | grep $TT  ) 
-    if [ -z "$TS" ]; then
+    #BUG local SS=$( ls -1l $DD/val | grep $TT  | awk '{print $5}' ) 
+    local SS=$( ls -1l $DD/val/$TS  | awk '{print $5}' ) 
+    [ -z "$SS" ] && SS=0
+    echo_date "    loop $J TT=$TT   TS=$TS  SS=$SS"
+    if [[ -z "$TS" || $SS -lt 1000 ]]; then
       echo_date "recovery job ${LABEL[$I]} $TT"
+
+      # remove any partial output files
+      local OUTTMP=$DD/art/${LABEL[$I]}_${TT}.art
+      if [ -f $OUTTMP ]; then
+	  echo_date "rm failed job output file $OUTTMP"
+	  rm -f $DD/art/${LABEL[$I]}_${TT}.art
+	  rm -f $DD/art/${LABEL[$I]}_${TT}.root
+	  rm -f $DD/val/val_${LABEL[$I]}_${TT}.root
+      fi
+      # if it crashed, there may be a useful log file
+      if [ -f $DD/log/${LABEL[$I]}_${TT}.log ]; then
+	  mv  $DD/log/${LABEL[$I]}_${TT}.log \
+	      $DD/log/${LABEL[$I]}_${TT}.log_crashed
+      fi
+
       NREC=$(( $NREC + 1 ))
       local RDIR=$BUILD_DIR/rec_${LABEL[$I]}_${TT}
       mkdir $RDIR
@@ -368,8 +395,8 @@ wait_jobs() {
 }
 
 #
-#
-#
+# analyze logs and return
+# average median lowest highest
 ana_numbers() {
   local TMP=$1
   local TMP2=$( mktemp )
@@ -487,12 +514,22 @@ valcompare() {
           cat $TMP
           local NBAD=$(grep "failed loose comparison" $TMP | awk '{print $1}')
           [ -z "$NBAD" ] && NBAD=999
-          echo "valcompare results ${LABEL[$I]} NBAD $NBAD"
+          local NSOSO1=$(grep "passed loose comparison, failed tight" $TMP | awk '{print $1}')
+          [ -z "$NSOSO1" ] && NSOSO1=999
+          local NSOSO2=$(grep "passed tight comparison, not perfect match" $TMP | awk '{print $1}')
+          [ -z "$NSOSO2" ] && NSOSO2=999
+	  local NSOSO=$(($NSOSO1+$NSOSO2))
+
+          echo "valcompare results ${LABEL[$I]} NBAD $NBAD  NSOSO $NSOSO"
           rm -f $TMP
           CSTATUS[$I]=$NBAD
           if [ $NBAD -eq 0 ]; then
             echo "OK ${LABEL[$I]} plots matched from $DAYS day(s) ago" >> $REPORT
-            echo "GRIDS OK ${LABEL[$I]}" >> $WEBREPORT
+	    if [ $NSOSO -eq 0 ]; then
+		echo "GRIDS PERFECT ${LABEL[$I]}" >> $WEBREPORT
+	    else
+		echo "GRIDS OK ${LABEL[$I]}" >> $WEBREPORT
+	    fi
           else
             echo "FAIL ${LABEL[$I]} $NBAD plots failed match from $DAYS day(s) ago" >> $REPORT
             echo "GRIDS FAIL ${LABEL[$I]}" >> $WEBREPORT
@@ -518,9 +555,12 @@ valcompare() {
 #
 #
 colorByStat() {
+    # no result
     COLOR=#deeaee
-    if [ "$1" == "OK" ]; then
+    if [ "$1" == "PERFECT" ]; then
 	COLOR=#588c7e
+    elif [ "$1" == "OK" ]; then
+	COLOR=#79a397
     elif [ "$1" == "MISSING" ]; then
 	COLOR=#fbefcc
     elif [ "$1" == "FAIL" ]; then
@@ -537,6 +577,15 @@ nightlyweb() {
   echo_date "starting nightly web page"
   # at this point done with the web report, copy it to the web area
   cp $WEBREPORT $WEB_DIR_DAY
+  local RC=$?
+  if [ $RC -ne 0  ]; then
+    echo "ERROR - could not write to web area "
+    echo "WEBREPORT=$WEBREPORT WEB_DIR_DAY=$WEB_DIR_DAY"
+    echo "ls of parent dir:"
+    ls -l $WEB_DIR_DAY/..
+    echo "df "
+    df -h
+  fi
   cp $REPORT $WEB_DIR_DAY
   cp $BUILD_DIR/build $WEB_DIR_DAY
   cp $BUILD_DIR/check $WEB_DIR_DAY
@@ -691,6 +740,12 @@ TBALL=/pnfs/mu2e/resilient/users/mu2epro/nightly/$(date +%Y-%m-%d).tgz
 WEB_DIR=/web/sites/mu2e.fnal.gov/htdocs/atwork/computing/ops/val/valJob/nightly
 WEB_DIR_DAY=/web/sites/mu2e.fnal.gov/htdocs/atwork/computing/ops/val/valJob/nightly/$(date +%Y_%m/%d)
 mkdir -p $WEB_DIR_DAY
+RC=$?
+if [ $RC -ne 0 ]; then
+    echo "ERROR - could not make web dir WEB_DIR_DAY=$WEB_DIR_DAY RC=$RC"
+    echo "ls of parent dir"
+    ls -l $WEB_DIR_DAY/..
+fi
 
 # build the code from the head
 build_code
@@ -708,15 +763,17 @@ check_code
 # setup the grid jobs
 echo_date "define jobs"
 NPROJ=0
-define_potSim
 define_ceSimReco
-define_cosmicSimReco
 define_reco
+define_cosmicSimReco
+define_potSim
 #define_surfaceCheck
 
 echo_date "$NPROJ projects defined: ${LABEL[*]}"
 
 # submit
+klist
+voms-proxy-info
 submit_jobs
 
 # wait for grid jobs
@@ -726,7 +783,11 @@ RC=$?
 
 # collect plots and check overlaps
 # will need root to do concatenation
-source $BUILD_DIR/Offline/setup.sh
+
+# temproraily setup explicity on 01 until it is also sl7
+#source $BUILD_DIR/Offline/setup.sh
+source /cvmfs/mu2e.opensciencegrid.org/Offline/v7_4_1/SLF6/prof/Offline/setup.sh
+
 collect_summaries
 RC=$?
 valcompare
