@@ -81,15 +81,15 @@ function do_runstep() {
         echo "geant surfaceCheck $ILLEGAL overlaps in $LEGAL"  >> "${WORKSPACE}/g4surfaceCheck.log"
         
         # print overlaps into the log
-        echo "Overlaps:"
-        grep 'Checking overlaps for volume' ${WORKSPACE}/g4surfaceCheck.log | grep -v OK
-        echo "--------"
+        echo "Overlaps:" >> "${WORKSPACE}/rootOverlaps.log"
+        grep 'Checking overlaps for volume' ${WORKSPACE}/g4surfaceCheck.log | grep -v OK  >> "${WORKSPACE}/rootOverlaps.log"
+        echo "--------"  >> "${WORKSPACE}/rootOverlaps.log"
         
         if [[ $RC -eq 0 && $LEGAL -gt 0 && $ILLEGAL -eq 0 ]]; then
-            echo "geant surfaceCheck OK"
+            echo "geant surfaceCheck OK"  >> "${WORKSPACE}/rootOverlaps.log"
             echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/g4surfaceCheck.log"
         else
-            echo "geant surfaceCheck FAILURE"
+            echo "geant surfaceCheck FAILURE" >> "${WORKSPACE}/rootOverlaps.log"
             RC=1
         fi
        
