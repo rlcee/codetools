@@ -58,6 +58,23 @@ function do_runstep() {
     done
 
     wait;
+    
+    # check for overlaps with root
+    (
+        echo "[$(date)] checking for overlaps using ROOT (output going to rootOverlaps.log)"
+        ${WORKSPACE}/codetools/bin/rootOverlaps.sh > ${WORKSPACE}/rootOverlaps.log
+        RC=$?
+        if [ ${RC} -eq 0 ]; then
+          echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/rootOverlaps.log"
+        fi
+
+        echo "++RETURN CODE++ $RC" >> "${WORKSPACE}/rootOverlaps.log"
+
+        echo "[$(date)] rootOverlaps return code is ${RC}"
+    ) &
+    
+    wait;
+
 }
 
 

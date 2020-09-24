@@ -130,12 +130,7 @@ else
 
         # run clang-tidy
         CLANG_TIDY_ARGS="-extra-arg=-isystem$CLANG_FQ_DIR/include/c++/v1 -p . -j 24"
-        CLANG_TIDY_RUNNER="${CLANG_FQ_DIR}/share/clang/run-clang-tidy.py"
-        
-        # 2to3
-        
-        2to3 ${CLANG_TIDY_RUNNER} -o . -n -w
-        python run-clang-tidy.py ${CLANG_TIDY_ARGS} ${CT_FILES} > $WORKSPACE/clang-tidy.log || exit 1
+        run-clang-tidy ${CLANG_TIDY_ARGS} ${CT_FILES} > $WORKSPACE/clang-tidy.log || exit 1
     )
 
     if [ $? -ne 1 ]; then
@@ -161,7 +156,7 @@ echo "[$(date)] report outcome"
 
 TESTS_FAILED=0
 MU2E_POSTBUILDTEST_STATUSES=""
-declare -a ART_TESTJOBS=("ceSimReco" "g4test_03MT" "transportOnly" "PS" "g4study" "cosmicSimReco")
+declare -a ART_TESTJOBS=("ceSimReco" "g4test_03MT" "transportOnly" "PS" "g4study" "cosmicSimReco" "rootOverlaps")
 for i in "${ART_TESTJOBS[@]}"
 do
     STATUS_temp=":wavy_dash:"
@@ -271,7 +266,12 @@ Build artefacts are deleted after 5 days. If this is not desired, select \`Keep 
 
 EOM
 
-${CMS_BOT_DIR}/upload-job-logfiles gh-report.md ${WORKSPACE}/*.log > gist-link.txt
+# truncate scons logfile in place, removing time debug info
+sed -i '/Command execution time:/d' scons.log
+sed -i '/SConscript:/d' scons.log
+
+${CMS_BOT_DIR}/upload-job-logfiles gh-report.md ${WORKSPACE}/*.log > gist-link.txt 2> upload_logfile_error_response.txt
+
 if [ $? -ne 0 ]; then
     # do nothing for now, but maybe add an error message in future
     echo "Couldn't upload logfiles..."
@@ -280,7 +280,7 @@ else
     GIST_LINK=$( cat gist-link.txt )
     cat >> "$WORKSPACE"/gh-report.md <<- EOM
 
-    Logfiles may also be accessed (at this link.)[${GIST_LINK}]
+Logfiles may also be accessed [at this link.](${GIST_LINK})
 
 EOM
 
