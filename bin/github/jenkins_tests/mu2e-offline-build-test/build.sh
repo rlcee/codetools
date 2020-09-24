@@ -53,7 +53,7 @@ function do_runstep() {
       ) &
     done
 
-    wait;
+    #wait;
     
     # check for overlaps with root
     (
