@@ -100,6 +100,9 @@ initialize() {
   tee_date "printenv"
   printenv
   
+  tee_date "uname"
+  uname -a
+  
   tee_date "model name"
   cat /proc/cpuinfo | grep "model name" | head -1
 
@@ -116,6 +119,7 @@ initialize() {
 # exe
 #
 exe() {
+  tee_date "start exe"
   TIME=`date +%s`
   cp Offline/$VALJOB_FCL ./local.fcl
   
@@ -128,11 +132,11 @@ exe() {
     echo "source.fileNames : [ " >> local.fcl
     if [ "$LOCALJOB" ]; then
 	cat Offline/$VALJOB_INPUT | \
-	    awk -v n=$VALJOB_NINPUT -v i=$PROCESS 'BEGIN{is=i*n;ie=(i+1)*n}{xend=",";if(NR==ie-1) xend="";if(NR>=is && NR<ie) print "\"" $0 "\"" xend}' >> local.fcl
+	    awk -v n=$VALJOB_NINPUT -v i=$PROCESS 'BEGIN{is=i*n+1;ie=(i+1)*n+1}{xend=",";if(NR==ie-1) xend="";if(NR>=is && NR<ie) print "\"" $0 "\"" xend}' >> local.fcl
 	echo "                   ]" >> local.fcl
     else
 	cat Offline/$VALJOB_INPUT | \
-	    awk -v n=$VALJOB_NINPUT -v i=$PROCESS 'BEGIN{is=i*n;ie=(i+1)*n}{xend=",";if(NR==ie-1) xend="";if(NR>=is && NR<ie) print "\"" $0 "\"" xend}' | \
+	    awk -v n=$VALJOB_NINPUT -v i=$PROCESS 'BEGIN{is=i*n+1;ie=(i+1)*n+1}{xend=",";if(NR==ie-1) xend="";if(NR>=is && NR<ie) print "\"" $0 "\"" xend}' | \
 	    sed 's|/pnfs|xroot://fndca1.fnal.gov/pnfs/fnal.gov/usr|' >> local.fcl
 	echo "                   ]" >> local.fcl
     fi
@@ -162,6 +166,8 @@ exe() {
 # validation exe
 #
 validation() {
+  tee_date "start validation"
+
   TIME=`date +%s`
   
   if [ ! -f ${LABEL}.art ]; then
@@ -169,9 +175,17 @@ validation() {
     return 1
   fi
 
-  /cvmfs/mu2e.opensciencegrid.org/bin/SLF6/mu2e_time \
-    mu2e -s ${LABEL}.art -c Validation/fcl/val.fcl -T val_${LABEL}.root
+  if [ "$LOCALJOB" ]; then
+      # read file locally
+      local IFILE=${LABEL}.art
+  else
+       # or if on  grid node, read from final location via network
+      local IFILE=$( echo "${VALJOB_OUTDIR}/art/${LABEL}.art" | sed 's|/pnfs/||' )
+      IFILE="xroot://fndca1.fnal.gov/pnfs/fnal.gov/usr/$IFILE"
+  fi
 
+  /cvmfs/mu2e.opensciencegrid.org/bin/SLF6/mu2e_time \
+    mu2e -s $IFILE -c Validation/fcl/val.fcl -T val_${LABEL}.root
   RC=$?
   tee_date "val $RC"
   
@@ -189,21 +203,6 @@ validation() {
 # output
 #
 
-mkoutdir() {
-  if [ "$LOCALJOB" ]; then
-    mkdir -p $OUTDIR
-    RC=$?
-  else
-    ifdh mkdir $OUTDIR
-    RC=$?
-  fi
-  tee_date "mkoutdir $OUTDIR $RC"
-  if [ $RC -ne 0 ]; then
-    tee_date "ERROR mkoutdir $RC"
-    return $RC
-  fi
-  return 0
-}
 
 transfer() {
   
@@ -214,15 +213,16 @@ transfer() {
     if [ -r "$FILE" ]; then
 
       if [ "$LOCALJOB" ]; then
+	  tee_date "cp ./$FILE $OUTDIR/$FILE "
 	  cp ./$FILE $OUTDIR/$FILE
 	  RC=$?
       else
+	  tee_date "ifdh cp ./$FILE $OUTDIR/$FILE "
 	  ifdh cp ./$FILE $OUTDIR/$FILE
 	  RC=$?
       fi
       
-      RC=$?
-      tee_date "cp ./$FILE $OUTDIR/$FILE $RC"
+      tee_date "cp done RC=$RC"
       
       if [ $RC -ne 0 ]; then
 	  tee_date "ERROR ifdh cp $RC"
@@ -239,21 +239,58 @@ transfer() {
   return $RC_TOT
 }
 
+#
+# transfer the art file
+#
+output_art() {
+
+  tee_date "output_art starting"
+
+  TIME=`date +%s`
+  tee_date "ls exe end"
+  ls -l
+
+  OUTDIR=${VALJOB_OUTDIR}/art
+  transfer  ${LABEL}.art ${LABEL}.root
+  RC=$?
+
+  DT=$((`date +%s`-$TIME))
+  tee_date "output_art time transfer $DT"
+  tee_date "output_art RC $RC"
+
+  return $RC
+
+}
+
+#
+# transfer last files, including log file
+#
 output() {
   local RC_JOB=$1
   tee_date "output starting with RC_JOB $RC_JOB"
+  local RC=0
+  local RC_T=0
 
   TIME=`date +%s`
   tee_date "ls end"
   ls -l
 
   OUTDIR=${VALJOB_OUTDIR}/val
-  #mkoutdir
-  transfer  val_${LABEL}.root
+  # only transfer the val file if the art job worked
+  # otherwise success could be wrongly concluded
+  if [ $RC_JOB -eq 0  ]; then
+    transfer  val_${LABEL}.root
+    RC=$?
+    [ $RC -ne 0  ] && RC_T=$RC
+  else
+    tee_date "not transferring val file because RC_JOB=$RC_JOB"
+  fi
 
-  OUTDIR=${VALJOB_OUTDIR}/art
-  #mkoutdir
-  transfer  ${LABEL}.art  ${LABEL}.root
+  # while commented out - now transfered before val
+  #OUTDIR=${VALJOB_OUTDIR}/art
+  #transfer  ${LABEL}.art  ${LABEL}.root
+  #RC=$?
+  #[ $RC -ne 0  ] && RC_T=$RC
 
   tee_date "finished data transfer"
   DT=$((`date +%s`-$TIME))
@@ -270,12 +307,24 @@ output() {
   OUTDIR=${VALJOB_OUTDIR}/log
   #mkoutdir
   transfer  ${LABEL}.log
+  RC=$?
+  [ $RC -ne 0  ] && RC_T=$RC
 
   if [ "$LOCALJOB" ]; then
       rm *.art
   fi
 
   tee_date "exit final"
+
+
+  if [ $RC_JOB -ne 0  ]; then
+      RC=$RC_JOB
+  elif [ $RC_T -ne 0 ]; then
+      RC=$RC_T
+  else
+      RC=0
+  fi
+
   exit $RC
 }
 
@@ -286,6 +335,8 @@ output() {
 LOCALJOB=""
 [ -z "$GRID_USER" ] && LOCALJOB="YES"
 tee_date "LOCALJOB=$LOCALJOB"
+
+export IFDH_DEBUG=10
 
 initialize
 RC=$?
@@ -299,6 +350,11 @@ fi
 exe
 RC=$?
 [ $RC -ne 0 ] && output $RC
+
+output_art
+# keep running in case validation works.
+#RC=$?
+#[ $RC -ne 0 ] && output $RC
 
 validation
 RC=$?
