@@ -72,12 +72,27 @@ function do_runstep() {
     # check for overlaps with geant4
     (
         echo "[$(date) check for overlaps with geant4 surfaceCheck.fcl"
-        mu2e -c Mu2eG4/fcl/surfaceCheck.fcl >> "${WORKSPACE}/g4surfaceCheck.log" 2>&1
+        mu2e -c Mu2eG4/fcl/surfaceCheck.fcl > "${WORKSPACE}/g4surfaceCheck.log" 2>&1
         RC=$?
-        if [ ${RC} -eq 0 ]; then
-          echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/g4surfaceCheck.log"
+        
+        LEGAL=$( grep 'Checking overlaps for volume' ${WORKSPACE}/g4surfaceCheck.log | grep -c OK )
+        ILLEGAL=$( grep 'Checking overlaps for volume' ${WORKSPACE}/g4surfaceCheck.log | grep -v OK | wc -l )
+        
+        echo "geant surfaceCheck $ILLEGAL overlaps in $LEGAL"  >> "${WORKSPACE}/g4surfaceCheck.log"
+        
+        # print overlaps into the log
+        echo "Overlaps:"
+        grep 'Checking overlaps for volume' ${WORKSPACE}/g4surfaceCheck.log | grep -v OK
+        echo "--------"
+        
+        if [[ $RC -eq 0 && $LEGAL -gt 0 && $ILLEGAL -eq 0 ]]; then
+            echo "geant surfaceCheck OK"
+            echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/g4surfaceCheck.log"
+        else
+            echo "geant surfaceCheck FAILURE"
+            RC=1
         fi
-
+       
         echo "++RETURN CODE++ $RC" >> "${WORKSPACE}/g4surfaceCheck.log"
         echo "[$(date)] g4surfaceCheck return code is ${RC}"
     ) &
