@@ -69,6 +69,19 @@ function do_runstep() {
         echo "[$(date)] rootOverlaps return code is ${RC}"
     ) &
     
+    # check for overlaps with geant4
+    (
+        echo "[$(date) check for overlaps with geant4 surfaceCheck.fcl"
+        mu2e -c Mu2eG4/fcl/surfaceCheck.fcl >> "${WORKSPACE}/g4surfaceCheck.log" 2>&1
+        RC=$?
+        if [ ${RC} -eq 0 ]; then
+          echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/g4surfaceCheck.log"
+        fi
+
+        echo "++RETURN CODE++ $RC" >> "${WORKSPACE}/g4surfaceCheck.log"
+        echo "[$(date)] g4surfaceCheck return code is ${RC}"
+    ) &
+    
     wait;
 
 }
