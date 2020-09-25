@@ -57,7 +57,7 @@ function do_runstep() {
       ) &
     done
 
-    wait;
+    #wait;
     
     # check for overlaps with root
     (
@@ -71,6 +71,34 @@ function do_runstep() {
         echo "++RETURN CODE++ $RC" >> "${WORKSPACE}/rootOverlaps.log"
 
         echo "[$(date)] rootOverlaps return code is ${RC}"
+    ) &
+    
+    # check for overlaps with geant4
+    (
+        echo "[$(date) check for overlaps with geant4 surfaceCheck.fcl"
+        mu2e -c Mu2eG4/fcl/surfaceCheck.fcl > "${WORKSPACE}/g4surfaceCheck.log" 2>&1
+        RC=$?
+        
+        LEGAL=$( grep 'Checking overlaps for volume' ${WORKSPACE}/g4surfaceCheck.log | grep -c OK )
+        ILLEGAL=$( grep 'Checking overlaps for volume' ${WORKSPACE}/g4surfaceCheck.log | grep -v OK | wc -l )
+        
+        echo "geant surfaceCheck $ILLEGAL overlaps in $LEGAL"  >> "${WORKSPACE}/g4surfaceCheck.log"
+        
+        # print overlaps into the log
+        echo "Overlaps:" >> "${WORKSPACE}/rootOverlaps.log"
+        grep 'Checking overlaps for volume' ${WORKSPACE}/g4surfaceCheck.log | grep -v OK  >> "${WORKSPACE}/rootOverlaps.log"
+        echo "--------"  >> "${WORKSPACE}/rootOverlaps.log"
+        
+        if [[ $RC -eq 0 && $LEGAL -gt 0 && $ILLEGAL -eq 0 ]]; then
+            echo "geant surfaceCheck OK"  >> "${WORKSPACE}/rootOverlaps.log"
+            echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/g4surfaceCheck.log"
+        else
+            echo "geant surfaceCheck FAILURE" >> "${WORKSPACE}/rootOverlaps.log"
+            RC=1
+        fi
+       
+        echo "++RETURN CODE++ $RC" >> "${WORKSPACE}/g4surfaceCheck.log"
+        echo "[$(date)] g4surfaceCheck return code is ${RC}"
     ) &
     
     wait;
