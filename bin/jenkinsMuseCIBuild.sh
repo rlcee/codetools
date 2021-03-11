@@ -18,12 +18,10 @@ initialize() {
   echo "[$(date)] ls of local dir"
   ls -al
   echo "[$(date)] cpuinfo"
-  cat /proc/cpuinfo | head -30
+  head -30  /proc/cpuinfo
 
-  local ARCH=$( cat /proc/cpuinfo  | grep vendor_id | \
-      tail -1 | awk '{print $NF}')
-  local NPROC=$( cat /proc/cpuinfo  | grep processor | \
-      tail -1 | awk '{print $NF}')
+  local ARCH=$( grep -m 1 vendor_id /proc/cpuinfo | awk '{print $NF}' )
+  local NPROC=$( grep -m 1 processor /proc/cpuinfo | awk '{print $NF}' )
   echo "[$(date)] architecture $ARCH"
   echo "[$(date)] number of processors $NPROC"
 
@@ -40,46 +38,65 @@ getCode() {
 
     echo "[$(date)] clone"
   # pull the main repo
-    if ! git clone https://github.com/Mu2e/Offline ; then
-	echo "[$(date)] failed to clone"
-	return 1
-    fi
+    git clone https://github.com/Mu2e/Offline  || return 1
 
-    cd Offline
+    # let git avoid doing an explicit cd here
+    GD=" -C Offline "
 
-    # set the remote 
-    echo "[$(date)] git rename remote"
-    if ! git remote rename origin mu2e ; then
-	echo "[$(date)]  could not rename remote"
-	cd ..
-	return 2
-    fi
+    git $GD remote rename origin mu2e  || return 2
 
-    # define this potential build
-    if ! git checkout $BRANCH ; then
-	echo "[$(date)]  could not checkout branch $BRANCH"
-	cd ..
-	return 2
-    fi
+    git $GD checkout "$BRANCH" || return 3
 
-    export HASH=$( git rev-parse HEAD | cut -c 1-8 )
-    if [ -z "$HASH" ] ; then
-	echo "[$(date)] could not find hash"
-	cd ..
-	return 3
-    fi
-#    local DATE=$( git show $HASH | grep Date: | head -1 | \
-#        awk '{print $2" "$3" "$4" "$5" "}' )
-#    local DATESTR=$( date -d "$DATE" +%Y_%m_%d_%H_%M)
-#    if [[ -z "$DATE" || -z "$DATESTR" ]] ; then
-#	echo "[$(date)][$BRANCH] could not parse branch date"
-#	cd $BUILDTOP
-#	return 4
+    export HASH=$( git $GD rev-parse HEAD | cut -c 1-8 )
+    [ $? -ne 0 ] && return 4
+
+#    (
+#	cd Offline || return 1
+#	git remote rename origin mu2e  || return 2
+#	git checkout "$BRANCH" || return 3
+#	git rev-parse HEAD | cut -c 1-8 > ../hash.txt
+#	[ $? -ne 0 ] && return 4
+#    )
+
+#    if ! cd Offline ; then
+#	echo "[$(date)]  could not cd Offline"
+#	return 1
 #    fi
-#    local BUILD=$DATESTR_$HASH
+#
+#    # set the remote 
+#    echo "[$(date)] git rename remote"
+#    if ! git remote rename origin mu2e ; then
+#	echo "[$(date)]  could not rename remote"
+#	cd ..
+#	return 2
+#    fi
+#
+#    # define this potential build
+#    if ! git checkout "$BRANCH" ; then
+#	echo "[$(date)]  could not checkout branch $BRANCH"
+#	cd ..
+#	return 2
+#    fi
+#
+#    export HASH=$( git rev-parse HEAD | cut -c 1-8 )
+#    if [ -z "$HASH" ] ; then
+#	echo "[$(date)] could not find hash"
+#	cd ..
+#	return 3
+#    fi
+##    local DATE=$( git show $HASH | grep Date: | head -1 | \
+##        awk '{print $2" "$3" "$4" "$5" "}' )
+##    local DATESTR=$( date -d "$DATE" +%Y_%m_%d_%H_%M)
+##    if [[ -z "$DATE" || -z "$DATESTR" ]] ; then
+##	echo "[$(date)][$BRANCH] could not parse branch date"
+##	cd $BUILDTOP
+##	return 4
+##    fi
+##    local BUILD=$DATESTR_$HASH
 
-    cd ..
-    echo "[$(date)] returning from getCode, pwd=$PWD"
+#    cd ..
+#    echo "[$(date)] returning from getCode"
+
     return 0
 
 }
@@ -91,7 +108,7 @@ checkExists() {
     # eventually may need to check this platform specifically
     # when there are multiple platforms
     local TDIR=$BASECDIR/$BRANCH/$HASH/Offline
-    if [ -d $TDIR ]; then
+    if [ -d "$TDIR" ]; then
 	echo "[$(date)][$BRANCH] is up to date at build $BUILD"
 	return 1
     fi
@@ -111,7 +128,7 @@ buildBranch() {
 
     echo "[$(date)] start build for hash $HASH with BUILD=$BUILD"
 
-    muse setup -q $BUILD
+    muse setup -q "$BUILD"
     RC=$?
     if [ $RC -ne 0 ]; then
 	echo "[$(date)] failed to run muse setup"
