@@ -166,13 +166,10 @@ tarball() {
 
     echo "[$(date)] start tarball"
 
-    local FDIR=$BRANCH/$HASH
-    local TBALL=copyBack/${BRANCH}+${HASH}.tgz
-    mkdir -p $FDIR
-    ln -s $PWD/Offline $FDIR/Offline
-    ln -s $PWD/build $FDIR/build
+    local FDIR="$BRANCH/$HASH/"
+    local TBALL=copyBack/${BRANCH}+${HASH}+${LABEL}.tgz
     
-    if ! tar -czhf $TBALL $BRANCH ; then
+    if ! tar  --transform="s|^|$FDIR|"   -czhf $TBALL Offline build ; then
 	echo "[$(date)] failed to run tar"
 	return 1
     fi
@@ -209,7 +206,7 @@ RC=$?
 
 for BUILD in prof debug
 do
-    # in parens so that setup does not persist
+    # in parens so runs in subshell and setup does not persist
     ( buildBranch )
     RC=$?
     [ $RC -ne 0 ] && exit $RC
