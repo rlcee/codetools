@@ -303,6 +303,10 @@ fi
 
 
 cmsbot_report "$WORKSPACE/gh-report.md"
+
+echo "[$(date)] cleaning up old gists"
+${CMS_BOT_DIR}/cleanup-old-gists
+
 wait;
 exit $BUILDTEST_OUTCOME;
 
