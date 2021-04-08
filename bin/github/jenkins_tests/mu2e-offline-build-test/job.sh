@@ -16,7 +16,7 @@ else
     declare -a NEVTS_TJ=("1" "10" "1" "1" "1" "1")
 
     # how many of these tests to run in parallel at once
-    export MAX_TEST_PROCESSES=6
+    export MAX_TEST_PROCESSES=8
 fi
 
 cd "$WORKSPACE" || exit
