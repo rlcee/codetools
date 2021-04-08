@@ -72,6 +72,7 @@ function setup_cmsbot() {
 
     [ -d "$HOME/mu2e-gh-bot-venv/" ] || python3 -m venv $HOME/mu2e-gh-bot-venv/
     source $HOME/mu2e-gh-bot-venv/bin/activate
+    CMS_BOT_VENV_SOURCED=1
 
     python --version
 
@@ -94,6 +95,10 @@ function setup_cmsbot() {
 }
 
 function cmsbot_report() {
+    if [ "${CMS_BOT_VENV_SOURCED}" -ne 1 ]; then
+        CMS_BOT_VENV_SOURCED=1
+        source $HOME/mu2e-gh-bot-venv/bin/activate
+    fi
     ${CMS_BOT_DIR}/comment-github-pullrequest -r ${REPOSITORY} -p ${PULL_REQUEST} --report-file $1
 
     if grep -Fxq "NOCOMMENT" $1
