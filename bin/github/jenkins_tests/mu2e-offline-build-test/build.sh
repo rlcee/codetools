@@ -1,8 +1,6 @@
 #!/bin/bash
 # Ryunosuke O'Neil, 2020
-# roneil@fnal.gov
-# ryunosuke.oneil@postgrad.manchester.ac.uk
-
+# Contact: @ryuwd on GitHub
 
 function do_setupstep() {
     source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
@@ -22,39 +20,64 @@ function do_buildstep() {
 }
 
 function do_runstep() {
-    if [ -f ".build-tests.sh" ]; then
-        source .build-tests.sh
-    else
-        declare -a JOBNAMES=("ceSimReco" "g4test_03MT" "transportOnly" "PS" "g4study" "cosmicSimReco")
-        declare -a FCLFILES=("Validation/fcl/ceSimReco.fcl" "Mu2eG4/fcl/g4test_03MT.fcl" "Mu2eG4/fcl/transportOnly.fcl" "JobConfig/beam/PS.fcl" "Mu2eG4/fcl/g4study.fcl" "Validation/fcl/cosmicSimReco.fcl")
-        declare -a NEVTS_TJ=("1" "10" "1" "1" "1" "1")
-    fi
-    
     arraylength=${#JOBNAMES[@]}
-
+    started=0
     for (( i=1; i<arraylength+1; i++ ));
     do
+      started=$((started+1))
       (
         JOBNAME=${JOBNAMES[$i-1]}
         FCLFILE=${FCLFILES[$i-1]}
+        NEVTS=${NEVTS_TJ[$i-1]}
 
         echo "[$(date)] ${JOBNAME} step. Output is being written to ${WORKSPACE}/${JOBNAME}.log"
         echo "Test: mu2e -n ${NEVTS_TJ[$i-1]} -c ${FCLFILE}" > "${WORKSPACE}/${JOBNAME}.log" 2>&1
         echo "Please see the EOF for job results." >> "${WORKSPACE}/${JOBNAME}.log" 2>&1
         echo "-----------------------------------" >> "${WORKSPACE}/${JOBNAME}.log" 2>&1
-
-        mu2e -n "${NEVTS_TJ[$i-1]}" -c "${FCLFILE}" >> "${WORKSPACE}/${JOBNAME}.log" 2>&1
+        mu2e -n "${NEVTS}" -c "${FCLFILE}" >> "${WORKSPACE}/${JOBNAME}.log" 2>&1
         RC=$?
 
         if [ ${RC} -eq 0 ]; then
           echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/${JOBNAME}.log"
+          touch ${WORKSPACE}/${JOBNAME}.log.SUCCESS
+          cat > gh-report-${JOBNAME}.md <<- EOM
+${COMMIT_SHA}
+mu2e/${JOBNAME}
+success
+mu2e -c ${FCLFILE} -n ${NEVTS} finished with return code ${RC}
+${JOB_URL}/${BUILD_NUMBER}/artifact/${JOBNAME}.log
+NOCOMMENT
+
+EOM
+        else
+          touch ${WORKSPACE}/${JOBNAME}.log.FAILED
+
+          cat > gh-report-${JOBNAME}.md <<- EOM
+${COMMIT_SHA}
+mu2e/${JOBNAME}
+failure
+mu2e -c ${FCLFILE} -n ${NEVTS_TJ[$i-1]} failed with return code ${RC}
+${JOB_URL}/${BUILD_NUMBER}/artifact/${JOBNAME}.log
+NOCOMMENT
+
+EOM
         fi
 
         echo "++RETURN CODE++ $RC" >> "${WORKSPACE}/${JOBNAME}.log"
 
         echo "[$(date)] ${JOBNAME} return code is ${RC}"
-
+        cmsbot_report gh-report-${JOBNAME}.md
       ) &
+
+      failed=$(ls -1 ${WORKSPACE} | { grep log.FAILED || true; } | wc -l)
+      finished=$(ls -1 ${WORKSPACE} | { grep log.SUCCESS || true; } | wc -l)
+      running=$((started - finished - failed))
+      while (( running >= MAX_TEST_PROCESSES )); do
+        sleep 90
+        failed=$(ls -1 ${WORKSPACE} | { grep log.FAILED || true; } | wc -l)
+        finished=$(ls -1 ${WORKSPACE} | { grep log.SUCCESS || true; } | wc -l)
+        running=$((started - finished - failed))
+      done
     done
 
     #wait;
