@@ -1,7 +1,23 @@
 #!/bin/bash
 # Ryunosuke O'Neil, 2020
-# roneil@fnal.gov
-# ryunosuke.oneil@postgrad.manchester.ac.uk
+# Contact: @ryuwd on GitHub
+
+
+# Configuration of test jobs to run directly after a successful build
+if [ -f ".build-tests.sh" ]; then
+    source .build-tests.sh
+else
+    # these arrays should have the same length
+    # name of the job
+    declare -a JOBNAMES=("ceSimReco" "g4test_03MT" "transportOnly" "PS" "g4study" "cosmicSimReco")
+    # the fcl file to run the job
+    declare -a FCLFILES=("Validation/fcl/ceSimReco.fcl" "Mu2eG4/fcl/g4test_03MT.fcl" "Mu2eG4/fcl/transportOnly.fcl" "JobConfig/beam/PS.fcl" "Mu2eG4/fcl/g4study.fcl" "Validation/fcl/cosmicSimReco.fcl")
+    # how many events?
+    declare -a NEVTS_TJ=("1" "10" "1" "1" "1" "1")
+
+    # how many of these tests to run in parallel at once
+    export MAX_TEST_PROCESSES=6
+fi
 
 cd "$WORKSPACE" || exit
 rm -f *.log
@@ -156,8 +172,7 @@ echo "[$(date)] report outcome"
 
 TESTS_FAILED=0
 MU2E_POSTBUILDTEST_STATUSES=""
-declare -a ART_TESTJOBS=("ceSimReco" "transportOnly" "PS" "g4study" "cosmicSimReco" "rootOverlaps" "g4surfaceCheck" "g4test_03MT")
-for i in "${ART_TESTJOBS[@]}"
+for i in "${JOBNAMES[@]}"
 do
     STATUS_temp=":wavy_dash:"
 
@@ -192,7 +207,7 @@ mu2e/buildtest
 failure
 The build is failing (${BUILDTYPE})
 ${JOB_URL}/${BUILD_NUMBER}/console
-:umbrella: The build is failing at ref ${COMMIT_SHA}.
+:umbrella: The build is failing at ${COMMIT_SHA}.
 
 \`\`\`
 ${ERROR_OUTPUT}
@@ -213,7 +228,7 @@ mu2e/buildtest
 failure
 The build succeeded, but other tests are failing.
 ${JOB_URL}/${BUILD_NUMBER}/console
-:umbrella: The tests failed for ref ${COMMIT_SHA}.
+:umbrella: The tests failed for ${COMMIT_SHA}.
 
 EOM
 
@@ -231,7 +246,7 @@ mu2e/buildtest
 success
 The tests passed.
 ${JOB_URL}/${BUILD_NUMBER}/console
-:sunny: The tests passed at ref ${COMMIT_SHA}.
+:sunny: The tests passed at ${COMMIT_SHA}.
 
 EOM
 
@@ -262,7 +277,7 @@ fi
 cat >> "$WORKSPACE"/gh-report.md <<- EOM
 
 For more information, please check the job page [here](${JOB_URL}/${BUILD_NUMBER}/console).
-Build artefacts are deleted after 5 days. If this is not desired, select \`Keep this build forever\` on the job page.
+Build artifacts are deleted after 5 days. If this is not desired, select \`Keep this build forever\` on the job page.
 
 EOM
 
