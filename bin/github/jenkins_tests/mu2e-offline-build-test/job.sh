@@ -82,7 +82,7 @@ done
 TD_FIXM_COUNT=$((FIXM_COUNT + TD_COUNT))
 
 if [ $TD_FIXM_COUNT == 0 ]; then
-    TD_FIXM_STATUS=":heavy_check_mark:"
+    TD_FIXM_STATUS=":white_check_mark:"
 fi
 
 echo "[$(date)] setup ${REPOSITORY}: perform merge"
@@ -132,7 +132,7 @@ ERROR_OUTPUT=$(grep "scons: \*\*\*" scons.log)
 if [[ -z $CT_FILES ]]; then
     echo "[$(date)] skip clang tidy step - no CPP files modified."
     echo "No CPP files modified." > $WORKSPACE/clang-tidy.log
-    CT_STATUS=":heavy_check_mark:"
+    CT_STATUS=":white_check_mark:"
 else
 
     echo "[$(date)] run clang tidy"
@@ -154,7 +154,7 @@ else
     )
 
     if [ $? -ne 1 ]; then
-        CT_STATUS=":heavy_check_mark:"
+        CT_STATUS=":white_check_mark:"
     fi
 fi
 
@@ -184,7 +184,7 @@ do
     # as a crude way to see if we have completed a check, we grep
     # this string on the corresp. logfile!
     if grep -q "++REPORT_STATUS_OK++" "$WORKSPACE/$i.log"; then
-        STATUS_temp=":heavy_check_mark:"
+        STATUS_temp=":white_check_mark:"
     elif [ -f "$WORKSPACE/$i.log" ]; then
         STATUS_temp=":x:"
         TESTS_FAILED=1
@@ -193,12 +193,21 @@ do
 | $i | ${STATUS_temp} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/$i.log) |"
 done
 
-# | ceSimReco (-n 1) | ${CE_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/ceSimReco.log) |
-# | g4test_03 (-n 1) | ${G4TEST3_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/g4test_03.log) |
-# | surfaceCheck | ${SURFACECHECK_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/surfaceCheck.log) |
-# | transportOnly (-n 1) | ${TRANSP_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/transportOnly.log) |
-# | PS (-n 1) | ${PS_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/PS.log) |
-# | g4study (-n 1) | ${G4S_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/g4study.log) |
+# (hack) to show 'non-fcl' tests as well
+declare -a ADDITIONAL_JOBNAMES=("rootOverlaps" "g4surfaceCheck")
+for i in "${ADDITIONAL_JOBNAMES[@]}"
+do
+    STATUS_temp=":wavy_dash:"
+    if grep -q "++REPORT_STATUS_OK++" "$WORKSPACE/$i.log"; then
+        STATUS_temp=":white_check_mark:"
+    elif [ -f "$WORKSPACE/$i.log" ]; then
+        STATUS_temp=":x:"
+        TESTS_FAILED=1
+    fi
+    MU2E_POSTBUILDTEST_STATUSES="${MU2E_POSTBUILDTEST_STATUSES}
+| $i | ${STATUS_temp} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/$i.log) |"
+done
+
 
 BUILDTIME_STR=""
 
@@ -220,7 +229,7 @@ ${ERROR_OUTPUT}
 EOM
 
 elif [ "$TESTS_FAILED" == 1 ]; then
-    BUILD_STATUS=":heavy_check_mark:"
+    BUILD_STATUS=":white_check_mark:"
     BUILDTEST_OUTCOME=1
     TIME_BUILD_OUTPUT=$(grep "Total build time: " scons.log)
     TIME_BUILD_OUTPUT=$(echo "$TIME_BUILD_OUTPUT" | grep -o -E '[0-9\.]+')
@@ -237,7 +246,7 @@ ${JOB_URL}/${BUILD_NUMBER}/console
 EOM
 
 else
-    BUILD_STATUS=":heavy_check_mark:"
+    BUILD_STATUS=":white_check_mark:"
 
     TIME_BUILD_OUTPUT=$(grep "Total build time: " scons.log)
     TIME_BUILD_OUTPUT=$(echo "$TIME_BUILD_OUTPUT" | grep -o -E '[0-9\.]+')
@@ -260,7 +269,7 @@ cat >> "$WORKSPACE"/gh-report.md <<- EOM
 
 | Test          | Result        | Details |
 | ------------- |:-------------:| ------- |
-| merge | :heavy_check_mark: | Merged ${COMMIT_SHA} at ${MASTER_COMMIT_SHA} |
+| merge | :white_check_mark: | Merged ${COMMIT_SHA} at ${MASTER_COMMIT_SHA} |
 | scons build (prof) | ${BUILD_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log). ${BUILDTIME_STR} |${MU2E_POSTBUILDTEST_STATUSES}
 | FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
 | clang-tidy | ${CT_STATUS} | [${CT_STAT_STRING}](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log) |
