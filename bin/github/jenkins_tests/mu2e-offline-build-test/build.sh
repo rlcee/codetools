@@ -66,6 +66,8 @@ EOM
         echo "++RETURN CODE++ $RC" >> "${WORKSPACE}/${JOBNAME}.log"
 
         echo "[$(date)] ${JOBNAME} return code is ${RC}"
+        
+        source $HOME/mu2e-gh-bot-venv/bin/activate
         cmsbot_report gh-report-${JOBNAME}.md
       ) &
 
