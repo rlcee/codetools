@@ -17,6 +17,10 @@ else
 
     # how many of these tests to run in parallel at once
     export MAX_TEST_PROCESSES=8
+    
+    export JOBNAMES
+    export FCLFILES
+    export NEVTS_TJ
 fi
 
 cd "$WORKSPACE" || exit
