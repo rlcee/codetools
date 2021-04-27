@@ -13,7 +13,7 @@ else
     # the fcl file to run the job
     declare -a FCLFILES=("Validation/fcl/ceSimReco.fcl" "Mu2eG4/fcl/g4test_03MT.fcl" "Mu2eG4/fcl/transportOnly.fcl" "JobConfig/beam/PS.fcl" "Mu2eG4/fcl/g4study.fcl" "Validation/fcl/cosmicSimReco.fcl")
     # how many events?
-    declare -a NEVTS_TJ=("1" "10" "1" "1" "1" "1")
+    declare -a NEVTS_TJ=("10" "10" "1" "1" "1" "1")
 
     # how many of these tests to run in parallel at once
     export MAX_TEST_PROCESSES=8
