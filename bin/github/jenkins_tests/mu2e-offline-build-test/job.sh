@@ -9,7 +9,7 @@ if [ -f ".build-tests.sh" ]; then
 else
     # these arrays should have the same length
     # name of the job
-    declare -a JOBNAMES=("ceSimReco" "g4test_03MT" "transportOnly" "PS" "g4study" "cosmicSimReco" "ceSteps","ceDigi" "muSteps")
+    declare -a JOBNAMES=("ceSimReco" "g4test_03MT" "transportOnly" "PS" "g4study" "cosmicSimReco" "ceSteps" "ceDigi" "muSteps")
     # the fcl file to run the job
     declare -a FCLFILES=("Validation/fcl/ceSimReco.fcl" "Mu2eG4/fcl/g4test_03MT.fcl" "Mu2eG4/fcl/transportOnly.fcl" "JobConfig/beam/PS.fcl" "Mu2eG4/fcl/g4study.fcl" "Validation/fcl/cosmicSimReco.fcl" "Validation/test/ceSteps.fcl" "Validation/test/ceDigi.fcl" "Validation/test/muSteps.fcl")
     # how many events?
