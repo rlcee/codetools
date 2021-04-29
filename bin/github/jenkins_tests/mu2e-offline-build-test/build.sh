@@ -83,7 +83,28 @@ EOM
     done
 
     #wait;
-    
+
+
+    # check the MDC2020 production sequence
+    (
+	for STAGE in ceSteps:100 ceDigi:100 muSteps:1000 ceMix:100
+	do
+	    FCL=$( echo $STAGE | awk -F: '{print $1}' )
+	    NEV=$( echo $STAGE | awk -F: '{print $2}' )
+            echo "[$(date)] Running MDC2020 production sequence, $FCL stage"
+	    mu2e -n $NEV -c Validation/test/${FCL}.fcl > ${WORKSPACE}/${FCL}.log 2>&1
+            RC=$?
+            if [ ${RC} -eq 0 ]; then
+		echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/${FCL}.log"
+            fi
+
+            echo "++RETURN CODE++ $RC" >> "${WORKSPACE}/${FCL}.log"
+
+            echo "[$(date)] MDC2020 production sequence, $FCL stage, return code is ${RC}"
+	done
+    ) &
+
+
     # check for overlaps with root
     (
         echo "[$(date)] checking for overlaps using ROOT (output going to rootOverlaps.log)"

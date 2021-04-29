@@ -9,11 +9,11 @@ if [ -f ".build-tests.sh" ]; then
 else
     # these arrays should have the same length
     # name of the job
-    declare -a JOBNAMES=("ceSimReco" "g4test_03MT" "transportOnly" "PS" "g4study" "cosmicSimReco" "ceSteps" "muSteps")
+    declare -a JOBNAMES=("ceSimReco" "g4test_03MT" "transportOnly" "PS" "g4study" "cosmicSimReco")
     # the fcl file to run the job
-    declare -a FCLFILES=("Validation/fcl/ceSimReco.fcl" "Mu2eG4/fcl/g4test_03MT.fcl" "Mu2eG4/fcl/transportOnly.fcl" "JobConfig/beam/PS.fcl" "Mu2eG4/fcl/g4study.fcl" "Validation/fcl/cosmicSimReco.fcl" "Validation/test/ceSteps.fcl" "Validation/test/muSteps.fcl")
+    declare -a FCLFILES=("Validation/fcl/ceSimReco.fcl" "Mu2eG4/fcl/g4test_03MT.fcl" "Mu2eG4/fcl/transportOnly.fcl" "JobConfig/beam/PS.fcl" "Mu2eG4/fcl/g4study.fcl" "Validation/fcl/cosmicSimReco.fcl")
     # how many events?
-    declare -a NEVTS_TJ=("10" "10" "1" "1" "1" "1" "100" "1000")
+    declare -a NEVTS_TJ=("10" "10" "1" "1" "1" "1")
 
     # how many of these tests to run in parallel at once
     export MAX_TEST_PROCESSES=8
@@ -194,7 +194,7 @@ do
 done
 
 # (hack) to show 'non-fcl' tests as well
-declare -a ADDITIONAL_JOBNAMES=("rootOverlaps" "g4surfaceCheck")
+declare -a ADDITIONAL_JOBNAMES=("ceSteps" "ceDigi" "muSteps" "ceMix" "rootOverlaps" "g4surfaceCheck")
 for i in "${ADDITIONAL_JOBNAMES[@]}"
 do
     STATUS_temp=":wavy_dash:"
