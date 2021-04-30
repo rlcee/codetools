@@ -194,7 +194,7 @@ do
 done
 
 # (hack) to show 'non-fcl' tests as well
-declare -a ADDITIONAL_JOBNAMES=("ceSteps" "ceDigi" "muSteps" "ceMix" "rootOverlaps" "g4surfaceCheck")
+declare -a ADDITIONAL_JOBNAMES=("ceSteps" "ceDigi" "muDauSteps" "ceMix" "rootOverlaps" "g4surfaceCheck")
 for i in "${ADDITIONAL_JOBNAMES[@]}"
 do
     STATUS_temp=":wavy_dash:"
