@@ -87,7 +87,7 @@ EOM
 
     # check the MDC2020 production sequence
     (
-	for STAGE in ceSteps:100 ceDigi:100 muSteps:1000 ceMix:100
+	for STAGE in ceSteps:100 ceDigi:100 muDauSteps:10000 ceMix:100
 	do
 	    FCL=$( echo $STAGE | awk -F: '{print $1}' )
 	    NEV=$( echo $STAGE | awk -F: '{print $2}' )
