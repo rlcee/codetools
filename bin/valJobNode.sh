@@ -9,6 +9,7 @@
 # VALJOB_OUTDIR=/pnfs/mu2e/persistent/users/mu2epro/valjob/2017/10/06/potSim
 # VALJOB_SEEDS=yes/no
 # VALJOB_WATCHDOG=yes/no
+# VALJOB_DATABASE=yes/no
 # -f seeds.txt
 
 tee_date() {
@@ -126,6 +127,13 @@ exe() {
   if [ "$VALJOB_SEEDS" != "no" ]; then
     export VALJOB_SEED=`cat Offline/seeds.txt | awk -v n=$PROCESS '{if(NR==(n+1)) print $1}'`
     echo "services.SeedService.baseSeed: $VALJOB_SEED" >> local.fcl
+  fi
+
+  if [ "$VALJOB_DATABASE" == "yes" ]; then
+    echo "services.DbService.purpose: TRK_TEST" >> local.fcl
+    echo "services.DbService.version: 2" >> local.fcl
+    echo "services.DbService.verbose: 5" >> local.fcl
+    echo "services.ProditionsService.strawElectronics.useDb: true" >> local.fcl
   fi
 
   if [ "$VALJOB_INPUT" != "NULL" ]; then
