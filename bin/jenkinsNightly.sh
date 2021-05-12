@@ -82,7 +82,7 @@ RC7=$?
 echo "[`date`] ceSimReco exe return code $RC7" | tee -a $REPORT
 
 # g4study
-mu2e -n 5 -c Mu2eG4/fcl/g4study.fcl
+mu2e -n 5 -c Mu2eG4/g4study/g4study.fcl
 RC8=$?
 echo "[`date`] g4study exe return code $RC8" | tee -a $REPORT
 

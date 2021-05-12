@@ -1,8 +1,8 @@
 #! /bin/bash
 #
-# build the code for nightly validation and run quick checks
-# $1= the work directory
-# $2= tarball full path
+# build the Offline code from a commit specification
+# $1= the build work directory
+# $2= output tarball full path
 #
 
 echo_date() {
