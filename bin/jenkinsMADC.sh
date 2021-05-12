@@ -4,7 +4,6 @@
 # the following are defined by the project:
 # export BUILDTYPE=prof
 # export label=SLF6
-# export LOCATION=offline or online
 # the following are defined as jenkins project parameters
 # export PACKAGE_VERSION=v1_02_00a
 # export COMPILER=e14
@@ -16,7 +15,7 @@
 
 OS=`echo $label | tr "[A-Z]" "[a-z]"`
 
-echo "[`date`] start $PACKAGE_VERSION $COMPILER $ART_VERSION $BUILDTYPE $OS $LOCATION"
+echo "[`date`] start $PACKAGE_VERSION $COMPILER $ART_VERSION $BUILDTYPE $OS"
 echo "[`date`] PWD"
 pwd
 echo "[`date`] directories"
@@ -57,8 +56,8 @@ FLAG="-p"
 [ "$BUILDTYPE" == "debug" ] && FLAG="-d"
 PFLAG=""
 [ -n "$PYTHON_VERSION_TAG" ] && PFLAG=":$PYTHON_VERSION_TAG"
-echo "[`date`] setup_for_development FLAG=$FLAG"
-source ../mu2e_artdaq-core/ups/setup_for_development $FLAG ${COMPILER}:${ART_VERSION}:${LOCATION}${PFLAG}
+echo "[`date`] setup_for_development $FLAG ${COMPILER}:${ART_VERSION}${PFLAG}"
+source ../mu2e_artdaq-core/ups/setup_for_development $FLAG ${COMPILER}:${ART_VERSION}${PFLAG}
 RC=$?
 [ $RC -ne 0 ] && exit $RC
 
@@ -72,7 +71,7 @@ echo "[`date`] buildtool RC=$RC"
 PACKAGE_VERSION_DOT=`echo $PACKAGE_VERSION | sed -e 's/v//' -e 's/_/\./g' `
 PYTHON_TAG=""
 [ -n "$PYTHON_VERSION_TAG" ] && PYTHON_TAG="-$PYTHON_VERSION_TAG"
-TBALL=mu2e_artdaq_core-${PACKAGE_VERSION_DOT}-${OS}-x86_64-${COMPILER}-${LOCATION}-${ART_VERSION}-${BUILDTYPE}${PYTHON_TAG}.tar.bz2
+TBALL=mu2e_artdaq_core-${PACKAGE_VERSION_DOT}-${OS}-x86_64-${COMPILER}-${ART_VERSION}-${BUILDTYPE}${PYTHON_TAG}.tar.bz2
 
 cd $LOCAL_DIR
 
