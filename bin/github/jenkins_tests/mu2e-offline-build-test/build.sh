@@ -160,6 +160,8 @@ cd "$REPO" || exit
 git show
 git rev-parse HEAD
 
+cd "$WORKSPACE" || exit
+
 echo "[$(date)] setup"
 
 do_setupstep
@@ -180,7 +182,7 @@ fi
 echo "[$(date)] Now gzip the compiled build, saving this for validation if needed."
 (
   cd "$WORKSPACE" || exit
-  tar -zcvf rev_"${COMMIT_SHA}"_pr_lib.tar.gz Offline/lib > /dev/null
+  tar -zcvf rev_"${COMMIT_SHA}"_pr_lib.tar.gz Offline build > /dev/null
 ) &
 
 echo "[$(date)] run tests"
