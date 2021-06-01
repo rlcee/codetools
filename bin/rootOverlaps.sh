@@ -14,14 +14,7 @@ if [ $RC -ne 0  ]; then
     exit $RC
 fi
 
-if [ -r ${MU2E_SATELLITE_RELEASE}/bin/overlapCheck.sh ]; then
-    ${MU2E_SATELLITE_RELEASE}/bin/overlapCheck.sh mu2e.gdml >& overlapCheck.log 
-elif [ -r ${MU2E_BASE_RELEASE}/bin/overlapCheck.sh ]; then
-    ${MU2E_BASE_RELEASE}/bin/overlapCheck.sh mu2e.gdml >& overlapCheck.log
-else
-    echo "ERROR rootOverlaps could not find bin/overlapCheck.sh"
-    exit 1
-fi
+overlapCheck.sh mu2e.gdml >& overlapCheck.log 
 
 # a message on how many volumes checked
 grep "in Geometry imported from GDML" overlapCheck.log
