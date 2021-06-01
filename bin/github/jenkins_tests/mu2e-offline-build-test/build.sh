@@ -9,7 +9,7 @@ function do_setupstep() {
     setup codetools
 
     # building prof or debug
-    setup muse -q $BUILDTYPE
+    muse setup -q $BUILDTYPE
 
     return 0
 }
