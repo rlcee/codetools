@@ -5,17 +5,17 @@
 function do_setupstep() {
     source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
     setup mu2e
+    setup muse
     setup codetools
 
     # building prof or debug
-    ./buildopts --build="$BUILDTYPE"
-    source setup.sh
+    setup muse -q $BUILDTYPE
 
     return 0
 }
 
 function do_buildstep() {
-    scons --debug=time -k --max-drift=1 --implicit-deps-unchanged -j 24 2>&1 | tee "${WORKSPACE}/scons.log"
+   muse build --debug=time -k --max-drift=1 --implicit-deps-unchanged -j 24 2>&1 | tee "${WORKSPACE}/scons.log"
     return "${PIPESTATUS[0]}"
 }
 
