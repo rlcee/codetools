@@ -46,6 +46,7 @@ echo "Setting up job environment..."
 rm -rf *.log *.md *.patch > /dev/null 2>&1
 
 function print_jobinfo() {
+    echo "[`date`] print_jobinfo"
     echo "[`date`] printenv"
     printenv
 
@@ -59,7 +60,7 @@ function print_jobinfo() {
     pwd
     export LOCAL_DIR=$PWD
 
-    echo "[`date`] ls of local dir"
+    echo "[`date`] ls of local dir at start"
     ls -al
 
     echo "[`date`] cpuinfo"
@@ -116,9 +117,7 @@ function setup_offline() {
     export REPO_FULLNAME=$1
     (
 
-        if [ -d ${REPO} ]; then
-            rm -rf $REPO
-        fi
+        rm -rf $REPO .sconsign.dblite build
 
         git clone "https://github.com/$REPO_FULLNAME"
 
@@ -151,6 +150,9 @@ function offline_domerge() {
 }
 
 echo "Running job now."
+
+print_jobinfo
+
 (
     source $JOB_SCRIPT
 )
