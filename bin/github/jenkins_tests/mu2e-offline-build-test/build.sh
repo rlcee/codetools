@@ -92,7 +92,7 @@ EOM
 	    FCL=$( echo $STAGE | awk -F: '{print $1}' )
 	    NEV=$( echo $STAGE | awk -F: '{print $2}' )
             echo "[$(date)] Running MDC2020 production sequence, $FCL stage"
-	    mu2e -n $NEV -c Validation/test/${FCL}.fcl > ${WORKSPACE}/${FCL}.log 2>&1
+	    mu2e -n $NEV -c Validation/${FCL}.fcl > ${WORKSPACE}/${FCL}.log 2>&1
             RC=$?
             if [ ${RC} -eq 0 ]; then
 		echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/${FCL}.log"

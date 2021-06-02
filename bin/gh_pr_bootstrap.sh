@@ -117,8 +117,9 @@ function setup_offline() {
     export REPO_FULLNAME=$1
     (
 
-        rm -rf $REPO .sconsign.dblite build
+        rm -rf $REPO .sconsign.dblite build Production
 
+        git clone https://github.com/Mu2e/Production
         git clone "https://github.com/$REPO_FULLNAME"
 
         cd $REPO
