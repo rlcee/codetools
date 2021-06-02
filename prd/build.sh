@@ -34,9 +34,9 @@ install() {
     echo "ERROR - failed to make release dir $DD"
     return 1
   fi
-  mkdir -p $DV
+  mkdir -p $DD
   mkdir -p $DU
-  mkdir -p $DD/bin
+  mkdir -p $DV
 
   # install UPS files
   cat $SOURCEDIR/prd/NULL \
@@ -48,10 +48,10 @@ install() {
      > $DD/ups/codetools.table
 
   # install scripts
-  cp $SOURCEDIR/bin/* $DD/bin
+  cp -r $SOURCEDIR/bin $SOURCEDIR/clangtools_utilities $DD
   RC=$?
   if [ $RC -ne 0 ]; then
-    echo "ERROR - failed to cp $DD/bin/val\*.sh $DD/bin"
+    echo "ERROR - failed to cp scripts from  $SOURCEDIR to $DD"
     return 1
   fi
 
