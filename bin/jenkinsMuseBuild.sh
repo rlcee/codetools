@@ -59,14 +59,13 @@ else
   exit 1
 fi
 
-cp $LOG $MUSE_BUILD_BASE/Offline/gen/txt
-
 RLOG=copyBack/build-release-${MU2E_TAG}-${MUSE_STUB}.log
 
 echo "[$(date)] muse build RELEASE"
 muse build RELEASE >& $RLOG
 [ $? -ne 0 ] && exit 1
 
+cp $LOG $MUSE_BUILD_BASE/Offline/gen/txt
 cp $RLOG $MUSE_BUILD_BASE/Offline/gen/txt
 
 mkdir tar
