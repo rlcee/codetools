@@ -101,12 +101,22 @@ function cmsbot_report() {
         source $HOME/mu2e-gh-bot-venv/bin/activate
     fi
     ${CMS_BOT_DIR}/comment-github-pullrequest -r ${REPOSITORY} -p ${PULL_REQUEST} --report-file $1
+}
 
-    if grep -Fxq "NOCOMMENT" $1
-    then
-        ${CMS_BOT_DIR}/process-pull-request ${PULL_REQUEST} --repository ${REPOSITORY}
+function cmsbot_report_test_status() {
+    if [ "${CMS_BOT_VENV_SOURCED}" -ne 1 ]; then
+        CMS_BOT_VENV_SOURCED=1
+        source $HOME/mu2e-gh-bot-venv/bin/activate
     fi
 
+    ${CMS_BOT_DIR}/report-test-status \
+        --repository ${REPOSITORY} \
+        --pullrequest ${PULL_REQUEST} \
+        --commit "${COMMIT_SHA}" \
+        --test-name "$1" \
+        --test-state "$2" \
+        --message "$3" \
+        --url "$4"
 }
 
 function setup_offline() {
