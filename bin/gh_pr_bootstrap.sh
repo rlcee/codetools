@@ -9,7 +9,6 @@ export JENKINS_TESTS_DIR="$DIR/github/jenkins_tests"
 export CLANGTOOLS_UTIL_DIR="$DIR/../clangtools_utilities"
 export TESTSCRIPT_DIR="$JENKINS_TESTS_DIR/$1"
 
-
 cd "$WORKSPACE" || exit 1;
 
 
@@ -29,6 +28,17 @@ check_set $COMMIT_SHA || exit 1;
 check_set $MASTER_COMMIT_SHA || exit 1;
 
 echo "OK!"
+
+
+# clean workspace from previous build 
+echo "Delete files in workspace from previous builds (not directories)"
+rm $WORKSPACE/* # removes files only - we only expect folders to exist in the workspace at the start of the build.
+rm $WORKSPACE/.sconsign.dblite
+rm -rf $WORKSPACE/build # this shouldn't be hanging around either
+echo "Workspace now:"
+ls -lah
+echo ""
+echo ""
 
 echo "Bootstrapping job $1..."
 
