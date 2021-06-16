@@ -29,6 +29,11 @@ function do_runstep() {
         JOBNAME=${JOBNAMES[$i-1]}
         FCLFILE=${FCLFILES[$i-1]}
         NEVTS=${NEVTS_TJ[$i-1]}
+        TEST_URL_GS="${JOB_URL}/${BUILD_NUMBER}/console"
+        (
+          source $HOME/mu2e-gh-bot-venv/bin/activate
+          cmsbot_report_test_status "mu2e/${JOBNAME}" "pending" "The test has started." "${TEST_URL_GS}"
+        ) &
 
         echo "[$(date)] ${JOBNAME} step. Output is being written to ${WORKSPACE}/${JOBNAME}.log"
         echo "Test: mu2e -n ${NEVTS_TJ[$i-1]} -c ${FCLFILE}" > "${WORKSPACE}/${JOBNAME}.log" 2>&1
@@ -37,48 +42,41 @@ function do_runstep() {
         mu2e -n "${NEVTS}" -c "${FCLFILE}" >> "${WORKSPACE}/${JOBNAME}.log" 2>&1
         RC=$?
 
+        TEST_STAT_GS="pending"
+
         if [ ${RC} -eq 0 ]; then
           echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/${JOBNAME}.log"
           touch ${WORKSPACE}/${JOBNAME}.log.SUCCESS
-          cat > gh-report-${JOBNAME}.md <<- EOM
-${COMMIT_SHA}
-mu2e/${JOBNAME}
-success
-mu2e -c ${FCLFILE} -n ${NEVTS} finished with return code ${RC}
-${JOB_URL}/${BUILD_NUMBER}/artifact/${JOBNAME}.log
-NOCOMMENT
 
-EOM
+          TEST_STAT_GS="success"
         else
           touch ${WORKSPACE}/${JOBNAME}.log.FAILED
-
-          cat > gh-report-${JOBNAME}.md <<- EOM
-${COMMIT_SHA}
-mu2e/${JOBNAME}
-failure
-mu2e -c ${FCLFILE} -n ${NEVTS_TJ[$i-1]} failed with return code ${RC}
-${JOB_URL}/${BUILD_NUMBER}/artifact/${JOBNAME}.log
-NOCOMMENT
-
-EOM
+          TEST_STAT_GS="failure"
         fi
+
+        TEST_URL_GS="${JOB_URL}/${BUILD_NUMBER}/artifact/${JOBNAME}.log"
+        TEST_MSG_GS="mu2e -c ${FCLFILE} -n ${NEVTS} finished with return code ${RC}"
 
         echo "++RETURN CODE++ $RC" >> "${WORKSPACE}/${JOBNAME}.log"
 
         echo "[$(date)] ${JOBNAME} return code is ${RC}"
         
-        source $HOME/mu2e-gh-bot-venv/bin/activate
-        cmsbot_report gh-report-${JOBNAME}.md
+        (
+          source $HOME/mu2e-gh-bot-venv/bin/activate
+          cmsbot_report_test_status "mu2e/${JOBNAME}" "${TEST_STAT_GS}" "${TEST_MSG_GS}" "${TEST_URL_GS}"
+        ) &
       ) &
 
       failed=$(ls -1 ${WORKSPACE} | { grep log.FAILED || true; } | wc -l)
       finished=$(ls -1 ${WORKSPACE} | { grep log.SUCCESS || true; } | wc -l)
       running=$((started - finished - failed))
       while (( running >= MAX_TEST_PROCESSES )); do
-        sleep 90
+        sleep 30
         failed=$(ls -1 ${WORKSPACE} | { grep log.FAILED || true; } | wc -l)
         finished=$(ls -1 ${WORKSPACE} | { grep log.SUCCESS || true; } | wc -l)
         running=$((started - finished - failed))
+
+        echo "[$(date)] ${running} tests still running. ${finished} have finished. ${failed} have errors."
       done
     done
 
@@ -91,16 +89,35 @@ EOM
 	do
 	    FCL=$( echo $STAGE | awk -F: '{print $1}' )
 	    NEV=$( echo $STAGE | awk -F: '{print $2}' )
-            echo "[$(date)] Running MDC2020 production sequence, $FCL stage"
-	    mu2e -n $NEV -c Validation/${FCL}.fcl > ${WORKSPACE}/${FCL}.log 2>&1
-            RC=$?
-            if [ ${RC} -eq 0 ]; then
-		echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/${FCL}.log"
-            fi
+      TEST_URL_GS="${JOB_URL}/${BUILD_NUMBER}/console"
+      (
+        source $HOME/mu2e-gh-bot-venv/bin/activate
+        cmsbot_report_test_status "mu2e/${FCL}" "pending" "The test has started." "${TEST_URL_GS}"
+      ) &
 
-            echo "++RETURN CODE++ $RC" >> "${WORKSPACE}/${FCL}.log"
+      echo "[$(date)] Running MDC2020 production sequence, $FCL stage"
+      mu2e -n $NEV -c Validation/${FCL}.fcl > ${WORKSPACE}/${FCL}.log 2>&1
+      RC=$?
 
-            echo "[$(date)] MDC2020 production sequence, $FCL stage, return code is ${RC}"
+      if [ ${RC} -eq 0 ]; then
+        echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/${FCL}.log"
+        TEST_STAT_GS="success"
+      else
+        TEST_STAT_GS="failure"
+      fi
+      
+      TEST_MSG_GS="mu2e -n ${NEV} -c Validation/${FCL}.fcl finished with return code ${RC}"
+      TEST_URL_GS="${JOB_URL}/${BUILD_NUMBER}/artifact/${JOBNAME}.log"
+
+      echo "++RETURN CODE++ $RC" >> "${WORKSPACE}/${FCL}.log"
+
+      echo "[$(date)] MDC2020 production sequence, $FCL stage, return code is ${RC}"
+
+      (
+        source $HOME/mu2e-gh-bot-venv/bin/activate
+        cmsbot_report_test_status "mu2e/${FCL}" "${TEST_STAT_GS}" "${TEST_MSG_GS}" "${TEST_URL_GS}"
+      ) &
+
 	done
     ) &
 
