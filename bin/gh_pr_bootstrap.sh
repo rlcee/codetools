@@ -9,7 +9,6 @@ export JENKINS_TESTS_DIR="$DIR/github/jenkins_tests"
 export CLANGTOOLS_UTIL_DIR="$DIR/../clangtools_utilities"
 export TESTSCRIPT_DIR="$JENKINS_TESTS_DIR/$1"
 
-
 cd "$WORKSPACE" || exit 1;
 
 
@@ -29,6 +28,17 @@ check_set $COMMIT_SHA || exit 1;
 check_set $MASTER_COMMIT_SHA || exit 1;
 
 echo "OK!"
+
+
+# clean workspace from previous build 
+echo "Delete files in workspace from previous builds (not directories)"
+rm $WORKSPACE/* # removes files only - we only expect folders to exist in the workspace at the start of the build.
+rm $WORKSPACE/.sconsign.dblite
+rm -rf $WORKSPACE/build # this shouldn't be hanging around either
+echo "Workspace now:"
+ls -lah
+echo ""
+echo ""
 
 echo "Bootstrapping job $1..."
 
@@ -101,12 +111,22 @@ function cmsbot_report() {
         source $HOME/mu2e-gh-bot-venv/bin/activate
     fi
     ${CMS_BOT_DIR}/comment-github-pullrequest -r ${REPOSITORY} -p ${PULL_REQUEST} --report-file $1
+}
 
-    if grep -Fxq "NOCOMMENT" $1
-    then
-        ${CMS_BOT_DIR}/process-pull-request ${PULL_REQUEST} --repository ${REPOSITORY}
+function cmsbot_report_test_status() {
+    if [ "${CMS_BOT_VENV_SOURCED}" -ne 1 ]; then
+        CMS_BOT_VENV_SOURCED=1
+        source $HOME/mu2e-gh-bot-venv/bin/activate
     fi
 
+    ${CMS_BOT_DIR}/report-test-status \
+        --repository ${REPOSITORY} \
+        --pullrequest ${PULL_REQUEST} \
+        --commit "${COMMIT_SHA}" \
+        --test-name "$1" \
+        --test-state "$2" \
+        --message "$3" \
+        --url "$4"
 }
 
 function setup_offline() {

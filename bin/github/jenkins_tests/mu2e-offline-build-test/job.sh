@@ -15,6 +15,9 @@ else
     # how many events?
     declare -a NEVTS_TJ=("10" "10" "1" "1" "1" "1")
 
+    # tests that are known to be bad
+    declare -a FAIL_OK=()
+
     # how many of these tests to run in parallel at once
     export MAX_TEST_PROCESSES=8
     
@@ -26,7 +29,7 @@ fi
 cd "$WORKSPACE" || exit
 rm -f *.log
 
-echo "[$(date)] setup CMS-BOT/mu2e"
+echo "[$(date)] setup Mu2e/CI"
 setup_cmsbot
 
 echo "[$(date)] setup ${REPOSITORY}"
@@ -115,7 +118,7 @@ cat > gh-report.md <<- EOM
 ${COMMIT_SHA}
 mu2e/buildtest
 pending
-The build is running in Jenkins...
+The build is running...
 ${JOB_URL}/${BUILD_NUMBER}/console
 NOCOMMENT
 
@@ -179,7 +182,7 @@ MU2E_POSTBUILDTEST_STATUSES=""
 for i in "${JOBNAMES[@]}"
 do
     STATUS_temp=":wavy_dash:"
-
+    ALLOWED_TO_FAIL=0
 
     # as a crude way to see if we have completed a check, we grep
     # this string on the corresp. logfile!
@@ -187,7 +190,19 @@ do
         STATUS_temp=":white_check_mark:"
     elif [ -f "$WORKSPACE/$i.log" ]; then
         STATUS_temp=":x:"
-        TESTS_FAILED=1
+
+        # Check if this test is "allowed to fail"
+        for j in "${FAIL_OK[@]}"; do
+            if [ "$i" = "$j" ]; then
+                # This test is allowed to fail.
+                ALLOWED_TO_FAIL=1
+                STATUS_temp=":heavy_exclamation_mark:"
+                break;
+            fi
+        done
+        if [ ${ALLOWED_TO_FAIL} -ne 1 ]; then
+            TESTS_FAILED=1
+        fi
     fi
     MU2E_POSTBUILDTEST_STATUSES="${MU2E_POSTBUILDTEST_STATUSES}
 | $i | ${STATUS_temp} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/$i.log) |"
@@ -205,7 +220,7 @@ do
         TESTS_FAILED=1
     fi
     MU2E_POSTBUILDTEST_STATUSES="${MU2E_POSTBUILDTEST_STATUSES}
-| $i | ${STATUS_temp} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/$i.log) |"
+| $i | ${STATUS_temp} | [Log file.](${JOB_URL}/${BUILD_NUMBER}/artifact/$i.log) |"
 done
 
 
@@ -285,8 +300,6 @@ EOM
 
 fi
 
-
-
 cat >> "$WORKSPACE"/gh-report.md <<- EOM
 
 For more information, please check the job page [here](${JOB_URL}/${BUILD_NUMBER}/console).
@@ -308,7 +321,7 @@ else
     GIST_LINK=$( cat gist-link.txt )
     cat >> "$WORKSPACE"/gh-report.md <<- EOM
 
-Logfiles may also be accessed [at this link.](${GIST_LINK})
+Log files have been uploaded [here.](${GIST_LINK})
 
 EOM
 
