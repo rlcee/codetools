@@ -31,7 +31,7 @@ You can review the generated patch [here]($PURL).
 If it is convenient, you may remove the trailing whitespace like this:
 \`\`\`
 curl $PURL | git apply -v --index
-git commit -am "Remove trailing whitespace found at ${COMMIT_SHA}" && git push
+git commit -am "Remove trailing whitespace" && git push
 \`\`\`
 
 EOM

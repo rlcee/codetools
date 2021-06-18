@@ -199,7 +199,7 @@ fi
 echo "[$(date)] Now gzip the compiled build, saving this for validation if needed."
 (
   cd "$WORKSPACE" || exit
-  tar -zcvf rev_"${COMMIT_SHA}"_pr_lib.tar.gz Offline build > /dev/null
+  tar -zcvf rev_"${COMMIT_SHA}"_pr_lib.tar.gz $REPO build > /dev/null
 ) &
 
 echo "[$(date)] run tests"
