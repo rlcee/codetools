@@ -31,22 +31,22 @@ do_setupstep
 
 
 #offline_domerge
-OFFLINE_MERGESTATUS=0
+# OFFLINE_MERGESTATUS=0
 
-if [ $OFFLINE_MERGESTATUS -ne 0 ];
-then
-    cat > gh-report.md <<- EOM
-${COMMIT_SHA}
-mu2e/codechecks
-error
-The PR branch could not be merged.
-http://github.com/${REPOSITORY}/pull/${PULL_REQUEST}
-:x: The build test could not run due to merge conflicts, or otherwise. Please resolve this first and try again.
+# if [ $OFFLINE_MERGESTATUS -ne 0 ];
+# then
+#     cat > gh-report.md <<- EOM
+# ${COMMIT_SHA}
+# mu2e/codechecks
+# error
+# The PR branch could not be merged.
+# http://github.com/${REPOSITORY}/pull/${PULL_REQUEST}
+# :x: The build test could not run due to merge conflicts, or otherwise. Please resolve this first and try again.
 
-EOM
-    cmsbot_report gh-report.md
-    exit 1;
-fi
+# EOM
+#     cmsbot_report gh-report.md
+#     exit 1;
+# fi
 
 # echo "[$(date)] setup compile_commands.json and get latest clang tool configs"
 # (
@@ -78,21 +78,21 @@ echo "[$(date)] check formatting"
 )
 if [ $? -ne 0 ]; then
     cmsbot_report $WORKSPACE/gh-report.md
-    exit 0;
+    exit 1;
 fi
 git reset --hard ${COMMIT_SHA}
 
 
-echo "[$(date)] include-what-you-use"
-(
-    echo "IWYU step has been switched off."
-    exit 0;
-    #source ${TESTSCRIPT_DIR}/iwyu.sh
-)
-if [ $? -ne 0 ]; then
-    cmsbot_report $WORKSPACE/gh-report.md
-    exit 0;
-fi
+# echo "[$(date)] include-what-you-use"
+# (
+#     echo "IWYU step has been switched off."
+#     exit 0;
+#     #source ${TESTSCRIPT_DIR}/iwyu.sh
+# )
+# if [ $? -ne 0 ]; then
+#     cmsbot_report $WORKSPACE/gh-report.md
+#     exit 0;
+# fi
 
 cmsbot_report $WORKSPACE/gh-report.md
 exit 0;
