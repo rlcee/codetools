@@ -139,9 +139,12 @@ function setup_offline() {
 
         rm -rf $REPO .sconsign.dblite build Production
 
-        git clone https://github.com/Mu2e/Production
         git clone "https://github.com/$REPO_FULLNAME"
-
+        
+        if [ ! -d "Production" ]; then
+            git clone https://github.com/Mu2e/Production
+        fi
+        
         cd $REPO
 
         git config user.email "you@example.com"
