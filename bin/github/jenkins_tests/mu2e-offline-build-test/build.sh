@@ -44,6 +44,8 @@ function babysit_test() {
           kill -9 $THE_PID
           break;
         fi
+      else # Exit condition 2: the process is finished
+        break; # test is no longer running
       fi
     done
   ) &
