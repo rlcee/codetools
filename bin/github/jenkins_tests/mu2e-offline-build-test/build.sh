@@ -38,7 +38,7 @@ function babysit_test() {
       then
         ELAPSEDTIME=$((CHECK_INTERVAL * NCHECK))
         echo "[$(date)] Monitoring: ${TEST_NAME} is still running after $ELAPSEDTIME seconds."
-        if [ "$ELAPSEDTIME" -gt "$TESTTIMEOUT" ]; then # Exit condition
+        if [ "$ELAPSEDTIME" -gt "$TEST_TIMEOUT" ]; then # Exit condition
           echo "[$(date)] Monitoring: Killed ${TEST_NAME} for running too long."
           touch "${WORKSPACE}/${TEST_NAME}.log.TIMEOUT"
           kill -9 $THE_PID
