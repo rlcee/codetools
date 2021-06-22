@@ -15,6 +15,9 @@ else
     # how many events?
     declare -a NEVTS_TJ=("10" "10" "1" "1" "1" "1")
 
+    # manually defined test names (see build.sh)
+    declare -a ADDITIONAL_JOBNAMES=("ceSteps" "ceDigi" "muDauSteps" "ceMix" "rootOverlaps" "g4surfaceCheck")
+
     # tests that are known to be bad
     declare -a FAIL_OK=()
 
@@ -177,50 +180,56 @@ echo $CT_STAT_STRING
 
 echo "[$(date)] report outcome"
 
+
 TESTS_FAILED=0
 MU2E_POSTBUILDTEST_STATUSES=""
-for i in "${JOBNAMES[@]}"
-do
+
+function append_report_row() {
+    MU2E_POSTBUILDTEST_STATUSES="${MU2E_POSTBUILDTEST_STATUSES}
+| $1 | $2 | $3 |"
+}
+
+function build_test_report() {
+    i=$1
+    EXTRAINFO=""
     STATUS_temp=":wavy_dash:"
     ALLOWED_TO_FAIL=0
-
-    # as a crude way to see if we have completed a check, we grep
-    # this string on the corresp. logfile!
-    if grep -q "++REPORT_STATUS_OK++" "$WORKSPACE/$i.log"; then
+    # Check if this test is "allowed to fail"
+    for j in "${FAIL_OK[@]}"; do
+        if [ "$i" = "$j" ]; then
+            # This test is allowed to fail.
+            ALLOWED_TO_FAIL=1
+            STATUS_temp=":heavy_exclamation_mark:"
+            break;
+        fi
+    done
+    if [ -f "$WORKSPACE/$i.log.SUCCESS" ]; then
         STATUS_temp=":white_check_mark:"
-    elif [ -f "$WORKSPACE/$i.log" ]; then
+    elif [ -f "$WORKSPACE/$i.log.TIMEOUT" ]; then
+        STATUS_temp=":stopwatch: :x:"
+        EXTRAINFO="Timed out."
+        if [ ${ALLOWED_TO_FAIL} -ne 1 ]; then
+            TESTS_FAILED=1
+        fi
+    elif [ -f "$WORKSPACE/$i.log.FAILED" ]; then
         STATUS_temp=":x:"
+        EXTRAINFO="Return Code $(cat $WORKSPACE/$i.log.FAILED)."
 
-        # Check if this test is "allowed to fail"
-        for j in "${FAIL_OK[@]}"; do
-            if [ "$i" = "$j" ]; then
-                # This test is allowed to fail.
-                ALLOWED_TO_FAIL=1
-                STATUS_temp=":heavy_exclamation_mark:"
-                break;
-            fi
-        done
         if [ ${ALLOWED_TO_FAIL} -ne 1 ]; then
             TESTS_FAILED=1
         fi
     fi
-    MU2E_POSTBUILDTEST_STATUSES="${MU2E_POSTBUILDTEST_STATUSES}
-| $i | ${STATUS_temp} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/$i.log) |"
-done
+    append_report_row "$i" "${STATUS_temp}" "[Log file.](${JOB_URL}/${BUILD_NUMBER}/artifact/$i.log) ${EXTRAINFO}"
+}
 
-# (hack) to show 'non-fcl' tests as well
-declare -a ADDITIONAL_JOBNAMES=("ceSteps" "ceDigi" "muDauSteps" "ceMix" "rootOverlaps" "g4surfaceCheck")
-for i in "${ADDITIONAL_JOBNAMES[@]}"
+
+for i in "${JOBNAMES[@]}"
 do
-    STATUS_temp=":wavy_dash:"
-    if grep -q "++REPORT_STATUS_OK++" "$WORKSPACE/$i.log"; then
-        STATUS_temp=":white_check_mark:"
-    elif [ -f "$WORKSPACE/$i.log" ]; then
-        STATUS_temp=":x:"
-        TESTS_FAILED=1
-    fi
-    MU2E_POSTBUILDTEST_STATUSES="${MU2E_POSTBUILDTEST_STATUSES}
-| $i | ${STATUS_temp} | [Log file.](${JOB_URL}/${BUILD_NUMBER}/artifact/$i.log) |"
+    build_test_report $i
+done
+for i in "${ADDITIONAL_JOBNAMES[@]}"
+do 
+    build_test_report $i
 done
 
 
