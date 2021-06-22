@@ -300,7 +300,7 @@ cat >> "$WORKSPACE"/gh-report.md <<- EOM
 
 EOM
 
-if [ $TRIGGER_VALIDATION -ne 0 ]; then
+if [ "$TRIGGER_VALIDATION" = "1" ]; then
 
 cat >> "$WORKSPACE"/gh-report.md <<- EOM
 :hourglass: The validation job has been queued.
