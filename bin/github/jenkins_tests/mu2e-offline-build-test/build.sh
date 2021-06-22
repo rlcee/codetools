@@ -19,7 +19,7 @@ function do_buildstep() {
     return "${PIPESTATUS[0]}"
 }
 
-TEST_TIMEOUT=1200 # half an hour
+TEST_TIMEOUT=1200 # 20mins
 
 function babysit_test() {
   # use:
