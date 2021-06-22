@@ -19,6 +19,36 @@ function do_buildstep() {
     return "${PIPESTATUS[0]}"
 }
 
+TEST_TIMEOUT=1200 # half an hour
+
+function babysit_test() {
+  # use:
+  # babysit_test "Test Name" $Test_PID
+  TEST_NAME=$1
+  THE_PID=$2
+  CHECK_INTERVAL=120 # how long to wait between checking
+  (
+    NCHECK=0
+    while [ ! -f "${WORKSPACE}/${TEST_NAME}.SUCCESS" ] | [ ! -f "${WORKSPACE}/${TEST_NAME}.FAILED" ]; do
+      sleep $CHECK_INTERVAL
+
+      NCHECK=$((NCHECK + 1))
+
+      if ps -p $THE_PID > /dev/null
+      then
+        ELAPSEDTIME=$((CHECK_INTERVAL * NCHECK))
+        echo "[$(date)] Monitoring: ${TEST_NAME} is still running after $ELAPSEDTIME seconds."
+        if [ "$ELAPSEDTIME" -gt "$TESTTIMEOUT" ]; then # Exit condition
+          echo "[$(date)] Monitoring: Killed ${TEST_NAME} for running too long."
+          touch "${WORKSPACE}/${TEST_NAME}.log.TIMEOUT"
+          kill -9 $THE_PID
+          break;
+        fi
+      fi
+    done
+  ) &
+}
+
 function do_runstep() {
     arraylength=${#JOBNAMES[@]}
     started=0
@@ -39,25 +69,28 @@ function do_runstep() {
         echo "Test: mu2e -n ${NEVTS_TJ[$i-1]} -c ${FCLFILE}" > "${WORKSPACE}/${JOBNAME}.log" 2>&1
         echo "Please see the EOF for job results." >> "${WORKSPACE}/${JOBNAME}.log" 2>&1
         echo "-----------------------------------" >> "${WORKSPACE}/${JOBNAME}.log" 2>&1
-        mu2e -n "${NEVTS}" -c "${FCLFILE}" >> "${WORKSPACE}/${JOBNAME}.log" 2>&1
-        RC=$?
+        mu2e -n "${NEVTS}" -c "${FCLFILE}" >> "${WORKSPACE}/${JOBNAME}.log" 2>&1 &
+        TESTPID=$!
+        babysit_test "${JOBNAME}" "${TESTPID}" # Kills the test after TEST_TIMEOUT seconds
+
+        wait $TESTPID; # Wait for process to finish
+        RC=$? # grab the return code from the process
 
         TEST_STAT_GS="pending"
 
         if [ ${RC} -eq 0 ]; then
-          echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/${JOBNAME}.log"
-          touch ${WORKSPACE}/${JOBNAME}.log.SUCCESS
-
+          echo "Job completed successfully." >> "${WORKSPACE}/${JOBNAME}.log"
+          echo "${RC}" > ${WORKSPACE}/${JOBNAME}.log.SUCCESS
           TEST_STAT_GS="success"
         else
-          touch ${WORKSPACE}/${JOBNAME}.log.FAILED
+          echo "${RC}" > ${WORKSPACE}/${JOBNAME}.log.FAILED
           TEST_STAT_GS="failure"
         fi
 
         TEST_URL_GS="${JOB_URL}/${BUILD_NUMBER}/artifact/${JOBNAME}.log"
         TEST_MSG_GS="mu2e -c ${FCLFILE} -n ${NEVTS} finished with return code ${RC}"
 
-        echo "++RETURN CODE++ $RC" >> "${WORKSPACE}/${JOBNAME}.log"
+        echo "Return Code: $RC" >> "${WORKSPACE}/${JOBNAME}.log"
 
         echo "[$(date)] ${JOBNAME} return code is ${RC}"
         
@@ -96,20 +129,26 @@ function do_runstep() {
       ) &
 
       echo "[$(date)] Running MDC2020 production sequence, $FCL stage"
-      mu2e -n $NEV -c Validation/${FCL}.fcl > ${WORKSPACE}/${FCL}.log 2>&1
-      RC=$?
+      mu2e -n $NEV -c Validation/${FCL}.fcl > ${WORKSPACE}/${FCL}.log 2>&1 &
+      TESTPID=$!
+      babysit_test "${FCL}" "${TESTPID}" # Kills the test after TEST_TIMEOUT seconds
+
+      wait $TESTPID; # Wait for process to finish
+      RC=$? # grab the return code from the process
 
       if [ ${RC} -eq 0 ]; then
-        echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/${FCL}.log"
+        echo "Job completed successfully." >> "${WORKSPACE}/${FCL}.log"
+        echo "${RC}" > ${WORKSPACE}/${FCL}.log.SUCCESS
         TEST_STAT_GS="success"
       else
         TEST_STAT_GS="failure"
+        echo "${RC}" > ${WORKSPACE}/${FCL}.log.FAILED
       fi
       
       TEST_MSG_GS="mu2e -n ${NEV} -c Validation/${FCL}.fcl finished with return code ${RC}"
       TEST_URL_GS="${JOB_URL}/${BUILD_NUMBER}/artifact/${JOBNAME}.log"
 
-      echo "++RETURN CODE++ $RC" >> "${WORKSPACE}/${FCL}.log"
+      echo "Return Code: $RC" >> "${WORKSPACE}/${FCL}.log"
 
       echo "[$(date)] MDC2020 production sequence, $FCL stage, return code is ${RC}"
 
@@ -125,13 +164,20 @@ function do_runstep() {
     # check for overlaps with root
     (
         echo "[$(date)] checking for overlaps using ROOT (output going to rootOverlaps.log)"
-        ${WORKSPACE}/codetools/bin/rootOverlaps.sh > ${WORKSPACE}/rootOverlaps.log
-        RC=$?
+        ${WORKSPACE}/codetools/bin/rootOverlaps.sh > ${WORKSPACE}/rootOverlaps.log &
+        TESTPID=$!
+        babysit_test "rootOverlaps" "${TESTPID}" # Kills the test after TEST_TIMEOUT seconds
+        wait $TESTPID; # Wait for process to finish
+        RC=$? # grab the return code from the process
+
         if [ ${RC} -eq 0 ]; then
-          echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/rootOverlaps.log"
+          echo "Job completed successfully." >> "${WORKSPACE}/rootOverlaps.log"
+          echo "${RC}" > ${WORKSPACE}/rootOverlaps.log.SUCCESS
+        else
+          echo "${RC}" > ${WORKSPACE}/rootOverlaps.log.FAILED
         fi
 
-        echo "++RETURN CODE++ $RC" >> "${WORKSPACE}/rootOverlaps.log"
+        echo "Return Code: $RC" >> "${WORKSPACE}/rootOverlaps.log"
 
         echo "[$(date)] rootOverlaps return code is ${RC}"
     ) &
@@ -139,8 +185,11 @@ function do_runstep() {
     # check for overlaps with geant4
     (
         echo "[$(date) check for overlaps with geant4 surfaceCheck.fcl"
-        mu2e -c Mu2eG4/fcl/surfaceCheck.fcl > "${WORKSPACE}/g4surfaceCheck.log" 2>&1
-        RC=$?
+        mu2e -c Mu2eG4/fcl/surfaceCheck.fcl > "${WORKSPACE}/g4surfaceCheck.log" 2>&1 &
+        TESTPID=$!
+        babysit_test "g4surfaceCheck" "${TESTPID}" # Kills the test after TEST_TIMEOUT seconds
+        wait $TESTPID; # Wait for process to finish
+        RC=$? # grab the return code from the process
         
         LEGAL=$( grep 'Checking overlaps for volume' ${WORKSPACE}/g4surfaceCheck.log | grep -c OK )
         ILLEGAL=$( grep 'Checking overlaps for volume' ${WORKSPACE}/g4surfaceCheck.log | grep -v OK | wc -l )
@@ -153,14 +202,16 @@ function do_runstep() {
         echo "--------"  >> "${WORKSPACE}/rootOverlaps.log"
         
         if [[ $RC -eq 0 && $LEGAL -gt 0 && $ILLEGAL -eq 0 ]]; then
-            echo "geant surfaceCheck OK"  >> "${WORKSPACE}/rootOverlaps.log"
-            echo "++REPORT_STATUS_OK++" >> "${WORKSPACE}/g4surfaceCheck.log"
+            echo "geant surfaceCheck OK"  >> "${WORKSPACE}/g4surfaceCheck.log"
+            echo "Job completed successfully." >> "${WORKSPACE}/g4surfaceCheck.log"
+            echo "${RC}" > ${WORKSPACE}/g4surfaceCheck.log.SUCCESS
         else
-            echo "geant surfaceCheck FAILURE" >> "${WORKSPACE}/rootOverlaps.log"
+            echo "geant surfaceCheck FAILURE" >> "${WORKSPACE}/g4surfaceCheck.log"
+            echo "${RC}" > ${WORKSPACE}/g4surfaceCheck.log.FAILED
             RC=1
         fi
        
-        echo "++RETURN CODE++ $RC" >> "${WORKSPACE}/g4surfaceCheck.log"
+        echo "Return Code: $RC" >> "${WORKSPACE}/g4surfaceCheck.log"
         echo "[$(date)] g4surfaceCheck return code is ${RC}"
     ) &
     
