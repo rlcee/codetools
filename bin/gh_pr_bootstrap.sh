@@ -156,17 +156,47 @@ function setup_offline() {
 
 
 function offline_domerge() {
-    git checkout ${MASTER_COMMIT_SHA}
-
-    git merge --no-ff ${COMMIT_SHA} -m "merged ${REPOSITORY} PR#${PULL_REQUEST} ${COMMIT_SHA} at ${MASTER_COMMIT_SHA}."
-
-    if [ "$?" -gt 0 ]; then
-        return 1;
+    if [ "${NO_MERGE}" = "1" ]; then 
+        echo "[$(date)] Checking out PR HEAD directly"
+        git checkout "pr${PULL_REQUEST}"
+    else
+        echo "[$(date)] Checking out latest commit on base branch"
+        git checkout ${MASTER_COMMIT_SHA}
     fi
 
-    CONFLICTS=$(git ls-files -u | wc -l)
-    if [ "$CONFLICTS" -gt 0 ] ; then
-        return 1
+    if [ "${TEST_WITH_PR}" != "" ]; then
+        # comma separated list
+
+        for pr in $(echo ${TEST_WITH_PR} | sed "s/,/ /g")
+        do
+            git fetch origin pull/${pr}/head:pr${pr}
+            echo "[$(date)] Merging PR#${pr} as part of this test."
+            # Merge it in
+            git merge --no-ff pr${pr} -m "merged PR#${pr} as part of this test"
+            if [ "$?" -gt 0 ]; then
+                echo "[$(date)] Merge failure!"
+                return 1;
+            fi
+            CONFLICTS=$(git ls-files -u | wc -l)
+            if [ "$CONFLICTS" -gt 0 ] ; then
+                echo "[$(date)] Merge conflicts!"
+                return 1
+            fi
+        done
+    fi
+
+    if [ "${NO_MERGE}" != "1" ]; then 
+        echo "[$(date)] Merging PR#${pr} at ${COMMIT_SHA}."
+        git merge --no-ff ${COMMIT_SHA} -m "merged ${REPOSITORY} PR#${PULL_REQUEST} ${COMMIT_SHA}."
+
+        if [ "$?" -gt 0 ]; then
+            return 1;
+        fi
+
+        CONFLICTS=$(git ls-files -u | wc -l)
+        if [ "$CONFLICTS" -gt 0 ] ; then
+            return 1
+        fi
     fi
 
     return 0
