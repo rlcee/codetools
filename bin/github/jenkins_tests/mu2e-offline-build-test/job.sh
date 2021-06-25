@@ -2,6 +2,101 @@
 # Ryunosuke O'Neil, 2020
 # Contact: @ryuwd on GitHub
 
+# the table
+MU2E_POSTBUILDTEST_STATUSES=""
+
+function append_report_row() {
+    MU2E_POSTBUILDTEST_STATUSES="${MU2E_POSTBUILDTEST_STATUSES}
+| $1 | $2 | $3 |"
+}
+
+function prepare_repositories() {
+    (
+        cd $REPO
+        if [ "${NO_MERGE}" = "1" ]; then 
+            echo "[$(date)] Mu2e/$REPO - Checking out PR HEAD directly"
+            git checkout "pr${PULL_REQUEST}"
+            git log -1
+            append_report_row "checkout" ":white_check_mark:" "Checked out ${COMMIT_SHA}"
+        else
+            echo "[$(date)] Mu2e/$REPO - Checking out latest commit on base branch"
+            git checkout ${MASTER_COMMIT_SHA}
+            git log -1
+        fi
+
+        if [ "${TEST_WITH_PR}" != "" ]; then
+            # comma separated list
+
+            for pr in $(echo ${TEST_WITH_PR} | sed "s/,/ /g")
+            do
+
+                # if it starts with "#" then it is a PR in $REPO.
+                if [[ $pr = \#* ]]; then
+                    REPO_NAME="$REPO"
+	                THE_PR=$( echo $pr | awk -F\# '{print $2}' )
+                    cd $WORKSPACE/$REPO || exit 1;
+                elif [[ $pr = *\#* ]]; then 
+                    # get the repository name
+                    REPO_NAME=$( echo $pr | awk -F\# '{print $1}' )
+	                THE_PR=$( echo $pr | awk -F\# '{print $2}' )
+
+                    # check it exists
+                    if [ ! -d "$WORKSPACE/$REPO_NAME" ]; then 
+                        exit 1; # press F to pay respects
+                    fi
+                    # change directory to it
+                    cd $WORKSPACE/$REPO_NAME || exit 1;
+                else
+                    # ???
+                    exit 1;
+                fi
+
+                git fetch origin pull/${THE_PR}/head:pr${THE_PR}
+
+                echo "[$(date)] Merging PR ${REPO_NAME}#${THE_PR} as part of this test."
+
+                THE_COMMIT_SHA=$(git rev-parse pr${THE_PR})
+
+                # Merge it in
+                git merge --no-ff pr${pr} -m "merged #${pr} as part of this test"
+                if [ "$?" -gt 0 ]; then
+                    echo "[$(date)] Merge failure!"
+                    append_report_row "test with" ":x:" "${REPO_NAME}#${THE_PR} (@ ${THE_COMMIT_SHA})) merge failed"
+                    exit 1;
+                fi
+                CONFLICTS=$(git ls-files -u | wc -l)
+                if [ "$CONFLICTS" -gt 0 ] ; then
+                    echo "[$(date)] Merge conflicts!"
+                    append_report_row "test with" ":x:" "${REPO_NAME}#${THE_PR} (@ ${THE_COMMIT_SHA})) has conflicts with this PR"
+                    exit 1
+                fi
+
+                append_report_row "test with" ":white_check_mark:" "Included ${REPO_NAME}#${THE_PR} (@ ${THE_COMMIT_SHA})) by merge"
+
+            done
+        fi
+
+        if [ "${NO_MERGE}" != "1" ]; then 
+            echo "[$(date)] Merging PR#${pr} at ${COMMIT_SHA}."
+            git merge --no-ff ${COMMIT_SHA} -m "merged ${REPOSITORY} PR#${PULL_REQUEST} ${COMMIT_SHA}."
+
+            append_report_row "merge" ":white_check_mark:" "Merged ${COMMIT_SHA} at ${MASTER_COMMIT_SHA}"
+
+            if [ "$?" -gt 0 ]; then
+                exit 1;
+            fi
+
+            CONFLICTS=$(git ls-files -u | wc -l)
+            if [ "$CONFLICTS" -gt 0 ] ; then
+                exit 1
+            fi
+        fi
+
+        exit 0
+    )
+    return $?
+}
+
 
 # Configuration of test jobs to run directly after a successful build
 if [ -f ".build-tests.sh" ]; then
@@ -91,9 +186,10 @@ if [ $TD_FIXM_COUNT == 0 ]; then
     TD_FIXM_STATUS=":white_check_mark:"
 fi
 
-echo "[$(date)] setup ${REPOSITORY}: perform merge"
 
-offline_domerge
+echo "[$(date)] setup ${REPOSITORY}: perform merge"
+cd $WORKSPACE || exit 1
+prepare_repositories
 OFFLINE_MERGESTATUS=$?
 
 if [ $OFFLINE_MERGESTATUS -ne 0 ];
@@ -109,6 +205,11 @@ http://github.com/${REPOSITORY}/pull/${PULL_REQUEST}
 > git diff --check | grep -i conflict
 $(git diff --check | grep -i conflict)
 \`\`\`
+
+| Test          | Result        | Details |
+| ------------- |:-------------:| ------- |${MU2E_POSTBUILDTEST_STATUSES}
+
+
 EOM
     cmsbot_report gh-report.md
     exit 1;
@@ -182,12 +283,6 @@ echo "[$(date)] report outcome"
 
 
 TESTS_FAILED=0
-MU2E_POSTBUILDTEST_STATUSES=""
-
-function append_report_row() {
-    MU2E_POSTBUILDTEST_STATUSES="${MU2E_POSTBUILDTEST_STATUSES}
-| $1 | $2 | $3 |"
-}
 
 function build_test_report() {
     i=$1
@@ -276,6 +371,7 @@ else
     TIME_BUILD_OUTPUT=$(echo "$TIME_BUILD_OUTPUT" | grep -o -E '[0-9\.]+')
 
     BUILDTIME_STR="Build time: $(date -d@$TIME_BUILD_OUTPUT -u '+%M min %S sec')"
+    append_report_row "build ($BUILDTYPE)" "${BUILD_STATUS}" "[Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log). ${BUILDTIME_STR}"
 
     cat > "$WORKSPACE"/gh-report.md <<- EOM
 ${COMMIT_SHA}
@@ -289,14 +385,14 @@ EOM
 
 fi
 
+append_report_row "FIXME, TODO" "${TD_FIXM_STATUS}" "[TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log)"
+append_report_row "clang-tidy" "[${CT_STAT_STRING}](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log)"
+
+
 cat >> "$WORKSPACE"/gh-report.md <<- EOM
 
 | Test          | Result        | Details |
-| ------------- |:-------------:| ------- |
-| merge | :white_check_mark: | Merged ${COMMIT_SHA} at ${MASTER_COMMIT_SHA} |
-| scons build (prof) | ${BUILD_STATUS} | [Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log). ${BUILDTIME_STR} |${MU2E_POSTBUILDTEST_STATUSES}
-| FIXME, TODO count | ${TD_FIXM_STATUS} | [TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log) |
-| clang-tidy | ${CT_STATUS} | [${CT_STAT_STRING}](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log) |
+| ------------- |:-------------:| ------- |${MU2E_POSTBUILDTEST_STATUSES}
 
 EOM
 
