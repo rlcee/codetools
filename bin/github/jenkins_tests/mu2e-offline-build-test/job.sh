@@ -29,7 +29,6 @@ function prepare_repositories() {
 
             for pr in $(echo ${TEST_WITH_PR} | sed "s/,/ /g")
             do
-
                 # if it starts with "#" then it is a PR in $REPO.
                 if [[ $pr = \#* ]]; then
                     REPO_NAME="$REPO"
@@ -53,7 +52,7 @@ function prepare_repositories() {
 
                 git fetch origin pull/${THE_PR}/head:pr${THE_PR}
 
-                echo "[$(date)] Merging PR ${REPO_NAME}#${THE_PR} as part of this test."
+                echo "[$(date)] Merging PR ${REPO_NAME}#${THE_PR} into ${REPO_NAME} as part of this test."
 
                 THE_COMMIT_SHA=$(git rev-parse pr${THE_PR})
 
@@ -198,9 +197,9 @@ then
 ${COMMIT_SHA}
 mu2e/buildtest
 error
-The PR branch cannot be merged.
+The PR branch may have conflicts.
 http://github.com/${REPOSITORY}/pull/${PULL_REQUEST}
-:bangbang: The build test could not run due to merge conflicts. Please resolve these first and try again.
+:bangbang: It was not possible to prepare the workspace for this test. This is often caused by merge conflicts - please check and try again.
 \`\`\`
 > git diff --check | grep -i conflict
 $(git diff --check | grep -i conflict)
@@ -317,17 +316,6 @@ function build_test_report() {
     append_report_row "$i" "${STATUS_temp}" "[Log file.](${JOB_URL}/${BUILD_NUMBER}/artifact/$i.log) ${EXTRAINFO}"
 }
 
-
-for i in "${JOBNAMES[@]}"
-do
-    build_test_report $i
-done
-for i in "${ADDITIONAL_JOBNAMES[@]}"
-do 
-    build_test_report $i
-done
-
-
 BUILDTIME_STR=""
 
 if [ "$BUILDTEST_OUTCOME" == 1 ]; then
@@ -371,7 +359,6 @@ else
     TIME_BUILD_OUTPUT=$(echo "$TIME_BUILD_OUTPUT" | grep -o -E '[0-9\.]+')
 
     BUILDTIME_STR="Build time: $(date -d@$TIME_BUILD_OUTPUT -u '+%M min %S sec')"
-    append_report_row "build ($BUILDTYPE)" "${BUILD_STATUS}" "[Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log). ${BUILDTIME_STR}"
 
     cat > "$WORKSPACE"/gh-report.md <<- EOM
 ${COMMIT_SHA}
@@ -384,6 +371,17 @@ ${JOB_URL}/${BUILD_NUMBER}/console
 EOM
 
 fi
+
+append_report_row "build ($BUILDTYPE)" "${BUILD_STATUS}" "[Log file](${JOB_URL}/${BUILD_NUMBER}/artifact/scons.log). ${BUILDTIME_STR}"
+
+for i in "${JOBNAMES[@]}"
+do
+    build_test_report $i
+done
+for i in "${ADDITIONAL_JOBNAMES[@]}"
+do 
+    build_test_report $i
+done
 
 append_report_row "FIXME, TODO" "${TD_FIXM_STATUS}" "[TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log)"
 append_report_row "clang-tidy" "[${CT_STAT_STRING}](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log)"
