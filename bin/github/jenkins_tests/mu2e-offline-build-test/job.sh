@@ -15,7 +15,7 @@ function prepare_repositories() {
         cd $REPO
         if [ "${NO_MERGE}" = "1" ]; then 
             echo "[$(date)] Mu2e/$REPO - Checking out PR HEAD directly"
-            git checkout "pr${PULL_REQUEST}"
+            git checkout ${COMMIT_SHA} #"pr${PULL_REQUEST}"
             git log -1
             append_report_row "checkout" ":white_check_mark:" "Checked out ${COMMIT_SHA}"
         else
@@ -39,12 +39,15 @@ function prepare_repositories() {
                     REPO_NAME=$( echo $pr | awk -F\# '{print $1}' )
 	                THE_PR=$( echo $pr | awk -F\# '{print $2}' )
 
-                    # check it exists
+                    # check it exists, and clone it into the workspace if it does not.
                     if [ ! -d "$WORKSPACE/$REPO_NAME" ]; then 
-                        exit 1; # press F to pay respects
+                        (
+                            cd $WORKSPACE
+                            git clone git@github.com:Mu2e/${REPO_NAME}.git ${REPO_NAME} || exit 1
+                        ) || exit 1
                     fi
                     # change directory to it
-                    cd $WORKSPACE/$REPO_NAME || exit 1;
+                    cd $WORKSPACE/$REPO_NAME || exit 1
                 else
                     # ???
                     exit 1;
