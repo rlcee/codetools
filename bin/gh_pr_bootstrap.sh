@@ -155,23 +155,6 @@ function setup_offline() {
 }
 
 
-function offline_domerge() {
-    git checkout ${MASTER_COMMIT_SHA}
-
-    git merge --no-ff ${COMMIT_SHA} -m "merged ${REPOSITORY} PR#${PULL_REQUEST} ${COMMIT_SHA} at ${MASTER_COMMIT_SHA}."
-
-    if [ "$?" -gt 0 ]; then
-        return 1;
-    fi
-
-    CONFLICTS=$(git ls-files -u | wc -l)
-    if [ "$CONFLICTS" -gt 0 ] ; then
-        return 1
-    fi
-
-    return 0
-
-}
 
 echo "Running job now."
 
