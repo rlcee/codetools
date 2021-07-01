@@ -81,10 +81,12 @@ function prepare_repositories() {
                 return 1
             fi
 
-            append_report_row "test with" ":white_check_mark:" "Included ${REPO_NAME}#${THE_PR} (@ ${THE_COMMIT_SHA})) by merge"
+            append_report_row "test with" ":white_check_mark:" "Included ${REPO_NAME}#${THE_PR} @ ${THE_COMMIT_SHA} by merge"
 
         done
     fi
+    
+    cd ${WORKSPACE}/${REPO}
 
     if [ "${NO_MERGE}" != "1" ]; then 
         echo "[$(date)] Merging PR#${PULL_REQUEST} at ${COMMIT_SHA}."
