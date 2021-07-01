@@ -378,7 +378,7 @@ do
     build_test_report $i
 done
 
-if [ "$TESTS_FAILED" == 1 ] && [ "$BUILDTEST_OUTCOME" == 1 ]; then
+if [ "$TESTS_FAILED" == 1 ] && [ "$BUILDTEST_OUTCOME" != 1 ]; then
     BUILDTEST_OUTCOME=1
 
     cat > "$WORKSPACE"/gh-report.md <<- EOM
