@@ -131,7 +131,7 @@ function do_runstep() {
       ) &
 
       echo "[$(date)] Running MDC2020 production sequence, $FCL stage"
-      mu2e -n $NEV -c Validation/${FCL}.fcl > ${WORKSPACE}/${FCL}.log 2>&1 &
+      mu2e -n $NEV -c Production/Validation/${FCL}.fcl > ${WORKSPACE}/${FCL}.log 2>&1 &
       TESTPID=$!
       babysit_test "${FCL}" "${TESTPID}" # Kills the test after TEST_TIMEOUT seconds
 
@@ -147,7 +147,7 @@ function do_runstep() {
         echo "${RC}" > ${WORKSPACE}/${FCL}.log.FAILED
       fi
       
-      TEST_MSG_GS="mu2e -n ${NEV} -c Validation/${FCL}.fcl finished with return code ${RC}"
+      TEST_MSG_GS="mu2e -n ${NEV} -c Production/Validation/${FCL}.fcl finished with return code ${RC}"
       TEST_URL_GS="${JOB_URL}/${BUILD_NUMBER}/artifact/${JOBNAME}.log"
 
       echo "Return Code: $RC" >> "${WORKSPACE}/${FCL}.log"
@@ -187,7 +187,7 @@ function do_runstep() {
     # check for overlaps with geant4
     (
         echo "[$(date) check for overlaps with geant4 surfaceCheck.fcl"
-        mu2e -c Mu2eG4/fcl/surfaceCheck.fcl > "${WORKSPACE}/g4surfaceCheck.log" 2>&1 &
+        mu2e -c Offline/Mu2eG4/fcl/surfaceCheck.fcl > "${WORKSPACE}/g4surfaceCheck.log" 2>&1 &
         TESTPID=$!
         babysit_test "g4surfaceCheck" "${TESTPID}" # Kills the test after TEST_TIMEOUT seconds
         wait $TESTPID; # Wait for process to finish
