@@ -59,6 +59,8 @@ function prepare_repositories() {
                 return 1
             fi
 
+            git config user.email "you@example.com"
+            git config user.name "Your Name"
             git fetch origin pull/${THE_PR}/head:pr${THE_PR}
 
             echo "[$(date)] Merging PR ${REPO_NAME}#${THE_PR} into ${REPO_NAME} as part of this test."
