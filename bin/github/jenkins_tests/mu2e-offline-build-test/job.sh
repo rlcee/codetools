@@ -48,7 +48,7 @@ function prepare_repositories() {
                         git clone git@github.com:Mu2e/${REPO_NAME}.git ${REPO_NAME} || exit 1
                     )
                     if [ $? -ne 0 ]; then 
-                        append_report_row "test with" ":x:" "${REPO_NAME} git clone failed"
+                        append_report_row "test with" ":x:" "Mu2e/${REPO_NAME} git clone failed"
                         return 1
                     fi
                 fi
@@ -71,17 +71,17 @@ function prepare_repositories() {
             git merge --no-ff pr${THE_PR} -m "merged #${THE_PR} as part of this test"
             if [ "$?" -gt 0 ]; then
                 echo "[$(date)] Merge failure!"
-                append_report_row "test with" ":x:" "${REPO_NAME}#${THE_PR} @ ${THE_COMMIT_SHA} merge failed"
+                append_report_row "test with" ":x:" "Mu2e/${REPO_NAME}#${THE_PR} @ ${THE_COMMIT_SHA} merge failed"
                 return 1
             fi
             CONFLICTS=$(git ls-files -u | wc -l)
             if [ "$CONFLICTS" -gt 0 ] ; then
                 echo "[$(date)] Merge conflicts!"
-                append_report_row "test with" ":x:" "${REPO_NAME}#${THE_PR} @ ${THE_COMMIT_SHA} has conflicts with this PR"
+                append_report_row "test with" ":x:" "Mu2e/${REPO_NAME}#${THE_PR} @ ${THE_COMMIT_SHA} has conflicts with this PR"
                 return 1
             fi
 
-            append_report_row "test with" ":white_check_mark:" "Included ${REPO_NAME}#${THE_PR} @ ${THE_COMMIT_SHA} by merge"
+            append_report_row "test with" ":white_check_mark:" "Included Mu2e/${REPO_NAME}#${THE_PR} @ ${THE_COMMIT_SHA} by merge"
 
         done
     fi
@@ -347,23 +347,6 @@ ${ERROR_OUTPUT}
 
 EOM
 
-elif [ "$TESTS_FAILED" == 1 ]; then
-    BUILD_STATUS=":white_check_mark:"
-    BUILDTEST_OUTCOME=1
-    TIME_BUILD_OUTPUT=$(grep "Total build time: " scons.log)
-    TIME_BUILD_OUTPUT=$(echo "$TIME_BUILD_OUTPUT" | grep -o -E '[0-9\.]+')
-    BUILDTIME_STR="Build time: $(date -d@$TIME_BUILD_OUTPUT -u '+%M min %S sec')"
-
-    cat > "$WORKSPACE"/gh-report.md <<- EOM
-${COMMIT_SHA}
-mu2e/buildtest
-failure
-The build succeeded, but other tests are failing.
-${JOB_URL}/${BUILD_NUMBER}/console
-:umbrella: The tests failed for ${COMMIT_SHA}.
-
-EOM
-
 else
     BUILD_STATUS=":white_check_mark:"
 
@@ -395,8 +378,22 @@ do
     build_test_report $i
 done
 
+if [ "$TESTS_FAILED" == 1 ] && [ "$BUILDTEST_OUTCOME" == 1 ]; then
+    BUILDTEST_OUTCOME=1
+
+    cat > "$WORKSPACE"/gh-report.md <<- EOM
+${COMMIT_SHA}
+mu2e/buildtest
+failure
+The build succeeded, but other tests are failing.
+${JOB_URL}/${BUILD_NUMBER}/console
+:umbrella: The tests failed for ${COMMIT_SHA}.
+
+EOM
+fi
+
 append_report_row "FIXME, TODO" "${TD_FIXM_STATUS}" "[TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log)"
-append_report_row "clang-tidy" "[${CT_STAT_STRING}](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log)"
+append_report_row "clang-tidy" "${CT_STATUS}" "[${CT_STAT_STRING}](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log)"
 
 
 cat >> "$WORKSPACE"/gh-report.md <<- EOM
@@ -413,6 +410,20 @@ cat >> "$WORKSPACE"/gh-report.md <<- EOM
 
 EOM
 
+fi
+
+if [ "${NO_MERGE}" = "0" ]; then
+    cat >> "$WORKSPACE"/gh-report.md <<- EOM
+
+N.B. These results were obtained from a build of this Pull Request at ${COMMIT_SHA} after being merged into the base branch at ${MASTER_COMMIT_SHA}.
+
+EOM
+else
+    cat >> "$WORKSPACE"/gh-report.md <<- EOM
+
+N.B. These results were obtained from a build of this pull request branch at ${COMMIT_SHA}.
+
+EOM
 fi
 
 cat >> "$WORKSPACE"/gh-report.md <<- EOM
