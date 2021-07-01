@@ -347,23 +347,6 @@ ${ERROR_OUTPUT}
 
 EOM
 
-elif [ "$TESTS_FAILED" == 1 ]; then
-    BUILD_STATUS=":white_check_mark:"
-    BUILDTEST_OUTCOME=1
-    TIME_BUILD_OUTPUT=$(grep "Total build time: " scons.log)
-    TIME_BUILD_OUTPUT=$(echo "$TIME_BUILD_OUTPUT" | grep -o -E '[0-9\.]+')
-    BUILDTIME_STR="Build time: $(date -d@$TIME_BUILD_OUTPUT -u '+%M min %S sec')"
-
-    cat > "$WORKSPACE"/gh-report.md <<- EOM
-${COMMIT_SHA}
-mu2e/buildtest
-failure
-The build succeeded, but other tests are failing.
-${JOB_URL}/${BUILD_NUMBER}/console
-:umbrella: The tests failed for ${COMMIT_SHA}.
-
-EOM
-
 else
     BUILD_STATUS=":white_check_mark:"
 
@@ -395,6 +378,20 @@ do
     build_test_report $i
 done
 
+if [ "$TESTS_FAILED" == 1 ] && [ "$BUILDTEST_OUTCOME" == 1 ]; then
+    BUILDTEST_OUTCOME=1
+
+    cat > "$WORKSPACE"/gh-report.md <<- EOM
+${COMMIT_SHA}
+mu2e/buildtest
+failure
+The build succeeded, but other tests are failing.
+${JOB_URL}/${BUILD_NUMBER}/console
+:umbrella: The tests failed for ${COMMIT_SHA}.
+
+EOM
+fi
+
 append_report_row "FIXME, TODO" "${TD_FIXM_STATUS}" "[TODO (${TD_COUNT}) FIXME (${FIXM_COUNT}) in ${FILES_SCANNED} files](${JOB_URL}/${BUILD_NUMBER}/artifact/fixme_todo.log)"
 append_report_row "clang-tidy" "${CT_STATUS}" "[${CT_STAT_STRING}](${JOB_URL}/${BUILD_NUMBER}/artifact/clang-tidy.log)"
 
@@ -413,6 +410,20 @@ cat >> "$WORKSPACE"/gh-report.md <<- EOM
 
 EOM
 
+fi
+
+if [ "${NO_MERGE}" = "0" ]; then
+    cat >> "$WORKSPACE"/gh-report.md <<- EOM
+
+N.B. These results were obtained from a build of this Pull Request at ${COMMIT_SHA} after being merged into the base branch at ${MASTER_COMMIT_SHA}.
+
+EOM
+else
+    cat >> "$WORKSPACE"/gh-report.md <<- EOM
+
+N.B. These results were obtained from a build of this pull request branch at ${COMMIT_SHA}.
+
+EOM
 fi
 
 cat >> "$WORKSPACE"/gh-report.md <<- EOM
