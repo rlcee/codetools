@@ -106,11 +106,11 @@ if [ -f ".build-tests.sh" ]; then
 else
     # these arrays should have the same length
     # name of the job
-    declare -a JOBNAMES=("ceSimReco" "g4test_03MT" "transportOnly" "POT" "g4study" "cosmicSimReco")
+    declare -a JOBNAMES=("ceSimReco" "g4test_03MT" "transportOnly" "POT" "g4study" "cosmicSimReco" "cosmicOffSpill" )
     # the fcl file to run the job
-    declare -a FCLFILES=("Validation/ceSimReco.fcl" "Mu2eG4/fcl/g4test_03MT.fcl" "Mu2eG4/fcl/transportOnly.fcl" "JobConfig/beam/POT_validation.fcl" "Mu2eG4/g4study/g4study.fcl" "Validation/cosmicSimReco.fcl")
+    declare -a FCLFILES=("Production/Validation/ceSimReco.fcl" "Offline/Mu2eG4/fcl/g4test_03MT.fcl" "Offline/Mu2eG4/fcl/transportOnly.fcl" "Production/JobConfig/beam/POT_validation.fcl" "Offline/Mu2eG4/g4study/g4study.fcl" "Production/Validation/cosmicSimReco.fcl" "Production/Validation/cosmicOffSpill.fcl")
     # how many events?
-    declare -a NEVTS_TJ=("10" "10" "1" "1" "1" "1")
+    declare -a NEVTS_TJ=("10" "10" "1" "1" "1" "1" "10")
 
     # manually defined test names (see build.sh)
     declare -a ADDITIONAL_JOBNAMES=("ceSteps" "ceDigi" "muDauSteps" "ceMix" "rootOverlaps" "g4surfaceCheck")
