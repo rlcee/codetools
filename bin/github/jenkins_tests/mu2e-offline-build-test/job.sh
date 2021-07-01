@@ -71,13 +71,13 @@ function prepare_repositories() {
             git merge --no-ff pr${THE_PR} -m "merged #${THE_PR} as part of this test"
             if [ "$?" -gt 0 ]; then
                 echo "[$(date)] Merge failure!"
-                append_report_row "test with" ":x:" "${REPO_NAME}#${THE_PR} (@ ${THE_COMMIT_SHA})) merge failed"
+                append_report_row "test with" ":x:" "${REPO_NAME}#${THE_PR} @ ${THE_COMMIT_SHA} merge failed"
                 return 1
             fi
             CONFLICTS=$(git ls-files -u | wc -l)
             if [ "$CONFLICTS" -gt 0 ] ; then
                 echo "[$(date)] Merge conflicts!"
-                append_report_row "test with" ":x:" "${REPO_NAME}#${THE_PR} (@ ${THE_COMMIT_SHA})) has conflicts with this PR"
+                append_report_row "test with" ":x:" "${REPO_NAME}#${THE_PR} @ ${THE_COMMIT_SHA} has conflicts with this PR"
                 return 1
             fi
 
