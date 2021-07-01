@@ -11,92 +11,97 @@ function append_report_row() {
 }
 
 function prepare_repositories() {
-    (
-        cd $REPO
-        if [ "${NO_MERGE}" = "1" ]; then 
-            echo "[$(date)] Mu2e/$REPO - Checking out PR HEAD directly"
-            git checkout ${COMMIT_SHA} #"pr${PULL_REQUEST}"
-            git log -1
-            append_report_row "checkout" ":white_check_mark:" "Checked out ${COMMIT_SHA}"
-        else
-            echo "[$(date)] Mu2e/$REPO - Checking out latest commit on base branch"
-            git checkout ${MASTER_COMMIT_SHA}
-            git log -1
-        fi
+    cd ${WORKSPACE}/${REPO}
+    if [ $? -ne 0 ]; then 
+        return 1
+    fi
+    if [ "${NO_MERGE}" = "1" ]; then
+        echo "[$(date)] Mu2e/$REPO - Checking out PR HEAD directly"
+        git checkout ${COMMIT_SHA} #"pr${PULL_REQUEST}"
+        git log -1
+        append_report_row "checkout" ":white_check_mark:" "Checked out ${COMMIT_SHA}"
+    else
+        echo "[$(date)] Mu2e/$REPO - Checking out latest commit on base branch"
+        git checkout ${MASTER_COMMIT_SHA}
+        git log -1
+    fi
 
-        if [ "${TEST_WITH_PR}" != "" ]; then
-            # comma separated list
+    if [ "${TEST_WITH_PR}" != "" ]; then
+        # comma separated list
 
-            for pr in $(echo ${TEST_WITH_PR} | sed "s/,/ /g")
-            do
-                # if it starts with "#" then it is a PR in $REPO.
-                if [[ $pr = \#* ]]; then
-                    REPO_NAME="$REPO"
-	                THE_PR=$( echo $pr | awk -F\# '{print $2}' )
-                    cd $WORKSPACE/$REPO || exit 1;
-                elif [[ $pr = *\#* ]]; then 
-                    # get the repository name
-                    REPO_NAME=$( echo $pr | awk -F\# '{print $1}' )
-	                THE_PR=$( echo $pr | awk -F\# '{print $2}' )
+        for pr in $(echo ${TEST_WITH_PR} | sed "s/,/ /g")
+        do
+            # if it starts with "#" then it is a PR in $REPO.
+            if [[ $pr = \#* ]]; then
+                REPO_NAME="$REPO"
+                THE_PR=$( echo $pr | awk -F\# '{print $2}' )
+                cd $WORKSPACE/$REPO
+            elif [[ $pr = *\#* ]]; then
+                # get the repository name
+                REPO_NAME=$( echo $pr | awk -F\# '{print $1}' )
+                THE_PR=$( echo $pr | awk -F\# '{print $2}' )
 
-                    # check it exists, and clone it into the workspace if it does not.
-                    if [ ! -d "$WORKSPACE/$REPO_NAME" ]; then 
-                        (
-                            cd $WORKSPACE
-                            git clone git@github.com:Mu2e/${REPO_NAME}.git ${REPO_NAME} || exit 1
-                        ) || exit 1
+                # check it exists, and clone it into the workspace if it does not.
+                if [ ! -d "$WORKSPACE/$REPO_NAME" ]; then
+                    (
+                        cd $WORKSPACE
+                        git clone git@github.com:Mu2e/${REPO_NAME}.git ${REPO_NAME} || exit 1
+                    )
+                    if [ $? -ne 0 ]; then 
+                        append_report_row "test with" ":x:" "${REPO_NAME} git clone failed"
+                        return 1
                     fi
-                    # change directory to it
-                    cd $WORKSPACE/$REPO_NAME || exit 1
-                else
-                    # ???
-                    exit 1;
                 fi
-
-                git fetch origin pull/${THE_PR}/head:pr${THE_PR}
-
-                echo "[$(date)] Merging PR ${REPO_NAME}#${THE_PR} into ${REPO_NAME} as part of this test."
-
-                THE_COMMIT_SHA=$(git rev-parse pr${THE_PR})
-
-                # Merge it in
-                git merge --no-ff pr${pr} -m "merged #${pr} as part of this test"
-                if [ "$?" -gt 0 ]; then
-                    echo "[$(date)] Merge failure!"
-                    append_report_row "test with" ":x:" "${REPO_NAME}#${THE_PR} (@ ${THE_COMMIT_SHA})) merge failed"
-                    exit 1;
-                fi
-                CONFLICTS=$(git ls-files -u | wc -l)
-                if [ "$CONFLICTS" -gt 0 ] ; then
-                    echo "[$(date)] Merge conflicts!"
-                    append_report_row "test with" ":x:" "${REPO_NAME}#${THE_PR} (@ ${THE_COMMIT_SHA})) has conflicts with this PR"
-                    exit 1
-                fi
-
-                append_report_row "test with" ":white_check_mark:" "Included ${REPO_NAME}#${THE_PR} (@ ${THE_COMMIT_SHA})) by merge"
-
-            done
-        fi
-
-        if [ "${NO_MERGE}" != "1" ]; then 
-            echo "[$(date)] Merging PR#${pr} at ${COMMIT_SHA}."
-            git merge --no-ff ${COMMIT_SHA} -m "merged ${REPOSITORY} PR#${PULL_REQUEST} ${COMMIT_SHA}."
-
-            append_report_row "merge" ":white_check_mark:" "Merged ${COMMIT_SHA} at ${MASTER_COMMIT_SHA}"
-
-            if [ "$?" -gt 0 ]; then
-                exit 1;
+                # change directory to it
+                cd $WORKSPACE/$REPO_NAME || exit 1
+            else
+                # ???
+                return 1
             fi
 
+            git fetch origin pull/${THE_PR}/head:pr${THE_PR}
+
+            echo "[$(date)] Merging PR ${REPO_NAME}#${THE_PR} into ${REPO_NAME} as part of this test."
+
+            THE_COMMIT_SHA=$(git rev-parse pr${THE_PR})
+
+            # Merge it in
+            git merge --no-ff pr${THE_PR} -m "merged #${THE_PR} as part of this test"
+            if [ "$?" -gt 0 ]; then
+                echo "[$(date)] Merge failure!"
+                append_report_row "test with" ":x:" "${REPO_NAME}#${THE_PR} (@ ${THE_COMMIT_SHA})) merge failed"
+                return 1
+            fi
             CONFLICTS=$(git ls-files -u | wc -l)
             if [ "$CONFLICTS" -gt 0 ] ; then
-                exit 1
+                echo "[$(date)] Merge conflicts!"
+                append_report_row "test with" ":x:" "${REPO_NAME}#${THE_PR} (@ ${THE_COMMIT_SHA})) has conflicts with this PR"
+                return 1
             fi
-        fi
 
-        exit 0
-    )
-    return $?
+            append_report_row "test with" ":white_check_mark:" "Included ${REPO_NAME}#${THE_PR} (@ ${THE_COMMIT_SHA})) by merge"
+
+        done
+    fi
+
+    if [ "${NO_MERGE}" != "1" ]; then 
+        echo "[$(date)] Merging PR#${PULL_REQUEST} at ${COMMIT_SHA}."
+        git merge --no-ff ${COMMIT_SHA} -m "merged ${REPOSITORY} PR#${PULL_REQUEST} ${COMMIT_SHA}."
+        if [ "$?" -gt 0 ]; then
+            append_report_row "merge" ":x:" "${COMMIT_SHA} into ${MASTER_COMMIT_SHA} merge failed"
+            return 1
+        fi
+        append_report_row "merge" ":white_check_mark:" "Merged ${COMMIT_SHA} at ${MASTER_COMMIT_SHA}"
+
+
+        CONFLICTS=$(git ls-files -u | wc -l)
+        if [ "$CONFLICTS" -gt 0 ] ; then
+            append_report_row "merge" ":x:" "${COMMIT_SHA} has merge conflicts with ${MASTER_COMMIT_SHA} "
+            return 1
+        fi
+    fi
+
+    return 0
 }
 
 
