@@ -50,6 +50,8 @@ getCode() {
     export HASH=$( git $GD rev-parse HEAD | cut -c 1-8 )
     [ $? -ne 0 ] && return 4
 
+    git clone https://github.com/Mu2e/Production  || return 1
+
 #    (
 #	cd Offline || return 1
 #	git remote rename origin mu2e  || return 2
@@ -169,10 +171,24 @@ tarball() {
     local FDIR="$BRANCH/$HASH/"
     local TBALL=copyBack/${BRANCH}+${HASH}+${LABEL}.tgz
     
-    if ! tar  --transform="s|^|$FDIR|"   -czhf $TBALL Offline build ; then
-	echo "[$(date)] failed to run tar"
-	return 1
-    fi
+#    if ! tar  --transform="s|^|$FDIR|"   -czhf $TBALL Offline build ; then
+#	echo "[$(date)] failed to run tar"
+#	return 1
+#    fi
+
+    mkdir tar
+
+    echo "[$(date)] muse tarball"
+    muse tarball -e ./tar -t ./tar -r $FDIR >& tar.log
+    [ $? -ne 0 ] && exit 1
+
+    TBALL2=$( find tar -type f | head -1)
+    echo "made tarball $TBALL2"
+    ls -l $TBALL2
+
+    mv $TBALL2 $TBALL
+    [ $? -ne 0 ] && exit 1
+
 
     return 0
 
@@ -216,5 +232,7 @@ tarball
 RC=$?
 [ $RC -ne 0 ] && exit $RC
 
+echo "[$(date)] ls copyBack area"
+ls -l copyBack
 
 exit 0
