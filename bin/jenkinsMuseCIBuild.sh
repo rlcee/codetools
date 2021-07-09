@@ -176,6 +176,8 @@ tarball() {
 #	return 1
 #    fi
 
+    muse setup
+
     mkdir tar
 
     echo "[$(date)] muse tarball"
@@ -228,7 +230,7 @@ do
     [ $RC -ne 0 ] && exit $RC
 done
 
-tarball
+( tarball )
 RC=$?
 [ $RC -ne 0 ] && exit $RC
 
