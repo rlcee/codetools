@@ -168,7 +168,7 @@ tarball() {
 
     echo "[$(date)] start tarball"
 
-    local FDIR="$BRANCH/$HASH/"
+    local FDIR="$BRANCH/$HASH"
     local TBALL=copyBack/${BRANCH}+${HASH}+${LABEL}.tgz
     
 #    if ! tar  --transform="s|^|$FDIR|"   -czhf $TBALL Offline build ; then
