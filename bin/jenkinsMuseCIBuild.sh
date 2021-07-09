@@ -169,7 +169,7 @@ tarball() {
     echo "[$(date)] start tarball"
 
     local FDIR="$BRANCH/$HASH"
-    local TBALL=copyBack/${BRANCH}+${HASH}+${LABEL}.tgz
+    local TBALL=copyBack/${BRANCH}+${HASH}+${LABEL}.bz2
     
 #    if ! tar  --transform="s|^|$FDIR|"   -czhf $TBALL Offline build ; then
 #	echo "[$(date)] failed to run tar"
