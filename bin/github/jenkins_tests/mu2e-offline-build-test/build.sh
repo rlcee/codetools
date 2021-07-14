@@ -8,8 +8,8 @@ function do_setupstep() {
     setup muse
     setup codetools
 
-    # building prof or debug
-    muse setup -q $BUILDTYPE
+    # building prof or debug; use single path only
+    muse setup -1 -q $BUILDTYPE
 
     return 0
 }
