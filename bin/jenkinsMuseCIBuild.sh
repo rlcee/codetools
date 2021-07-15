@@ -130,7 +130,7 @@ buildBranch() {
 
     echo "[$(date)] start build for hash $HASH with BUILD=$BUILD"
 
-    muse setup -q "$BUILD"
+    muse setup -1 -q "$BUILD"
     RC=$?
     if [ $RC -ne 0 ]; then
 	echo "[$(date)] failed to run muse setup"
@@ -176,7 +176,7 @@ tarball() {
 #	return 1
 #    fi
 
-    muse setup
+    muse setup -1
 
     mkdir tar
 
