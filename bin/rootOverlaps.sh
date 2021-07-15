@@ -6,7 +6,7 @@
 
 
 rm -f mu2e.gdml
-mu2e -c Mu2eG4/fcl/gdmldump.fcl >& makeGdml.log
+mu2e -c Offline/Mu2eG4/fcl/gdmldump.fcl >& makeGdml.log
 RC=$?
 if [ $RC -ne 0  ]; then
     echo "ERROR rootOverlaps could not make gdml file"
