@@ -3,7 +3,7 @@
 #
 # expects:
 # VALJOB_RELEASE=/pnfs/mu2e/resilient/users/mu2epro/nightly/date.tgz
-# VALJOB_FCL=Validation/fcl/potSim.fcl
+# VALJOB_FCL=Production/Validation/potSim.fcl
 # VALJOB_NEV=500
 # VALJOB_LABEL=potSim
 # VALJOB_OUTDIR=/pnfs/mu2e/persistent/users/mu2epro/valjob/2017/10/06/potSim
@@ -61,6 +61,9 @@ watchdog() {
 initialize() {
   ## move input files to cwd
   #find $CONDOR_DIR_INPUT -type f -exec mv {} . \;
+
+  NUMBER=$(printf "%02d" $PROCESS )
+  LABEL=$(printf "%s_%02d" $VALJOB_LABEL $PROCESS )
   
   tee_date "setup"
   source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
@@ -71,7 +74,7 @@ initialize() {
  
   if [ -n "$VALJOB_TARBALL" ]; then
     tee_date "copy in tarball $VALJOB_TARBALL"
-    ifdh cp $VALJOB_TARBALL ./tball.tgz
+    ifdh cp $VALJOB_TARBALL ./tball
     RC=$?
     tee_date "tarball copy return code $RC"
     if [ $RC -ne 0 ]; then
@@ -80,24 +83,51 @@ initialize() {
     fi
     
     tee_date "unwind tarball"
-    tar -xzf tball.tgz
+    tar -xjf tball
     RC=$?
     tee_date "tarball unwind return code $RC"
     if [ $RC -ne 0 ]; then
       tee_date "ERROR exit unwind tarball $RC"
       return $RC
     fi
+
+    tee_date "setup"
+    mv Code/* .
+    sed -i 's/-q/-1 -q/' setup.sh
+    source setup.sh
+
   else
-    tee_date "no tarball, assuming Offline exists"
+    tee_date "no tarball, checking that Offline exists"
     if [ ! -d Offline ]; then
       tee_date "ERROR no tarball or Offline directory"
       return 1
     fi
+
+    tee_date "setup"
+    setup muse
+    muse setup -1
+    if [ -z "$VALJOB_RSDIR" ]; then
+      tee_date "ERROR VALJOB_RSDIR not defined, not sure what to do, quitting"
+      return 1
+    fi
+
+    if [ $VALJOB_INPUT != "NULL" ]; then
+	tee_date "cp $VALJOB_INPUT $VALJOB_RSDIR"
+	cp $VALJOB_INPUT $VALJOB_RSDIR
+    fi
+
+    if [ "$VALJOB_SEEDS" != "no" ]; then
+	tee_date cp seeds.txt $VALJOB_RSDIR
+	cp seeds.txt $VALJOB_RSDIR
+    fi
+    
+    tee_date cd $VALJOB_RSDIR
+    cd $VALJOB_RSDIR
+
   fi
 
-  tee_date "setup"
-  source Offline/setup.sh
-  
+  muse status
+
   tee_date "printenv"
   printenv
   
@@ -107,12 +137,10 @@ initialize() {
   tee_date "model name"
   cat /proc/cpuinfo | grep "model name" | head -1
 
+  tee_date PWD=$PWD
   tee_date "ls start"
   ls -l
   
-  NUMBER=$(printf "%02d" $PROCESS )
-  LABEL=$(printf "%s_%02d" $VALJOB_LABEL $PROCESS )
-
   return 0
 }
 
@@ -122,10 +150,11 @@ initialize() {
 exe() {
   tee_date "start exe"
   TIME=`date +%s`
-  cp Offline/$VALJOB_FCL ./local.fcl
+  tee_date cp $MUSE_WORK_DIR/$VALJOB_FCL ./local.fcl
+  cp $MUSE_WORK_DIR/$VALJOB_FCL ./local.fcl
   
   if [ "$VALJOB_SEEDS" != "no" ]; then
-    export VALJOB_SEED=`cat Offline/seeds.txt | awk -v n=$PROCESS '{if(NR==(n+1)) print $1}'`
+    export VALJOB_SEED=`cat seeds.txt | awk -v n=$PROCESS '{if(NR==(n+1)) print $1}'`
     echo "services.SeedService.baseSeed: $VALJOB_SEED" >> local.fcl
   fi
 
@@ -136,26 +165,33 @@ exe() {
     echo "services.ProditionsService.strawElectronics.useDb: true" >> local.fcl
   fi
 
+
+  # if there is a list of input files, insert the ones we need
   if [ "$VALJOB_INPUT" != "NULL" ]; then
     echo "source.fileNames : [ " >> local.fcl
-    if [ "$LOCALJOB" ]; then
-	cat Offline/$VALJOB_INPUT | \
+	cat $VALJOB_INPUT | \
 	    awk -v n=$VALJOB_NINPUT -v i=$PROCESS 'BEGIN{is=i*n+1;ie=(i+1)*n+1}{xend=",";if(NR==ie-1) xend="";if(NR>=is && NR<ie) print "\"" $0 "\"" xend}' >> local.fcl
 	echo "                   ]" >> local.fcl
-    else
-	cat Offline/$VALJOB_INPUT | \
-	    awk -v n=$VALJOB_NINPUT -v i=$PROCESS 'BEGIN{is=i*n+1;ie=(i+1)*n+1}{xend=",";if(NR==ie-1) xend="";if(NR>=is && NR<ie) print "\"" $0 "\"" xend}' | \
-	    sed 's|/pnfs|xroot://fndca1.fnal.gov/pnfs/fnal.gov/usr|' >> local.fcl
-	echo "                   ]" >> local.fcl
-    fi
   fi
+
+  # if not local job, switch input files to xrootd
+  if [ -z "$LOCALJOB" ]; then
+      sed -i 's|/pnfs|xroot://fndca1.fnal.gov/pnfs/fnal.gov/usr|' local.fcl
+  fi
+
 
   NEV=""
   [ $VALJOB_NEV -gt 0 ] && NEV=" -n $VALJOB_NEV "
   
-  /cvmfs/mu2e.opensciencegrid.org/bin/SLF6/mu2e_time \
+
+  # potsim has multiple output streams, select the main one
+  OUTTEXT=""
+  #[ "$VALJOB_LABEL" == "potSim" ] && OUTTEXT="BeamOutput:"
+
+
+  /cvmfs/mu2e.opensciencegrid.org/bin/SLF7/mu2e_time \
     mu2e $NEV -c ./local.fcl \
-    -o ${LABEL}.art -T ${LABEL}.root
+    -o ${OUTTEXT}${LABEL}.art -T ${LABEL}.root
   RC=$?
   tee_date "exe $RC"
   
@@ -193,7 +229,7 @@ validation() {
   fi
 
   /cvmfs/mu2e.opensciencegrid.org/bin/SLF6/mu2e_time \
-    mu2e -s $IFILE -c Validation/fcl/val.fcl -T val_${LABEL}.root
+    mu2e -s $IFILE -c Offline/Validation/fcl/val.fcl -T val_${LABEL}.root
   RC=$?
   tee_date "val $RC"
   
