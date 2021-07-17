@@ -11,7 +11,7 @@ echo "[$(date)] $*"
 define_surfaceCheck() {
     LABEL[$NPROJ]=surfaceCheck
     TARBALL[$NPROJ]=$TBALL
-    FCL[$NPROJ]=Mu2eG4/fcl/surfaceCheck.fcl
+    FCL[$NPROJ]=Offline/Mu2eG4/fcl/surfaceCheck.fcl
     INPUT[$NPROJ]=NULL
     NINPUT[$NPROJ]=0
     NEV[$NPROJ]=1
@@ -21,6 +21,7 @@ define_surfaceCheck() {
     JID[$NPROJ]=0
     SEEDS[$NPROJ]=no
     WATCHDOG[$NPROJ]=no
+    DATABASE[$NPROJ]=no
     CHECK[$NPROJ]=overLaps
     STATUS[$NPROJ]="defined"
     CSTATUS[$NPROJ]="undefined"
@@ -33,7 +34,7 @@ define_surfaceCheck() {
 define_potSim() {
     LABEL[$NPROJ]=potSim
     TARBALL[$NPROJ]=$TBALL
-    FCL[$NPROJ]=Validation/fcl/potSim.fcl
+    FCL[$NPROJ]=Production/Validation/potSim.fcl
     INPUT[$NPROJ]=NULL
     NINPUT[$NPROJ]=0
     NEV[$NPROJ]=500
@@ -43,6 +44,7 @@ define_potSim() {
     JID[$NPROJ]=0
     SEEDS[$NPROJ]=yes
     WATCHDOG[$NPROJ]=no
+    DATABASE[$NPROJ]=no
     CHECK[$NPROJ]=statPlots
     STATUS[$NPROJ]="defined"
     CSTATUS[$NPROJ]="undefined"
@@ -54,7 +56,7 @@ define_potSim() {
 define_ceSimReco() {
     LABEL[$NPROJ]=ceSimReco
     TARBALL[$NPROJ]=$TBALL
-    FCL[$NPROJ]=Validation/fcl/ceSimReco.fcl
+    FCL[$NPROJ]=Production/Validation/ceSimReco.fcl
     INPUT[$NPROJ]=NULL
     NINPUT[$NPROJ]=0
     NEV[$NPROJ]=5000
@@ -64,6 +66,7 @@ define_ceSimReco() {
     JID[$NPROJ]=0
     SEEDS[$NPROJ]=yes
     WATCHDOG[$NPROJ]=no
+    DATABASE[$NPROJ]=no
     CHECK[$NPROJ]=statPlots
     CSTATUS[$NPROJ]="undefined"
     STATUS[$NPROJ]="defined"
@@ -75,7 +78,7 @@ define_ceSimReco() {
 define_cosmicSimReco() {
     LABEL[$NPROJ]=cosmicSimReco
     TARBALL[$NPROJ]=$TBALL
-    FCL[$NPROJ]=Validation/fcl/cosmicSimReco.fcl
+    FCL[$NPROJ]=Production/Validation/cosmicSimReco.fcl
     INPUT[$NPROJ]=NULL
     NINPUT[$NPROJ]=0
     NEV[$NPROJ]=50000
@@ -85,6 +88,7 @@ define_cosmicSimReco() {
     JID[$NPROJ]=0
     SEEDS[$NPROJ]=yes
     WATCHDOG[$NPROJ]=no
+    DATABASE[$NPROJ]=no
     CHECK[$NPROJ]=statPlots
     STATUS[$NPROJ]="defined"
     CSTATUS[$NPROJ]="undefined"
@@ -96,9 +100,9 @@ define_cosmicSimReco() {
 define_reco() {
     LABEL[$NPROJ]=reco
     TARBALL[$NPROJ]=$TBALL
-    FCL[$NPROJ]=Validation/fcl/reco.fcl
+    FCL[$NPROJ]=Production/Validation/reco.fcl
     INPUT[$NPROJ]=recoInputFiles.txt
-    NINPUT[$NPROJ]=4
+    NINPUT[$NPROJ]=1
     NEV[$NPROJ]=999999
     NJOB[$NPROJ]=40
     MEM[$NPROJ]=1980MB
@@ -106,6 +110,7 @@ define_reco() {
     JID[$NPROJ]=0
     SEEDS[$NPROJ]=no
     WATCHDOG[$NPROJ]=yes
+    DATABASE[$NPROJ]=no
     CHECK[$NPROJ]=statPlots
     STATUS[$NPROJ]="defined"
     CSTATUS[$NPROJ]="undefined"
@@ -125,25 +130,27 @@ build_code() {
 	return 1
     fi
     DD=$(dirname $BUILD_DIR)
-    rm -rf $DD/05
-    mv $DD/04 $DD/05
-    mv $DD/03 $DD/04
-    mv $DD/02 $DD/03
-    mv $DD/01 $DD/02
-    mv $DD/current $DD/01
+    if [ -z "$DEBUG" ]; then
+	rm -rf $DD/05
+	mv $DD/04 $DD/05
+	mv $DD/03 $DD/04
+	mv $DD/02 $DD/03
+	mv $DD/01 $DD/02
+	mv $DD/current $DD/01
+    fi
     mkdir -p $BUILD_DIR
 
-    ssh -n mu2ebuild01 "$HOME/cron/val/valJobBuild.sh $BUILD_DIR $TBALL >& $BUILD_DIR/build"
+    ssh -n mu2ebuild01 "$HOME/cron/val/valJobBuild.sh $BUILD_DIR $TBALL >& $BUILD_DIR/buildlog"
     RC=$? # this includes the tar command
     if [ $RC -ne 0 ]; then
       echo_date "ERROR in build $RC"
-      tail -20 $BUILD_DIR/build
+      tail -20 $BUILD_DIR/buildlog
       echo "FAIL build" >> $REPORT
     else
       echo_date "Done build"
       echo "OK build" >> $REPORT
     fi
-    grep REPORT $BUILD_DIR/build | sed 's/REPORT //' >> $WEBREPORT
+    grep REPORT $BUILD_DIR/buildlog | sed 's/REPORT //' >> $WEBREPORT
     return $RC
 }
 
@@ -211,6 +218,7 @@ submit_jobs() {
     CMD="$CMD -e VALJOB_LABEL=${LABEL[$I]} "
     CMD="$CMD -e VALJOB_SEEDS=${SEEDS[$I]} "
     CMD="$CMD -e VALJOB_WATCHDOG=${WATCHDOG[$I]} "
+    CMD="$CMD -e VALJOB_DATABASE=${DATABASE[$I]} "
     CMD="$CMD -e VALJOB_OUTDIR=$VALJOB_OUTDIR "
     CMD="$CMD -e VALJOB_NEV=${NEV[$I]} "
     CMD="$CMD file://$PWD/$SCRIPT"
@@ -296,7 +304,8 @@ recover_jobs() {
       fi
 
       NREC=$(( $NREC + 1 ))
-      local RDIR=$BUILD_DIR/rec_${LABEL[$I]}_${TT}
+      local RSDIR=rec_${LABEL[$I]}_${TT}
+      local RDIR=$BUILD_DIR/$RSDIR
       mkdir $RDIR
       local CMDF=$RDIR/rec.sh
       touch $CMDF
@@ -309,11 +318,12 @@ recover_jobs() {
       echo "export VALJOB_NINPUT=${NINPUT[$I]} " >> $CMDF
       echo "export VALJOB_SEEDS=${SEEDS[$I]} " >> $CMDF
       echo "export VALJOB_WATCHDOG=no " >> $CMDF
+      echo "export VALJOB_DATABASE=${DATABASE[$I]} " >> $CMDF 
       echo "export VALJOB_OUTDIR=$OUTDIR/${LABEL[$I]} " >> $CMDF
       echo "export VALJOB_NEV=${NEV[$I]} " >> $CMDF
-      echo "cd $RDIR " >> $CMDF
-      echo "ln -s ../Offline " >> $CMDF
-      echo "/mu2e/app/home/mu2epro/cron/val/valJobNode.sh >& log" >> $CMDF
+      echo "export VALJOB_RSDIR=$RSDIR " >> $CMDF
+      echo "cd $BUILD_DIR " >> $CMDF
+      echo "/mu2e/app/home/mu2epro/cron/val/valJobNode.sh >& $RDIR/log" >> $CMDF
       ssh -n -f mu2ebuild01 "$CMDF"
     fi
 
@@ -396,7 +406,7 @@ wait_jobs() {
 
 #
 # analyze logs and return
-# average median lowest highest
+# average median highest lowest
 ana_numbers() {
   local TMP=$1
   local TMP2=$( mktemp )
@@ -417,7 +427,7 @@ ana_numbers() {
 
 #
 #
-#
+#order CPU Wall memory
 ana_logs() {
   local I=$1
   local DD=$OUTDIR/${LABEL[$I]}/log
@@ -587,7 +597,7 @@ nightlyweb() {
     df -h
   fi
   cp $REPORT $WEB_DIR_DAY
-  cp $BUILD_DIR/build $WEB_DIR_DAY
+  cp $BUILD_DIR/buildlog $WEB_DIR_DAY
   cp $BUILD_DIR/check $WEB_DIR_DAY
 
   local CPWD=$PWD
@@ -621,7 +631,9 @@ nightlyweb() {
     STAT=$( grep build $DDR/valJobWeb.txt | grep STATUS | awk '{print $2}')
     [ -z "$STAT" ] && STAT="-"
     colorByStat "$STAT"
-    if [ -r $DDR/build ]; then
+    if [ -r $DDR/buildlog ]; then
+        echo "<TD bgcolor=$COLOR><a href=$DDR/buildlog>log</a></TD>" >> $TF
+    elif [ -r $DDR/build ]; then
         echo "<TD bgcolor=$COLOR><a href=$DDR/build>log</a></TD>" >> $TF
     else
         echo "<TD bgcolor=$COLOR>log</TD>" >> $TF
@@ -702,7 +714,7 @@ exit_proc() {
   local RESULT="SUCCESS"
   [ -n "`grep FAIL $REPORT`" ] && RESULT=FAIL
   cat $REPORT | mail -r valJob -s "valJob $COMPLETE and $RESULT" \
-rlc@fnal.gov,genser@fnal.gov,kutschke@fnal.gov,dave_brown@lbl.gov,david.brown@louisville.edu,gandr@fnal.gov,murat@fnal.gov,gianipez@fnal.gov,echenard@fnal.gov,ehrlich@virginia.edu
+rlc@fnal.gov,genser@fnal.gov,kutschke@fnal.gov,dave_brown@lbl.gov,david.brown@louisville.edu,gandr@fnal.gov,murat@fnal.gov,gianipez@fnal.gov,echenard@fnal.gov,ehrlich@virginia.edu,macndev@fnal.gov,hcasler@fnal.gov
 #    rlc@fnal.gov
   exit $RC
 }
@@ -714,10 +726,19 @@ rlc@fnal.gov,genser@fnal.gov,kutschke@fnal.gov,dave_brown@lbl.gov,david.brown@lo
 #
 #
 
+
+#
+# if there is a argument, then being run as a test, 
+# write t oa test area and do not run the web part
+#
+DEBUG="$1"
+shift
+
 echo_date "start setups"
 cd $HOME/cron/val
 source /cvmfs/fermilab.opensciencegrid.org/products/common/etc/setups
 source /cvmfs/mu2e.opensciencegrid.org/setupmu2e-art.sh
+setup muse
 source $HOME/bin/authentication.sh
 setup jobsub_client
 
@@ -729,16 +750,29 @@ WEBREPORT=valJobWeb.txt
 rm -f $WEBREPORT
 # all output will be written here
 BASE_DIR=/pnfs/mu2e/persistent/users/mu2epro/valjob
-OUTDIR=$BASE_DIR/`date +%Y`/`date +%m`/`date +%d`
-# the collected plots
-mkdir -p $OUTDIR/summary
-# the build location
-BUILD_DIR=/mu2e/app/users/mu2epro/nightly/current
-# tarball for submission to the grid
-TBALL=/pnfs/mu2e/resilient/users/mu2epro/nightly/$(date +%Y-%m-%d).tgz
 # the val comparison
 WEB_DIR=/web/sites/mu2e.fnal.gov/htdocs/atwork/computing/ops/val/valJob/nightly
-WEB_DIR_DAY=/web/sites/mu2e.fnal.gov/htdocs/atwork/computing/ops/val/valJob/nightly/$(date +%Y_%m/%d)
+
+if [ -n "$DEBUG" ]; then
+    OUTDIR=$BASE_DIR/$DEBUG
+    # the build location
+    BUILD_DIR=/mu2e/app/users/mu2epro/nightly/$DEBUG
+    # tarball for submission to the grid
+    TBALL=/pnfs/mu2e/resilient/users/mu2epro/nightly/${DEBUG}.tgz
+    # web subdir
+    WEB_DIR_DAY=$WEB_DIR/$DEBUG
+else
+    OUTDIR=$BASE_DIR/`date +%Y`/`date +%m`/`date +%d`
+    # the collected plots
+    BUILD_DIR=/mu2e/app/users/mu2epro/nightly/current
+    # tarball for submission to the grid
+    TBALL=/pnfs/mu2e/resilient/users/mu2epro/nightly/$(date +%Y-%m-%d).tgz
+    # the val comparison
+    WEB_DIR_DAY=$WEB_DIR/$(date +%Y_%m/%d)
+fi
+
+# the collected plots
+mkdir -p $OUTDIR/summary
 mkdir -p $WEB_DIR_DAY
 RC=$?
 if [ $RC -ne 0 ]; then
@@ -752,8 +786,12 @@ build_code
 RC=$?
 # can't continue if the build fails
 if [ $RC -ne 0 ]; then
-  nightlyweb
-  exit_proc 1 "build failed"
+  if [ -z "$DEBUG" ]; then
+      nightlyweb
+      exit_proc 1 "build failed"
+  else
+      exit 1
+  fi
 fi
 
 # run quick tests
@@ -784,12 +822,15 @@ RC=$?
 # collect plots and check overlaps
 # will need root to do concatenation
 
-# temproraily setup explicity on 01 until it is also sl7
-#source $BUILD_DIR/Offline/setup.sh
-source /cvmfs/mu2e.opensciencegrid.org/Offline/v7_4_1/SLF6/prof/Offline/setup.sh
+# need to access hadd and valCompare
+muse setup Offline
 
 collect_summaries
 RC=$?
+
+# quit with no comparison if running in test mode
+[ -n "$DEBUG" ] && exit 0
+
 valcompare
 RC=$?
 nightlyweb
