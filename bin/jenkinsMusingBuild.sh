@@ -4,7 +4,8 @@
 # inputs from jenkins parameters:
 # MUSING=SimJob
 # VERSION=v00_00_00
-# label=prof
+# BUILDTYPE=prof
+# label=SLF7
 #
 
 
@@ -33,7 +34,8 @@ echo "[`date`] printenv after setup"
 printenv
 
 
-echo "[$(date)] starting with MUSING=$MUSING VERSION=$VERSION label=$label"
+echo "[$(date)] starting with MUSING=$MUSING VERSION=$VERSION"
+echo "       BUILDTYPE=$BUILDTYPE label=$label"
 
 if [ -z "$MUSING" ]; then
     echo "ERROR - required MUSING parameter is not set"
@@ -41,6 +43,10 @@ if [ -z "$MUSING" ]; then
 fi
 if [ -z "$VERSION" ]; then
     echo "ERROR - required VERSION parameter is not set"
+    exit 1
+fi
+if [ -z "$BUILDTYPE" ]; then
+    echo "ERROR - required BUILDTYPE parameter is not set"
     exit 1
 fi
 if [ -z "$label" ]; then
@@ -141,8 +147,8 @@ do
 
 done
 
-echo "[$(date)] muse setup -q $label $ENVSET"
-muse setup -q $label $ENVSET
+echo "[$(date)] muse setup -q $BUILDTYPE $ENVSET"
+muse setup -q $BUILDTYPE $ENVSET
 [ $? -ne 0 ] && exit 1
 
 echo "[$(date)] muse staus"
